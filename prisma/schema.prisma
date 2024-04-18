@@ -1,0 +1,290 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root@localhost:3306/la_msi"
+  // provider = "sqlite"
+  // url      = "file:../dev.db"
+}
+
+// **************************************************************************************************** 
+
+model users {
+  id                String       @id
+  // 
+  role              u_roles?     @relation(fields: [roleId], references: [id])
+  roleId            String?
+  address           u_addresses? @relation(fields: [addressId], references: [id])
+  addressId         String?
+  // 
+  todo_employees    todos[]      @relation("employee")
+  todo_agents       todos[]      @relation("agent")
+  invoice_employees invoices[]   @relation("employee")
+  invoice_agents    invoices[]   @relation("agent")
+  photo             u_photos?
+  // 
+  password          String       @default("")
+  description       String       @default("")
+  first_name        String       @default("")
+  last_name         String       @default("")
+  gender            String       @default("")
+  activity          String       @default("")
+  nrc               String       @default("")
+  nif               String       @default("")
+  phone             String       @default("")
+  fax               String       @default("")
+  website           String       @default("")
+  email             String       @default("")
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+model u_addresses {
+  id        String    @id
+  // 
+  city      u_cities? @relation(fields: [cityId], references: [id])
+  cityId    String?
+  // 
+  user      users[]
+  // 
+  latitude  Float     @default(0)
+  longitude Float     @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model u_cities {
+  id        String        @id
+  // 
+  state     u_states?     @relation(fields: [stateId], references: [id])
+  stateId   String?
+  // 
+  address   u_addresses[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model u_states {
+  id        String       @id
+  // 
+  country   u_countries? @relation(fields: [countryId], references: [id])
+  countryId String?
+  // 
+  city      u_cities[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model u_countries {
+  id        String     @id
+  // 
+  state     u_states[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model u_photos {
+  user      users    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId    String   @unique
+  // 
+  photo     Bytes?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// **************************************************************************************************** 
+
+model u_roles {
+  id            String               @id
+  // 
+  user          users[]
+  authorization u_roles_operations[]
+  // 
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+model u_operations {
+  id              String               @id
+  role_operations u_roles_operations[]
+  //
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model u_roles_operations {
+  role        u_roles?     @relation(fields: [roleId], references: [id])
+  roleId      String
+  operation   u_operations @relation(fields: [operationId], references: [id])
+  operationId String
+  // 
+  value       Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@id([roleId, operationId])
+}
+
+// **************************************************************************************************** 
+model products {
+  id          String        @id
+  // 
+  categorie   p_categories? @relation(fields: [categorieId], references: [id])
+  categorieId String?
+  unity       p_units?      @relation(fields: [unityId], references: [id])
+  unityId     String?
+  // 
+  i_products  i_products[]
+  photo       p_photos?
+  p_stock     p_stocks?
+  // 
+  code        String        @unique
+  description String        @default("")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model p_stocks {
+  product          products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  productId        String   @unique
+  //
+  money_purchase   Float    @default(0)
+  money_selling    Float    @default(0)
+  quantity_initial Float    @default(0)
+  quantity         Float    @default(0)
+  date_production  DateTime @default(now())
+  date_purchase    DateTime @default(now())
+  date_expiration  DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model p_categories {
+  id        String     @id
+  // 
+  products  products[]
+  // 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model p_units {
+  id        String     @id
+  // 
+  products  products[]
+  //
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model p_photos {
+  product   products @relation(fields: [producId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  producId  String   @unique
+  // 
+  photo     Bytes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// **************************************************************************************************** 
+
+enum i_valid {
+  NEW
+  COMPLETED
+}
+
+enum i_type {
+  SALE
+  PURCHASE
+  LOSS
+}
+
+model invoices {
+  id                  String       @id @default(uuid())
+  // 
+  employee            users        @relation("employee", fields: [employeeId], references: [id])
+  employeeId          String
+  agent               users?       @relation("agent", fields: [agentId], references: [id])
+  agentId             String?
+  // 
+  i_products          i_products[]
+  // 
+  valid               i_valid      @default(NEW)
+  type                i_type       @default(SALE)
+  description         String       @default("")
+  money_without_added Float        @default(0)
+  money_tax           Float        @default(0)
+  money_stamp         Float        @default(0)
+  money_required      Float        @default(0)
+  money_paid          Float        @default(0)
+  money_unpaid        Float        @default(0)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+}
+
+model i_products {
+  invoice     invoices @relation(fields: [invoiceId], references: [id])
+  invoiceId   String
+  product     products @relation(fields: [productId], references: [id])
+  productId   String
+  //
+  description String   @default("")
+  quantity    Float    @default(0)
+  unity       Float    @default(0)
+  money_unite Float    @default(0)
+  money_total Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@id([invoiceId, productId])
+}
+
+// **************************************************************************************************** 
+enum t_valid {
+  NEW
+  COMPLITED_FAILURE
+  COMPLITED_SUCCESSFUL
+}
+
+model todos {
+  id             String    @id @default(uuid())
+  // 
+  employee       users     @relation("employee", fields: [employeeId], references: [id])
+  employeeId     String
+  agent          users?    @relation("agent", fields: [agentId], references: [id])
+  agentId        String?
+  // 
+  photo          t_photos?
+  // 
+  valid          t_valid   @default(NEW)
+  description    String    @default("")
+  money_expenses Float     @default(0)
+  money_required Float     @default(0)
+  money_paid     Float     @default(0)
+  money_unpaid   Float     @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model t_photos {
+  todo      todos    @relation(fields: [todoId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  todoId    String   @unique
+  //
+  photo     Bytes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// **************************************************************************************************** 
+
+model settings {
+  key       String   @id
+  // 
+  value     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// **************************************************************************************************** 

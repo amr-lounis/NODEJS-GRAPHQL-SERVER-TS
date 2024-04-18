@@ -1,0 +1,41 @@
+{
+  "name": "gql_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "c": "npx tsc",
+    "start": "nodemon ./dist/index.js",
+    "dev": "npx nodemon --exec ts-node src/index.ts",
+    "db": "npx prisma migrate dev --name init"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@apollo/server": "^4.10.2",
+    "@graphql-tools/schema": "^10.0.3",
+    "@prisma/client": "^5.12.1",
+    "apollo-server-core": "^3.13.0",
+    "apollo-server-express": "^3.13.0",
+    "express": "^4.19.2",
+    "graphql": "^16.8.1",
+    "graphql-fields": "^2.0.3",
+    "graphql-middleware": "^6.1.35",
+    "graphql-subscriptions": "^2.0.0",
+    "graphql-tools": "^9.0.1",
+    "graphql-ws": "^5.16.0",
+    "jsonwebtoken": "^9.0.2",
+    "nexus": "^1.3.0",
+    "node-machine-id": "^1.1.12",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.2",
+    "nodemon": "^3.1.0",
+    "prisma": "^5.11.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.3"
+  }
+}
