@@ -4,6 +4,7 @@
 /_zip
 /.vs
 /.git
+/prisma/migrations
 
 #files
 /package-lock.json
