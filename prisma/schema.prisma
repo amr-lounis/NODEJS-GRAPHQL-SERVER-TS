@@ -147,18 +147,19 @@ model products {
 }
 
 model p_stocks {
-  product          products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  productId        String   @unique
+  product           products @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  productId         String   @unique
   //
-  money_purchase   Float    @default(0)
-  money_selling    Float    @default(0)
-  quantity_initial Float    @default(0)
-  quantity         Float    @default(0)
-  date_production  DateTime @default(now())
-  date_purchase    DateTime @default(now())
-  date_expiration  DateTime @default(now())
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  money_purchase    Float    @default(0)
+  money_selling     Float    @default(0)
+  quantity          Float    @default(0)
+  quantity_initial  Float    @default(0)
+  quantity_critical Float    @default(0)
+  date_production   DateTime @default(now())
+  date_purchase     DateTime @default(now())
+  date_expiration   DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model p_categories {

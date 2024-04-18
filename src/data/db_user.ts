@@ -46,8 +46,8 @@ class user_controller {
     }
     async setUserPhoto(userId: string, photo: string) {
         const exist = await db.u_photos.findFirst({ select: { userId: true }, where: { userId: userId, } })
-        if (!await exist) return await this.createUserPhoto(userId, userId)
-        else return await this.updateUserPhoto(userId, userId)
+        if (!await exist) return await this.createUserPhoto(userId, photo)
+        else return await this.updateUserPhoto(userId, photo)
     }
     // ****************************************************************************************************
 }

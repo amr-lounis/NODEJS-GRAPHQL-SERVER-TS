@@ -37,8 +37,8 @@ class todo_controller {
     }
     async setTodoPhoto(TodoId: string, photo: string) {
         const exist = await db.t_photos.findFirst({ select: { todoId: true }, where: { todoId: TodoId, } })
-        if (!await exist) return await this.createTodoPhoto(TodoId, TodoId)
-        else return await this.updateTodoPhoto(TodoId, TodoId)
+        if (!await exist) return await this.createTodoPhoto(TodoId, photo)
+        else return await this.updateTodoPhoto(TodoId, photo)
     }
     // ****************************************************************************************************
 }

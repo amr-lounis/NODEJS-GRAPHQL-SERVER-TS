@@ -2,6 +2,7 @@
 /node_modules/
 /dist/
 /_zip
+/_db
 /.vs
 /.git
 /prisma/migrations

@@ -21,6 +21,15 @@ export const UserMutation = extendType({
                 },
             }),
             // 
+            t.field('user_update_my', {
+                type: UserOut,
+                args: userIn,
+                resolve(parent, args, context, info) {
+                    if (args.id == context?.userThis?.id) return db_user.updateUser(args.id, args)
+                    else throw new Error("owner only can do update")
+                },
+            }),
+            // 
             t.field('user_photo_set', {
                 type: userPhotoOut,
                 args: userPhotoSetIn,
