@@ -190,18 +190,6 @@ model p_photos {
 }
 
 // **************************************************************************************************** 
-
-enum i_valid {
-  NEW
-  COMPLETED
-}
-
-enum i_type {
-  SALE
-  PURCHASE
-  LOSS
-}
-
 model invoices {
   id                  String       @id @default(uuid())
   // 
@@ -212,8 +200,8 @@ model invoices {
   // 
   i_products          i_products[]
   // 
-  valid               i_valid      @default(NEW)
-  type                i_type       @default(SALE)
+  valid               String       @default("NEW") //{NEW,COMPLITED}
+  type                String       @default("SALE") //{SALE,PURCHASE,LOSS}
   description         String       @default("")
   money_without_added Float        @default(0)
   money_tax           Float        @default(0)
@@ -243,11 +231,6 @@ model i_products {
 }
 
 // **************************************************************************************************** 
-enum t_valid {
-  NEW
-  COMPLITED
-}
-
 model todos {
   id             String    @id @default(uuid())
   // 
@@ -258,7 +241,7 @@ model todos {
   // 
   photo          t_photos?
   // 
-  valid          t_valid   @default(NEW)
+  valid          String    @default("NEW") //{NEW,COMPLITED}
   description    String    @default("")
   money_expenses Float     @default(0)
   money_required Float     @default(0)

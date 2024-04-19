@@ -22,8 +22,8 @@ class todo_controller {
         return { ...p, photo: p?.photo?.toString() ?? "" }
     }
     async setTodoPhoto(todoId: string, photo: string) {
+        if (photo.length > 524288) return new Error("The size is greater than the maximum value");
         const photpBytes = Buffer.from(photo ?? "", 'utf8')
-        if (photpBytes.length > 500000) return new Error("The size is greater than the maximum value");
         // 
         const exist = await db.t_photos.findFirst({ select: { todoId: true }, where: { todoId: todoId } }) ? true : false
         if (!await exist) {
