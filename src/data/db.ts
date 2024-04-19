@@ -8,10 +8,3 @@ class Models {
     }
 }
 export const db = Models.getInstance();
-
-// if (!global.pubsub) {
-//     global.pubsub = new PubSub()
-//     console.log("PubSub init")
-// }
-
-// export const pubsub = global.pubsub;

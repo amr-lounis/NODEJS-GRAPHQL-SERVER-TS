@@ -18,39 +18,53 @@ class role_controller {
     matrix: Matrix = {};
     listOperationName: string[] = []
 
-    async createRole(id: string) {
-        return await db.u_roles.create({ data: { id: id } })
+    async setRole(id: string) {
+        const exist = await db.u_roles.findFirst({ where: { id: id } }) ? true : false
+        if (!exist) {
+            return await db.u_roles.create({ data: { id: id } })
+        }
     }
-    async createOperation(id: string) {
-        return await db.u_operations.create({ data: { id: id } })
+
+    async deleteRole(id: string) {
+        const exist = await db.u_roles.delete({ where: { id: id } }) ? true : false
+        if (!exist) {
+            return await db.u_roles.create({ data: { id: id } })
+        }
     }
-    async createRoleOperation(roleId: string, operationId: string, value: boolean) {
-        return await db.u_roles_operations.create({
-            data: {
-                operationId: operationId,
-                roleId: roleId,
-                value: value
-            },
-        })
+
+    async setOperation(id: string) {
+        const exist = await db.u_operations.findFirst({ where: { id: id } }) ? true : false
+        if (!exist) {
+            return await db.u_operations.create({ data: { id: id } })
+        }
     }
-    async updateRoleOperation(roleId: string, operationId: string, value: boolean) {
-        return await db.u_roles_operations.updateMany({
-            where: {
-                operationId: operationId,
-                roleId: roleId
-            },
-            data: {
-                operationId: operationId,
-                roleId: roleId,
-                value: value
-            },
-        })
-    }
+
     async setRoleOperation(roleId: string, operationId: string, value: boolean) {
-        const exist = await db.u_roles_operations.findFirst({ where: { operationId: operationId, roleId: roleId } })
-        if (!exist) return await this.createRoleOperation(roleId, operationId, value)
-        else return await this.updateRoleOperation(roleId, operationId, value)
+        const exist = await db.u_roles_operations.findFirst({ where: { operationId: operationId, roleId: roleId } }) ? true : false
+        if (!exist) {
+            return await db.u_roles_operations.create({
+                data: {
+                    operationId: operationId,
+                    roleId: roleId,
+                    value: value
+                },
+            })
+        }
+        else {
+            return await db.u_roles_operations.updateMany({
+                where: {
+                    operationId: operationId,
+                    roleId: roleId
+                },
+                data: {
+                    operationId: operationId,
+                    roleId: roleId,
+                    value: value
+                },
+            })
+        }
     }
+
     async initMatrix() {
         const roles = await db.u_roles.findMany();
         const operations = await db.u_operations.findMany();

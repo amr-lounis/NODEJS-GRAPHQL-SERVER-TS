@@ -17,28 +17,23 @@ class todo_controller {
         return await db.todos.delete({ where: { id: id } })
     }
     // ****************************************************************************************************
-    async createTodoPhoto(TodoId: string, photo: string) {
+    async getTodoPhoto(todoId: string) {
+        const p = await db.t_photos.findFirst({ where: { todoId: todoId } },);
+        return { ...p, photo: p?.photo?.toString() ?? "" }
+    }
+    async setTodoPhoto(todoId: string, photo: string) {
         const photpBytes = Buffer.from(photo ?? "", 'utf8')
         if (photpBytes.length > 500000) return new Error("The size is greater than the maximum value");
         // 
-        const p = await db.t_photos.create({ data: { todoId: TodoId, photo: photpBytes } },);
-        return { ...p, photo: p?.photo?.toString() ?? "" }
-    }
-    async updateTodoPhoto(TodoId: string, photo: string) {
-        const photpBytes = Buffer.from(photo ?? "", 'utf8')
-        if (photpBytes.length > 500000) return new Error("The size is greater than the maximum value");
-        // 
-        const p = await db.t_photos.update({ where: { todoId: TodoId }, data: { photo: photpBytes } },);
-        return { ...p, photo: p?.photo?.toString() ?? "" }
-    }
-    async getTodoPhoto(TodoId: string) {
-        const p = await db.t_photos.findFirst({ where: { todoId: TodoId } },);
-        return { ...p, photo: p?.photo?.toString() ?? "" }
-    }
-    async setTodoPhoto(TodoId: string, photo: string) {
-        const exist = await db.t_photos.findFirst({ select: { todoId: true }, where: { todoId: TodoId, } })
-        if (!await exist) return await this.createTodoPhoto(TodoId, photo)
-        else return await this.updateTodoPhoto(TodoId, photo)
+        const exist = await db.t_photos.findFirst({ select: { todoId: true }, where: { todoId: todoId } }) ? true : false
+        if (!await exist) {
+            const p = await db.t_photos.create({ data: { todoId: todoId, photo: photpBytes } },);
+            return { ...p, photo: p?.photo?.toString() ?? "" }
+        }
+        else {
+            const p = await db.t_photos.update({ where: { todoId: todoId }, data: { photo: photpBytes } },);
+            return { ...p, photo: p?.photo?.toString() ?? "" }
+        }
     }
     // ****************************************************************************************************
 }

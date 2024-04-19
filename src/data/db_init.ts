@@ -4,18 +4,17 @@ import { db_user } from "./db_user"
 export const db_init = async () => {
     console.log(" +++++ initDB +++++")
     const admin = 'admin'
+    // --------------------------------------------------
     try {
         // create admin role if not exist
-        await db_role.createRole(admin)
+        await db_role.setRole(admin)
         // create operation if not exist
-        for (let i = 0; i < db_role.listOperationName.length; i++) {
-            const operation = db_role.listOperationName[i];
-            await db_role.createOperation(operation)
-        }
+        for (let i = 0; i < db_role.listOperationName.length; i++)
+            await db_role.setOperation(db_role.listOperationName[i])
         // create admin user if not exist
         await db_user.createUser({ id: admin, password: admin, roleId: admin })
-    } catch (error) { }
-
+    } catch (err) { }
+    // --------------------------------------------------
     try {
         // init matrix roles
         await db_role.initMatrix()
@@ -28,6 +27,8 @@ export const db_init = async () => {
         }
         // stor matrix in database
         await db_role.storeMatrix()
-
-    } catch (error) { }
+    } catch (err) {
+        console.log(err.message)
+    }
+    // --------------------------------------------------
 }

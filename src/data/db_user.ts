@@ -3,11 +3,11 @@ import { db } from './db';
 
 class user_controller {
     // ****************************************************************************************************
-    async createUser(data: any) {
-        return await db.users.create({ data: data })
-    }
     async getUsers() {
         return await db.users.findMany({});
+    }
+    async createUser(data: any) {
+        return await db.users.create({ data: data })
     }
     async updateUser(id: string, data: any) {
         return await db.users.update({ where: { id: id }, data: data })
@@ -26,28 +26,23 @@ class user_controller {
         return r
     }
     // ****************************************************************************************************
-    async createUserPhoto(userId: string, photo: string) {
-        const photpBytes = Buffer.from(photo ?? "", 'utf8')
-        if (photpBytes.length > 500000) return new Error("The size is greater than the maximum value");
-        // 
-        const p = await db.u_photos.create({ data: { userId: userId, photo: photpBytes } },);
-        return { ...p, photo: p?.photo?.toString() ?? "" }
-    }
-    async updateUserPhoto(userId: string, photo: string) {
-        const photpBytes = Buffer.from(photo ?? "", 'utf8')
-        if (photpBytes.length > 500000) return new Error("The size is greater than the maximum value");
-        // 
-        const p = await db.u_photos.update({ where: { userId: userId }, data: { photo: photpBytes } },);
-        return { ...p, photo: p?.photo?.toString() ?? "" }
-    }
     async getUserPhoto(userId: string) {
         const p = await db.u_photos.findFirst({ where: { userId: userId } },);
         return { ...p, photo: p?.photo?.toString() ?? "" }
     }
     async setUserPhoto(userId: string, photo: string) {
-        const exist = await db.u_photos.findFirst({ select: { userId: true }, where: { userId: userId, } })
-        if (!await exist) return await this.createUserPhoto(userId, photo)
-        else return await this.updateUserPhoto(userId, photo)
+        const photpBytes = Buffer.from(photo ?? "", 'utf8')
+        if (photpBytes.length > 500000) return new Error("The size is greater than the maximum value");
+        // 
+        const exist = await db.u_photos.findFirst({ select: { userId: true }, where: { userId: userId } }) ? true : false
+        if (!await exist) {
+            const p = await db.u_photos.create({ data: { userId: userId, photo: photpBytes } },);
+            return { ...p, photo: p?.photo?.toString() ?? "" }
+        }
+        else {
+            const p = await db.u_photos.update({ where: { userId: userId }, data: { photo: photpBytes } },);
+            return { ...p, photo: p?.photo?.toString() ?? "" }
+        }
     }
     // ****************************************************************************************************
 }
