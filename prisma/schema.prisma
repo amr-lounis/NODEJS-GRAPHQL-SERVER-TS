@@ -190,6 +190,28 @@ model p_photos {
 }
 
 // **************************************************************************************************** 
+model invoices {
+  id                  String       @id @default(uuid())
+  // 
+  employee            users        @relation("employee", fields: [employeeId], references: [id])
+  employeeId          String
+  agent               users?       @relation("agent", fields: [agentId], references: [id])
+  agentId             String?
+  // 
+  i_products          i_products[]
+  // 
+  valid               String       @default("NEW") //{NEW,COMPLITED}
+  type                String       @default("SALE") //{SALE,PURCHASE,LOSS}
+  description         String       @default("")
+  money_without_added Float        @default(0)
+  money_tax           Float        @default(0)
+  money_stamp         Float        @default(0)
+  money_required      Float        @default(0)
+  money_paid          Float        @default(0)
+  money_unpaid        Float        @default(0)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+}
 
 model i_products {
   invoice     invoices @relation(fields: [invoiceId], references: [id])
