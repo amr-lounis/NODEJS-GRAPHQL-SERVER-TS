@@ -7,10 +7,10 @@ export const db_init = async () => {
     // --------------------------------------------------
     try {
         // create admin role if not exist
-        await db_role.setRole(admin)
+        await db_role.createRole(admin)
         // create operation if not exist
         for (let i = 0; i < db_role.listOperationName.length; i++)
-            await db_role.setOperation(db_role.listOperationName[i])
+            await db_role.createOperation(db_role.listOperationName[i])
         // create admin user if not exist
         await db_user.createUser({ id: admin, password: admin, roleId: admin })
     } catch (err) { }

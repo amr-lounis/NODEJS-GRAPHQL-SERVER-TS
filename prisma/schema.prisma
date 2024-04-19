@@ -245,8 +245,7 @@ model i_products {
 // **************************************************************************************************** 
 enum t_valid {
   NEW
-  COMPLITED_FAILURE
-  COMPLITED_SUCCESSFUL
+  COMPLITED
 }
 
 model todos {
