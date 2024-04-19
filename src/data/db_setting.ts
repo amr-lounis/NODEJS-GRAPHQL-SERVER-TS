@@ -2,18 +2,17 @@ import { MyToken } from '../utils';
 import { db } from './db';
 
 class setting_controller {
-    // ****************************************************************************************************
-    async getSettings() {
+    async gets() {
         return await db.settings.findMany({});
     }
-    async getSetting(key: string) {
+    async get(key: string) {
         return await db.settings.findUnique({
             where: {
                 key: key
             }
         })
     }
-    async setSetting(key: string, value: string) {
+    async set(key: string, value: string) {
         const exist = await db.settings.findFirst({ select: { key: true }, where: { key: key } }) ? true : false
         if (!exist) {
             await db.settings.create({
@@ -34,6 +33,13 @@ class setting_controller {
                 }
             })
         }
+    }
+    async delete(key: string) {
+        await db.settings.delete({
+            where: {
+                key: key
+            }
+        })
     }
 }
 

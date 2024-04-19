@@ -9,7 +9,7 @@ export const UserMutation = extendType({
             type: UserOut,
             args: userIn,
             resolve(parent, args, context, info) {
-                return db_user.createUser(args)
+                return db_user.create(args)
             },
         }),
             // 
@@ -18,7 +18,7 @@ export const UserMutation = extendType({
                 args: userIn,
                 resolve(parent, args, context, info) {
                     if (!args.id == context?.userThis?.id) throw new Error("this user only can do .")
-                    else return db_user.updateUser(args.id, args)
+                    else return db_user.update(args.id, args)
                 },
             }),
             // 
@@ -27,7 +27,7 @@ export const UserMutation = extendType({
                 args: userPhotoSetIn,
                 resolve(parent, args, context, info) {
                     if (!args.id == context?.userThis?.id) throw new Error("this user only can do .")
-                    return db_user.setUserPhoto(args.userId, args.photo)
+                    return db_user.setPhoto(args.userId, args.photo)
                 },
             });
         // 

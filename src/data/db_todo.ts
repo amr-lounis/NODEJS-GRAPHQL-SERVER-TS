@@ -4,24 +4,31 @@ export const createTodo = (data) => {
     return db.todos.create({ data: data })
 }
 class todo_controller {
-    async createTodo(data) {
-        return await db.todos.create({ data: data })
-    }
-    async getTodos() {
+    async gets() {
         return await db.todos.findMany({});
     }
-    async updateTodo(id: string, data: any) {
+    async get(id: string) {
+        return await db.todos.findUnique({
+            where: {
+                id: id
+            }
+        });
+    }
+    async create(data) {
+        return await db.todos.create({ data: data })
+    }
+    async update(id: string, data: any) {
         return await db.todos.update({ where: { id: id }, data: data })
     }
-    async deleteTodo(id: string,) {
+    async delete(id: string,) {
         return await db.todos.delete({ where: { id: id } })
     }
     // ****************************************************************************************************
-    async getTodoPhoto(todoId: string) {
+    async getPhoto(todoId: string) {
         const p = await db.t_photos.findFirst({ where: { todoId: todoId } },);
         return { ...p, photo: p?.photo?.toString() ?? "" }
     }
-    async setTodoPhoto(todoId: string, photo: string) {
+    async setPhoto(todoId: string, photo: string) {
         if (photo.length > 524288) return new Error("The size is greater than the maximum value");
         const photpBytes = Buffer.from(photo ?? "", 'utf8')
         // 

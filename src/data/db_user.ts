@@ -3,16 +3,23 @@ import { db } from './db';
 
 class user_controller {
     // ****************************************************************************************************
-    async getUsers() {
+    async gets() {
         return await db.users.findMany({});
     }
-    async createUser(data: any) {
+    async get(id: string) {
+        return await db.users.findUnique({
+            where: {
+                id: id
+            }
+        });
+    }
+    async create(data: any) {
         return await db.users.create({ data: data })
     }
-    async updateUser(id: string, data: any) {
+    async update(id: string, data: any) {
         return await db.users.update({ where: { id: id }, data: data })
     }
-    async deleteUser(id: string) {
+    async delete(id: string) {
         return await db.users.delete({ where: { id: id } })
     }
     async signin(id: string, password: string) {
@@ -26,11 +33,11 @@ class user_controller {
         return r
     }
     // ****************************************************************************************************
-    async getUserPhoto(userId: string) {
+    async getPhoto(userId: string) {
         const p = await db.u_photos.findFirst({ where: { userId: userId } },);
         return { ...p, photo: p?.photo?.toString() ?? "" }
     }
-    async setUserPhoto(userId: string, photo: string) {
+    async setPhoto(userId: string, photo: string) {
         if (photo.length > 524288) return new Error("The size is greater than the maximum value");
         const photpBytes = Buffer.from(photo ?? "", 'utf8')
         // 

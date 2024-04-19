@@ -9,14 +9,14 @@ export const UserQuery = extendType({
             type: list(UserOut),
             args: {},
             resolve(parent, args, context, info) {
-                return db_user.getUsers()
+                return db_user.gets()
             },
         });
         t.field('user_photo_get', {
             type: userPhotoOut,
             args: userPhotoGetIn,
             resolve(parent, args, context, info) {
-                return db_user.getUserPhoto(args.idName)
+                return db_user.getPhoto(args.idName)
             },
         });
         t.field('user_signin', {

@@ -18,21 +18,46 @@ class role_controller {
     matrix: Matrix = {};
     listOperationName: string[] = []
 
+    async getRoles() {
+        return await db.u_roles.findMany({});
+    }
     async createRole(id: string) {
         return await db.u_roles.create({ data: { id: id } })
     }
-
+    async updateRole(id: string, idNew: string) {
+        await db.u_roles.update({
+            where: {
+                id: id
+            },
+            data: {
+                id: idNew
+            }
+        })
+    }
     async deleteRole(id: string) {
         return await db.u_roles.delete({ where: { id: id } })
     }
-    // 
+    // **************************************************************************************************** 
+    async getOperations() {
+        return await db.u_operations.findMany({});
+    }
     async createOperation(id: string) {
         return await db.u_operations.create({ data: { id: id } })
+    }
+    async updateOperation(id: string, idNew: string) {
+        await db.u_operations.update({
+            where: {
+                id: id
+            },
+            data: {
+                id: idNew
+            }
+        })
     }
     async deleteOperation(id: string) {
         return await db.u_operations.delete({ where: { id: id } })
     }
-    // 
+    // **************************************************************************************************** 
     async setRoleOperation(roleId: string, operationId: string, value: boolean) {
         const exist = await db.u_roles_operations.findFirst({ where: { operationId: operationId, roleId: roleId } }) ? true : false
         if (!exist) {
