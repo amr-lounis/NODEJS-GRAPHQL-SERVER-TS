@@ -110,7 +110,7 @@ class role_controller {
         });
         this.matrix = matrix;
     }
-
+    // **************************************************************************************************** 
     async storeMatrix() {
         const roleIds = Object.keys(this.matrix);
         for (const roleId of roleIds) {

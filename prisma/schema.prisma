@@ -6,83 +6,33 @@ datasource db {
   provider = "mysql"
   url      = "mysql://root@localhost:3306/la_msi"
   // provider = "sqlite"
-  // url      = "file:../dev.db"
+  // url      = "file:../_db/dev.db"
 }
 
 // **************************************************************************************************** 
 
 model users {
-  id                String       @id
+  id                String     @id
   // 
-  role              u_roles?     @relation(fields: [roleId], references: [id])
+  role              u_roles?   @relation(fields: [roleId], references: [id])
   roleId            String?
-  address           u_addresses? @relation(fields: [addressId], references: [id])
-  addressId         String?
   // 
-  todo_employees    todos[]      @relation("employee")
-  todo_agents       todos[]      @relation("agent")
-  invoice_employees invoices[]   @relation("employee")
-  invoice_agents    invoices[]   @relation("agent")
+  todo_employees    todos[]    @relation("employee")
+  todo_agents       todos[]    @relation("agent")
+  invoice_employees invoices[] @relation("employee")
+  invoice_agents    invoices[] @relation("agent")
   photo             u_photos?
   // 
-  password          String       @default("")
-  description       String       @default("")
-  first_name        String       @default("")
-  last_name         String       @default("")
-  gender            String       @default("")
-  activity          String       @default("")
-  nrc               String       @default("")
-  nif               String       @default("")
-  phone             String       @default("")
-  fax               String       @default("")
-  website           String       @default("")
-  email             String       @default("")
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-}
-
-model u_addresses {
-  id        String    @id
-  // 
-  city      u_cities? @relation(fields: [cityId], references: [id])
-  cityId    String?
-  // 
-  user      users[]
-  // 
-  latitude  Float     @default(0)
-  longitude Float     @default(0)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model u_cities {
-  id        String        @id
-  // 
-  state     u_states?     @relation(fields: [stateId], references: [id])
-  stateId   String?
-  // 
-  address   u_addresses[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-}
-
-model u_states {
-  id        String       @id
-  // 
-  country   u_countries? @relation(fields: [countryId], references: [id])
-  countryId String?
-  // 
-  city      u_cities[]
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-}
-
-model u_countries {
-  id        String     @id
-  // 
-  state     u_states[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  password          String     @default("")
+  description       String     @default("")
+  address           String     @default("")
+  first_name        String     @default("")
+  last_name         String     @default("")
+  phone             String     @default("")
+  fax               String     @default("")
+  email             String     @default("")
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 }
 
 model u_photos {

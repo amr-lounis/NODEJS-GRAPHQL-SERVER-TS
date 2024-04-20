@@ -4,22 +4,18 @@ export const userIn = {
     id: nonNull(stringArg()),
     password: stringArg(),
     // roleId: stringArg(),
-    addressId: stringArg(),
+    description: stringArg(),
+    address: stringArg(),
+    first_name: stringArg(),
+    last_name: stringArg(),
     phone: stringArg(),
     fax: stringArg(),
     email: stringArg(),
-    website: stringArg(),
-    first_name: stringArg(),
-    last_name: stringArg(),
-    activity: stringArg(),
-    gender: stringArg(),
-    nif: stringArg(),
-    nrc: stringArg(),
 }
 export const UserOut = objectType({
     name: 'UserOut',
     definition(t) {
-        ["id", "roleId", "addressId", "phone", "fax", "email", "website", "first_name", "last_name", "activity", "gender", "nif", "nrc", "createdAt", "updatedAt"].map(x =>
+        ["id", "roleId", "description", "address", "first_name", "last_name", "phone", "fax", "email", "createdAt", "updatedAt"].map(x =>
             t.nullable.string(x)
         )
     },
@@ -50,6 +46,23 @@ export const userAuthenticationOut = objectType({
     definition(t) {
         ["Authorization"].map(x =>
             t.nullable.string(x)
+        )
+    },
+});
+// ****************************************************************************************************
+export const userDeletIn = {
+    id: nonNull(stringArg())
+};
+// ****************************************************************************************************
+export const userRoleIn = {
+    id: nonNull(stringArg()),
+    roleId: nonNull(stringArg())
+};
+export const userRoleOut = objectType({
+    name: 'userRoleOut',
+    definition(t) {
+        ["deleted"].map(x =>
+            t.string(x)
         )
     },
 });

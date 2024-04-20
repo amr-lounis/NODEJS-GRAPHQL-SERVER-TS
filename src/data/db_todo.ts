@@ -1,8 +1,5 @@
 import { db } from './db';
 
-export const createTodo = (data) => {
-    return db.todos.create({ data: data })
-}
 class todo_controller {
     async gets() {
         return await db.todos.findMany({});

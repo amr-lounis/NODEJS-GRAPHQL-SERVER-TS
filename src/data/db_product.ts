@@ -80,6 +80,37 @@ class product_controller {
         })
     }
     // ****************************************************************************************************
+    async getStocks() {
+        return await db.p_stocks.findMany({});
+    }
+    async getStock(productId: string) {
+        return await db.p_stocks.findUnique({
+            where: {
+                productId: productId
+            }
+        })
+    }
+    async createStock(data: any) {
+        await db.p_stocks.create({
+            data: data
+        })
+    }
+    async updateStock(productId: string, data: any) {
+        await db.p_stocks.update({
+            where: {
+                productId: productId
+            },
+            data: data
+        })
+    }
+    async deleteStock(productId: string) {
+        await db.p_stocks.delete({
+            where: {
+                productId: productId
+            }
+        })
+    }
+    // ****************************************************************************************************
     async getPhoto(producId: string) {
         const p = await db.p_photos.findFirst({ where: { producId: producId } },);
         return { ...p, photo: p?.photo?.toString() ?? "" }
