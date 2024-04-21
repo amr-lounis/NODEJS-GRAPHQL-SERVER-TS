@@ -1,5 +1,4 @@
-import { extendType } from 'nexus';
-import { userNotificationOut } from './types';
+import { extendType, objectType } from 'nexus';
 import { withFilter } from 'graphql-subscriptions';
 import { pubsub } from '../../utils'
 
@@ -7,7 +6,15 @@ export const UserSubscription = extendType({
     type: 'Subscription',
     definition(t) {
         t.field('user_subscription', {
-            type: userNotificationOut,
+            type: objectType({
+                name: 'userNotificationOut',
+                definition(t) {
+                    t.nullable.int('sender_id');
+                    t.nullable.int('receiver_id');
+                    t.nullable.string('title');
+                    t.nullable.string('content');
+                },
+            }),
             args: {},
             subscribe: withFilter(
                 () => pubsub.asyncIterator('user_notification_sender'),

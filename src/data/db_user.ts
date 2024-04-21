@@ -20,9 +20,7 @@ class user_controller {
         return await db.users.update({ where: { id: id }, data: data })
     }
     async delete(id: string) {
-        const r = await db.users.delete({ where: { id: id } })
-        console.log(r)
-        return { deleted: "ok" }
+        return await db.users.delete({ where: { id: id } })
     }
     async signin(id: string, password: string) {
         let r = { Authorization: "" }

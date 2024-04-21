@@ -83,6 +83,9 @@ class role_controller {
             })
         }
     }
+    async deleteRoleOperation(roleId: string, operationId: string) {
+        return await db.u_roles_operations.deleteMany({ where: { operationId: operationId, roleId: roleId } })
+    }
     // 
     async initMatrix() {
         const roles = await db.u_roles.findMany();
