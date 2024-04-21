@@ -4,15 +4,17 @@ import { db_user } from "./db_user"
 export const db_init = async () => {
     console.log(" +++++ initDB +++++")
     const admin = 'admin'
+    const employee = 'employee'
     // --------------------------------------------------
     try {
-        // create admin role if not exist
         await db_role.createRole(admin)
-        // create operation if not exist
+        await db_role.createRole(employee)
+        // 
         for (let i = 0; i < db_role.listOperationName.length; i++)
             await db_role.createOperation(db_role.listOperationName[i])
-        // create admin user if not exist
+        // 
         await db_user.create({ id: admin, password: admin, roleId: admin })
+        await db_user.create({ id: employee, password: employee, roleId: employee })
     } catch (err) { }
     // --------------------------------------------------
     try {

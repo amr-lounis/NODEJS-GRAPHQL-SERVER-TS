@@ -65,9 +65,9 @@ model u_operations {
 }
 
 model u_roles_operations {
-  role        u_roles?     @relation(fields: [roleId], references: [id])
+  role        u_roles?     @relation(fields: [roleId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   roleId      String
-  operation   u_operations @relation(fields: [operationId], references: [id])
+  operation   u_operations @relation(fields: [operationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   operationId String
   // 
   value       Boolean      @default(false)
