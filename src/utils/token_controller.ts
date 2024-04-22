@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { config } from "./";
 
-export type userThisType = {
+export type jwtType = {
     id: string,
     role: string
 }
@@ -9,7 +9,7 @@ class token_controller {
     constructor() { }
 
     Token_Create(id, role) {
-        const payload: userThisType = { id: id, role: role };
+        const payload: jwtType = { id: id, role: role };
         const token = jwt.sign(payload, config.JWT_Secret, { expiresIn: config.JWT_ExpiresDay });
         return token;
     }

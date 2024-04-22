@@ -9,18 +9,14 @@ import { WebSocketServer } from 'ws'
 import { applyMiddleware } from 'graphql-middleware'
 import { makeSchema } from 'nexus';
 import * as types_gql from './typesgql';
-import { MyToken, myLog } from './utils';
+import { MyToken, config, myLog } from './utils';
 import { db_role, db_init } from './data';
-// --------------------------------------------------
-export const schema = makeSchema({
-  types: types_gql,
-});
-// --------------------------------------------------
-const port = 3000;
-const serverSSL = false
 // --------------------------------------------------
 const main = async () => {
   // -----------------------
+  const schema = makeSchema({
+    types: types_gql,
+  });
   const listOperationName = [...Object.keys(schema.getMutationType()['_fields']), ...Object.keys(schema.getQueryType()['_fields'])]
   await db_init(listOperationName)
   // -----------------------
@@ -28,7 +24,7 @@ const main = async () => {
   //
   const schemaWithMiddleware = applyMiddleware(schema, info_GraphqlMiddleware)
   // ----------------------- https or http
-  const server = serverSSL ? https_server(app, "./assets/cert.pem", "./assets/key.pem") : http_server(app);
+  const server = config.SERVER_SSL ? https_server(app, "./assets/cert.pem", "./assets/key.pem") : http_server(app);
   // ----------------------- ws
   const serverCleanup = ws_server(server, schema)
   // ----------------------- ApolloServer
@@ -40,7 +36,7 @@ const main = async () => {
     },
     context: (ctx) => {
       const token = ctx?.req?.headers?.authorization || '';
-      return { userThis: MyToken.Token_Verifay(token) };
+      return { jwt: MyToken.Token_Verifay(token) };
     },
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer: server }),
@@ -58,8 +54,8 @@ const main = async () => {
   await apolloServer.start();
   apolloServer.applyMiddleware({ app, path: "/graphql" })
   // ------------------------------------------------ listen
-  server.listen(port, () => {
-    myLog(`localhost:${port}/graphql`);
+  server.listen(config.PORT_HTTP, () => {
+    myLog(`localhost:${config.PORT_HTTP}/graphql`);
   });
 };
 // -------------------------------------------------- https_server
@@ -86,14 +82,14 @@ const ws_server = (_server, _schema) => {
     schema: _schema,
     context: (ctx, msg, args) => {
       const token = ctx?.connectionParams?.Authorization || ''
-      return { userThis: MyToken.Token_Verifay(token) };
+      return { jwt: MyToken.Token_Verifay(token) };
     },
     onConnect: async (ctx) => {
       const token = ctx?.connectionParams?.Authorization || ''
-      const userThis = MyToken.Token_Verifay(token);
+      const jwt = MyToken.Token_Verifay(token);
 
-      if (userThis.id == null) {// return false to sertver disconnect ro throw new Error('')
-        myLog(`-------------- WS : token not authorized : [${JSON.stringify(userThis)}]`)
+      if (jwt.id == null) {// return false to sertver disconnect ro throw new Error('')
+        myLog(`-------------- WS : token not authorized : [${JSON.stringify(jwt)}]`)
         return false;
       }
     },
@@ -106,9 +102,9 @@ async function info_GraphqlMiddleware(resolve, root, args, context, info) {
   if ((info?.parentType?.name == 'Query') || (info?.parentType?.name == 'Mutation')) {
     const operationName = info?.fieldName || ''
     const operationType = info?.parentType?.name || '';
-    const userThis = context.userThis;
-    const r = db_role.authorization_get(userThis.role, operationName)
-    if (!r) throw Error(`role:${userThis.role} --- operationName:${operationName} not authorized .`)
+    const jwt = context.jwt;
+    const r = db_role.authorization_get(jwt.role, operationName)
+    if (!r) throw Error(`role:${jwt.role} --- operationName:${operationName} not authorized .`)
     if (args?.id?.length < 3) return new Error("id length smal then 3 ")
     myLog(`context :${JSON.stringify(context)} --- args : [${Object.keys(args)}] `)
   }

@@ -19,7 +19,7 @@ export const UserSubscription = extendType({
             subscribe: withFilter(
                 () => pubsub.asyncIterator('user_notification_sender'),
                 (payload, args, context, info) => {
-                    if (context?.userThis?.id == payload?.receiverId) return true
+                    if (context?.jwt?.id == payload?.receiverId) return true
                 },
             ),
             async resolve(payload, args, context, info) {
