@@ -1,22 +1,22 @@
 import { db } from './db';
 
 class product_controller {
-    async gets() {
+    async products_get() {
         return await db.products.findMany({});
     }
-    async get(id: string) {
+    async product_get(id: string) {
         return await db.products.findUnique({
             where: {
                 id: id
             }
         })
     }
-    async create(data: any) {
+    async product_create(data: any) {
         await db.products.create({
             data: data
         })
     }
-    async update(id: string, data: any) {
+    async product_update(id: string, data: any) {
         await db.products.update({
             where: {
                 id: id
@@ -24,7 +24,7 @@ class product_controller {
             data: data
         })
     }
-    async delete(id: string) {
+    async product_delete(id: string) {
         await db.products.delete({
             where: {
                 id: id
@@ -32,15 +32,15 @@ class product_controller {
         })
     }
     // ****************************************************************************************************
-    async getUnits() {
+    async units_get() {
         return await db.p_units.findMany({});
     }
-    async createUnity(data: any) {
+    async unity_create(data: any) {
         await db.p_units.create({
             data: data
         })
     }
-    async updateUnity(id: string, data: any) {
+    async unity_update(id: string, data: any) {
         await db.p_units.update({
             where: {
                 id: id
@@ -48,7 +48,7 @@ class product_controller {
             data: data
         })
     }
-    async deleteUnity(id: string) {
+    async unity_delete(id: string) {
         await db.p_units.delete({
             where: {
                 id: id
@@ -56,15 +56,15 @@ class product_controller {
         })
     }
     // ****************************************************************************************************
-    async getCategories() {
+    async categories_get() {
         return await db.p_categories.findMany({});
     }
-    async createCategorie(data: any) {
+    async categorie_create(data: any) {
         await db.p_categories.create({
             data: data
         })
     }
-    async updateCategorie(id: string, data: any) {
+    async categorie_update(id: string, data: any) {
         await db.p_categories.update({
             where: {
                 id: id
@@ -72,7 +72,7 @@ class product_controller {
             data: data
         })
     }
-    async deleteCategorie(id: string) {
+    async categorie_delete(id: string) {
         await db.p_categories.delete({
             where: {
                 id: id
@@ -80,22 +80,22 @@ class product_controller {
         })
     }
     // ****************************************************************************************************
-    async getStocks() {
+    async stocks_get() {
         return await db.p_stocks.findMany({});
     }
-    async getStock(productId: string) {
+    async stock_get(productId: string) {
         return await db.p_stocks.findUnique({
             where: {
                 productId: productId
             }
         })
     }
-    async createStock(data: any) {
+    async stock_create(data: any) {
         await db.p_stocks.create({
             data: data
         })
     }
-    async updateStock(productId: string, data: any) {
+    async stock_update(productId: string, data: any) {
         await db.p_stocks.update({
             where: {
                 productId: productId
@@ -103,7 +103,7 @@ class product_controller {
             data: data
         })
     }
-    async deleteStock(productId: string) {
+    async stock_delete(productId: string) {
         await db.p_stocks.delete({
             where: {
                 productId: productId
@@ -111,11 +111,11 @@ class product_controller {
         })
     }
     // ****************************************************************************************************
-    async getPhoto(producId: string) {
+    async Photo_get(producId: string) {
         const p = await db.p_photos.findFirst({ where: { producId: producId } },);
         return { ...p, photo: p?.photo?.toString() ?? "" }
     }
-    async setPhoto(producId: string, photo: string) {
+    async Photo_set(producId: string, photo: string) {
         if (photo.length > 524288) return new Error("The size is greater than the maximum value");
         const photpBytes = Buffer.from(photo ?? "", 'utf8')
         // 

@@ -18,59 +18,66 @@ class role_controller {
     matrix: Matrix = {};
     listOperationName: string[] = []
 
-    async getRoles() {
-        return await db.u_roles.findMany({});
+    async roles_get(): Promise<String[]> {
+        const r = await db.u_roles.findMany({ select: { id: true } });
+        return r.map((x) => x.id)
     }
-    async createRole(id: string) {
-        return await db.u_roles.create({ data: { id: id } })
+    async role_create(id: string): Promise<String> {
+        await db.u_roles.create({ data: { id: id } })
+        return "ok"
     }
-    async updateRole(id: string, idNew: string) {
-        await db.u_roles.update({
-            where: {
-                id: id
-            },
-            data: {
-                id: idNew
-            }
-        })
+    async role_update(id: string, idNew: string): Promise<String> {
+        await db.u_roles.update({ where: { id: id }, data: { id: idNew } })
+        return "ok"
     }
-    async deleteRole(id: string) {
-        return await db.u_roles.delete({ where: { id: id } })
+    async role_delete(id: string): Promise<String> {
+        await db.u_roles.delete({ where: { id: id } })
+        return "ok"
     }
     // **************************************************************************************************** 
-    async getOperations() {
-        return await db.u_operations.findMany({});
+    async operations_get(): Promise<String[]> {
+        const r = await db.u_operations.findMany({});
+        return r.map((x) => x.id)
     }
-    async createOperation(id: string) {
-        return await db.u_operations.create({ data: { id: id } })
+    async operation_create(id: string): Promise<String> {
+        await db.u_operations.create({ data: { id: id } })
+        return "ok"
     }
-    async updateOperation(id: string, idNew: string) {
-        await db.u_operations.update({
-            where: {
-                id: id
-            },
-            data: {
-                id: idNew
-            }
-        })
+    async operation_update(id: string, idNew: string): Promise<String> {
+        await db.u_operations.update({ where: { id: id }, data: { id: idNew } })
+        return "ok"
     }
-    async deleteOperation(id: string) {
-        return await db.u_operations.delete({ where: { id: id } })
+    async operation_delete(id: string): Promise<String> {
+        await db.u_operations.delete({ where: { id: id } })
+        return "ok"
     }
     // **************************************************************************************************** 
-    async setRoleOperation(roleId: string, operationId: string, value: boolean) {
+    authorization_get(role: string, operationName: string): boolean {
+        if (operationName == 'user_signin') return true;
+        if (this.matrix.hasOwnProperty(role) && this.matrix[role].hasOwnProperty(operationName)) {
+            return this.matrix[role][operationName];
+        } else {
+            // Return false if the role or operation doesn't exist in the matrix
+            return false;
+        }
+    }
+    async authorizations_get(roleId: string) {
+        return await db.u_roles_operations.findMany({ where: { roleId: roleId } })
+    }
+    async authorization_set(roleId: string, operationId: string, value: boolean): Promise<String> {
         const exist = await db.u_roles_operations.findFirst({ where: { operationId: operationId, roleId: roleId } }) ? true : false
         if (!exist) {
-            return await db.u_roles_operations.create({
+            await db.u_roles_operations.create({
                 data: {
                     operationId: operationId,
                     roleId: roleId,
                     value: value
                 },
             })
+            return "ok"
         }
         else {
-            return await db.u_roles_operations.updateMany({
+            await db.u_roles_operations.updateMany({
                 where: {
                     operationId: operationId,
                     roleId: roleId
@@ -81,12 +88,15 @@ class role_controller {
                     value: value
                 },
             })
+            return "ok"
         }
+
     }
-    async deleteRoleOperation(roleId: string, operationId: string) {
-        return await db.u_roles_operations.deleteMany({ where: { operationId: operationId, roleId: roleId } })
+    async authorization_delete(roleId: string, operationId: string): Promise<String> {
+        await db.u_roles_operations.deleteMany({ where: { operationId: operationId, roleId: roleId } })
+        return "ok"
     }
-    // 
+    // **************************************************************************************************** 
     async initMatrix() {
         const roles = await db.u_roles.findMany();
         const operations = await db.u_operations.findMany();
@@ -120,18 +130,8 @@ class role_controller {
             const operationIds = Object.keys(this.matrix[roleId]);
             for (const operationId of operationIds) {
                 const value = this.matrix[roleId][operationId];
-                await this.setRoleOperation(roleId, operationId, value)
+                await this.authorization_set(roleId, operationId, value)
             }
-        }
-    }
-
-    getAuthorization(role: string, operationName: string): boolean {
-        if (operationName == 'user_signin') return true;
-        if (this.matrix.hasOwnProperty(role) && this.matrix[role].hasOwnProperty(operationName)) {
-            return this.matrix[role][operationName];
-        } else {
-            // Return false if the role or operation doesn't exist in the matrix
-            return false;
         }
     }
 }

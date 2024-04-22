@@ -1,4 +1,4 @@
-import { extendType, nonNull, nullable, objectType, stringArg } from 'nexus';
+import { extendType, nonNull, nullable, objectType, scalarType, stringArg } from 'nexus';
 import { db_user } from '../../data';
 
 export const UserMutation = extendType({
@@ -19,15 +19,10 @@ export const UserMutation = extendType({
                 email: stringArg(),
             },
             // ------------------------------
-            type: objectType({
-                name: 'user_create_out',
-                definition(t) {
-                    t.nullable.string("id")
-                },
-            }),
+            type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.create(args)
+                return db_user.user_create(args)
             },
         }),
             // **************************************************************************************************** 
@@ -35,7 +30,6 @@ export const UserMutation = extendType({
                 args: {
                     id: nonNull(stringArg()),
                     password: stringArg(),
-                    // roleId: stringArg(),
                     description: stringArg(),
                     address: stringArg(),
                     first_name: stringArg(),
@@ -45,16 +39,11 @@ export const UserMutation = extendType({
                     email: stringArg(),
                 },
                 // ------------------------------
-                type: objectType({
-                    name: 'user_update_out',
-                    definition(t) {
-                        t.nullable.string("id")
-                    },
-                }),
+                type: nonNull('String'),
                 // ------------------------------
                 resolve(parent, args, context, info) {
                     if (!args.id == context?.userThis?.id) throw new Error("this user only can do .")
-                    else return db_user.update(args.id, args)
+                    else return db_user.user_update(args.id, args)
                 },
             }),
             // **************************************************************************************************** 
@@ -63,15 +52,10 @@ export const UserMutation = extendType({
                     id: nonNull(stringArg())
                 },
                 // ------------------------------
-                type: objectType({
-                    name: 'user_delete_out',
-                    definition(t) {
-                        t.nullable.string("id")
-                    },
-                }),
+                type: nonNull("String"),
                 // ------------------------------
                 resolve(parent, args, context, info) {
-                    return db_user.delete(args.id)
+                    return db_user.user_delete(args.id)
                 },
             }),
             // **************************************************************************************************** 
@@ -81,16 +65,11 @@ export const UserMutation = extendType({
                     photo: nonNull(stringArg()),
                 },
                 // ------------------------------
-                type: objectType({
-                    name: 'userPhoto_update_out',
-                    definition(t) {
-                        t.nullable.string("userId")
-                    },
-                }),
+                type: nonNull("String"),
                 // ------------------------------
                 resolve(parent, args, context, info) {
                     if (!args.id == context?.userThis?.id) throw new Error("this user only can do .")
-                    return db_user.setPhoto(args.userId, args.photo)
+                    return db_user.Photo_set(args.userId, args.photo)
                 },
             });
         // ****************************************************************************************************  
@@ -100,16 +79,10 @@ export const UserMutation = extendType({
                 roleId: nullable(stringArg()),
             },
             // ------------------------------
-            type: objectType({
-                name: 'userRole_update_out',
-                definition(t) {
-                    t.nullable.string("id")
-                    t.nullable.string("roleId")
-                },
-            }),
+            type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.update(args.id, { roleId: args.roleId })
+                return db_user.userRole_update(args.id, args.roleId)
             }
         });
         // **************************************************************************************************** 

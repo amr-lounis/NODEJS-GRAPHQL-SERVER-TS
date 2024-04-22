@@ -108,7 +108,7 @@ async function info_GraphqlMiddleware(resolve, root, args, context, info) {
     const operationName = info?.fieldName || ''
     const operationType = info?.parentType?.name || '';
     const userThis = context.userThis;
-    const r = db_role.getAuthorization(userThis.role, operationName)
+    const r = db_role.authorization_get(userThis.role, operationName)
     if (!r) throw Error(`role:${userThis.role} --- operationName:${operationName} not authorized .`)
     if (args?.id?.length < 3) return new Error("id length smal then 3 ")
     myLog('------------------ debug -------------------------')

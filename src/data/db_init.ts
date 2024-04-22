@@ -7,14 +7,17 @@ export const db_init = async () => {
     const employee = 'employee'
     // --------------------------------------------------
     try {
-        await db_role.createRole(admin)
-        await db_role.createRole(employee)
-        // 
-        for (let i = 0; i < db_role.listOperationName.length; i++)
-            await db_role.createOperation(db_role.listOperationName[i])
-        // 
-        await db_user.create({ id: admin, password: admin, roleId: admin })
-        await db_user.create({ id: employee, password: employee, roleId: employee })
+        await db_role.role_create(admin)
+        await db_role.role_create(employee)
+    } catch (err) { }
+    // --------------------------------------------------
+
+    for (let i = 0; i < db_role.listOperationName.length; i++)
+        try { await db_role.operation_create(db_role.listOperationName[i]) } catch (err) { }
+    // --------------------------------------------------
+    try {
+        await db_user.user_create({ id: admin, password: admin, roleId: admin })
+        await db_user.user_create({ id: employee, password: employee, roleId: employee })
     } catch (err) { }
     // --------------------------------------------------
     try {

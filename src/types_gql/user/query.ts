@@ -11,15 +11,34 @@ export const UserQuery = extendType({
                 password: nonNull(stringArg())
             },
             // ------------------------------
-            type: objectType({
-                name: 'user_signin_out',
-                definition(t) {
-                    t.nonNull.string("Authorization")
-                },
-            }),
+            type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.signin(args.id, args.password)
+                return db_user.user_signin(args.id, args.password)
+            },
+        });
+        // **************************************************************************************************** 
+        t.field('userRole_get', {
+            args: {
+                userId: nonNull(stringArg()),
+            },
+            // ------------------------------
+            type: nonNull("String"),
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                return db_user.userRole_get(args.userId)
+            },
+        });
+        // **************************************************************************************************** 
+        t.field('userPhoto_get', {
+            args: {
+                userId: nonNull(stringArg()),
+            },
+            // ------------------------------
+            type: nonNull("String"),
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                return db_user.Photo_get(args.userId)
             },
         });
         // **************************************************************************************************** 
@@ -31,7 +50,7 @@ export const UserQuery = extendType({
             type: objectType({
                 name: 'user_get_out',
                 definition(t) {
-                    ["id", "roleId", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
+                    ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
                         t.nullable.string(x)
                     );
                     ["createdAt", "updatedAt"].map(x =>
@@ -41,7 +60,7 @@ export const UserQuery = extendType({
             }),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.get(args.id)
+                return db_user.user_get(args.id)
             },
         });
         // **************************************************************************************************** 
@@ -51,7 +70,7 @@ export const UserQuery = extendType({
             type: list(objectType({
                 name: 'users_get_out',
                 definition(t) {
-                    ["id", "roleId", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
+                    ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
                         t.nullable.string(x)
                     );
                     ["createdAt", "updatedAt"].map(x =>
@@ -61,29 +80,7 @@ export const UserQuery = extendType({
             })),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.gets()
-            },
-        });
-        // **************************************************************************************************** 
-        t.field('userPhoto_get', {
-            args: {
-                userId: nonNull(stringArg()),
-            },
-            // ------------------------------
-            type: objectType({
-                name: 'userPhoto_get_out',
-                definition(t) {
-                    ["userId", "photo"].map(x =>
-                        t.nullable.string(x)
-                    );
-                    ["createdAt", "updatedAt"].map(x =>
-                        t.nullable.float(x)
-                    );
-                },
-            }),
-            // ------------------------------
-            resolve(parent, args, context, info) {
-                return db_user.getPhoto(args.userId)
+                return db_user.users_get()
             },
         });
         // **************************************************************************************************** 
