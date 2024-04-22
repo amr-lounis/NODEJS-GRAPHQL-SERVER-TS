@@ -153,7 +153,7 @@ export const UserMutation = extendType({
                 type: nonNull('String'),
                 // ------------------------------
                 resolve(parent, args, context, info) {
-                    if (!args.id == context?.jwt?.id) throw new Error("this user only can do .")
+                    if (args?.id != context?.jwt?.id) throw new Error(`${args.id} not match ${context?.jwt?.id} .`)
                     else return db_user.user_update(args.id, args)
                 },
             }),
@@ -179,7 +179,7 @@ export const UserMutation = extendType({
                 type: nonNull("String"),
                 // ------------------------------
                 resolve(parent, args, context, info) {
-                    if (!args.id == context?.jwt?.id) throw new Error("this user only can do .")
+                    if (args?.userId != context?.jwt?.id) throw new Error(` ${args.userId} not match  ${context?.jwt?.id}.`)
                     return db_user.Photo_set(args.userId, args.photo)
                 },
             });

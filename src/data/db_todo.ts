@@ -11,8 +11,9 @@ class todo_controller {
             }
         });
     }
-    async todo_create(data) {
-        return await db.todos.create({ data: data })
+    async todo_create(data): Promise<string> {
+        const r = await db.todos.create({ data: data })
+        return r.id
     }
     async todo_update(id: string, data: any) {
         return await db.todos.update({ where: { id: id }, data: data })

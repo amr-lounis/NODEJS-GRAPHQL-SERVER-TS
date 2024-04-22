@@ -9,7 +9,7 @@ import { WebSocketServer } from 'ws'
 import { applyMiddleware } from 'graphql-middleware'
 import { makeSchema } from 'nexus';
 import * as types_gql from './typesgql';
-import { MyToken, config, myLog } from './utils';
+import { MyToken, myConfig, myLog } from './utils';
 import { db_role, db_init } from './data';
 // --------------------------------------------------
 const main = async () => {
@@ -24,7 +24,7 @@ const main = async () => {
   //
   const schemaWithMiddleware = applyMiddleware(schema, info_GraphqlMiddleware)
   // ----------------------- https or http
-  const server = config.SERVER_SSL ? https_server(app, "./assets/cert.pem", "./assets/key.pem") : http_server(app);
+  const server = myConfig.SERVER_SSL ? https_server(app, "./assets/cert.pem", "./assets/key.pem") : http_server(app);
   // ----------------------- ws
   const serverCleanup = ws_server(server, schema)
   // ----------------------- ApolloServer
@@ -54,8 +54,8 @@ const main = async () => {
   await apolloServer.start();
   apolloServer.applyMiddleware({ app, path: "/graphql" })
   // ------------------------------------------------ listen
-  server.listen(config.PORT_HTTP, () => {
-    myLog(`localhost:${config.PORT_HTTP}/graphql`);
+  server.listen(myConfig.PORT_HTTP, () => {
+    myLog(`localhost:${myConfig.PORT_HTTP}/graphql`);
   });
 };
 // -------------------------------------------------- https_server

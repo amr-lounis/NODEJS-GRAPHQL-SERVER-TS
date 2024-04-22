@@ -1,25 +1,5 @@
-import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
-import { db_setting } from '../data/db_setting';
-import { db_todo } from 'src/data/db_todo';
-
-export const todoMutation = extendType({
-    type: 'Mutation',
-    definition(t) {
-        // **************************************************************************************************** 
-        t.field('todo_set', {
-            args: {
-                key: nonNull(stringArg()),
-                value: nonNull(stringArg()),
-            },
-            // ------------------------------
-            type: nonNull('String'),
-            // ------------------------------
-            resolve(parent, args, context, info) {
-                return db_setting.setting_set(args.key, args.value)
-            },
-        });
-    }
-});
+import { arg, extendType, floatArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
+import { db_todo } from '../data/db_todo';
 
 export const todoQuery = extendType({
     type: 'Query',
@@ -30,7 +10,7 @@ export const todoQuery = extendType({
             type: list(objectType({
                 name: 'todos_get_out',
                 definition(t) {
-                    ["id", "employeeId", "agentId", "valid"].map((x) => t.nullable.string(x));
+                    ["id", "employeeId", "agentId", "valid", "description"].map((x) => t.nullable.string(x));
                     ["money_expenses", "money_required", "money_paid", "money_unpaid", "createdAt", "updatedAt"].map((x) => t.nullable.float(x));
                 },
             })),
@@ -41,4 +21,31 @@ export const todoQuery = extendType({
         });
     }
 });
+
+export const todoMutation = extendType({
+    type: 'Mutation',
+    definition(t) {
+        // **************************************************************************************************** 
+        t.field('todo_create', {
+            args: {
+                employeeId: nonNull(stringArg()),
+                agentId: nullable(stringArg()),
+                valid: nullable(stringArg()),
+                description: nullable(stringArg()),
+                money_expenses: nullable(floatArg()),
+                money_required: nullable(floatArg()),
+                money_paid: nullable(floatArg()),
+                money_unpaid: nullable(floatArg()),
+            },
+            // ------------------------------
+            type: nonNull('String'),
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                if (args.employeeId != context?.jwt?.id) throw new Error(`${args.employeeId} not match ${context?.jwt?.id}.`)
+                return db_todo.todo_create(args)
+            },
+        });
+    }
+});
+
 
