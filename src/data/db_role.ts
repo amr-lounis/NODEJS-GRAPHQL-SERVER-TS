@@ -16,8 +16,6 @@ interface Matrix {
 
 class role_controller {
     matrix: Matrix = {};
-    listOperationName: string[] = []
-
     async roles_get(): Promise<String[]> {
         const r = await db.u_roles.findMany({ select: { id: true } });
         return r.map((x) => x.id)
@@ -51,16 +49,11 @@ class role_controller {
         await db.u_operations.delete({ where: { id: id } })
         return "ok"
     }
-    // **************************************************************************************************** 
-    authorization_get(role: string, operationName: string): boolean {
-        if (operationName == 'user_signin') return true;
-        if (this.matrix.hasOwnProperty(role) && this.matrix[role].hasOwnProperty(operationName)) {
-            return this.matrix[role][operationName];
-        } else {
-            // Return false if the role or operation doesn't exist in the matrix
-            return false;
-        }
+    async operations_set(listOperationName: string[]): Promise<void> {
+        for (let i = 0; i < listOperationName.length; i++)
+            try { await db.u_operations.create({ data: { id: listOperationName[i] } }) } catch (err) { }
     }
+    // **************************************************************************************************** 
     async authorizations_get(roleId: string) {
         return await db.u_roles_operations.findMany({ where: { roleId: roleId } })
     }
@@ -97,8 +90,19 @@ class role_controller {
         return "ok"
     }
     // **************************************************************************************************** 
+    authorization_get(role: string, operationName: string): boolean {
+        if (operationName == 'user_signin') return true;
+        if (this.matrix.hasOwnProperty(role) && this.matrix[role].hasOwnProperty(operationName)) {
+            return this.matrix[role][operationName];
+        } else {
+            // Return false if the role or operation doesn't exist in the matrix
+            return false;
+        }
+    }
     async initMatrix() {
+        // get roles from database
         const roles = await db.u_roles.findMany();
+        // get operations from database
         const operations = await db.u_operations.findMany();
         const matrix: Matrix = {};
 

@@ -15,14 +15,14 @@ import { db_role, db_init } from './data';
 export const schema = makeSchema({
   types: types_gql,
 });
-db_role.listOperationName = [...Object.keys(schema.getMutationType()['_fields']), ...Object.keys(schema.getQueryType()['_fields'])]
 // --------------------------------------------------
 const port = 3000;
 const serverSSL = false
 // --------------------------------------------------
 const main = async () => {
   // -----------------------
-  await db_init()
+  const listOperationName = [...Object.keys(schema.getMutationType()['_fields']), ...Object.keys(schema.getQueryType()['_fields'])]
+  await db_init(listOperationName)
   // -----------------------
   const app = express();
   //

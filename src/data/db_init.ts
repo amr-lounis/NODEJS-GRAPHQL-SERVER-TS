@@ -2,19 +2,18 @@ import { myLog } from "../utils"
 import { db_role } from "./db_role"
 import { db_user } from "./db_user"
 
-export const db_init = async () => {
+export const db_init = async (listOperationName: string[]) => {
     myLog(" +++++ initDB +++++")
     const admin = 'admin'
     const employee = 'employee'
+    // --------------------------------------------------
+    for (let i = 0; i < listOperationName.length; i++)
+        try { await db_role.operation_create(listOperationName[i]) } catch (err) { }
     // --------------------------------------------------
     try {
         await db_role.role_create(admin)
         await db_role.role_create(employee)
     } catch (err) { }
-    // --------------------------------------------------
-
-    for (let i = 0; i < db_role.listOperationName.length; i++)
-        try { await db_role.operation_create(db_role.listOperationName[i]) } catch (err) { }
     // --------------------------------------------------
     try {
         await db_user.user_create({ id: admin, password: admin, roleId: admin })
