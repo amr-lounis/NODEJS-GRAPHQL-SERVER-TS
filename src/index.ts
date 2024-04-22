@@ -7,8 +7,8 @@ import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { WebSocketServer } from 'ws'
 import { applyMiddleware } from 'graphql-middleware'
-import * as types_gql from './types_gql';
-import { MyToken, pubsub } from './utils';
+import * as types_gql from './typesgql';
+import { MyToken } from './utils';
 import { makeSchema } from 'nexus';
 import { myLog } from './utils';
 import { db_role, db_init } from './data';
@@ -121,10 +121,3 @@ async function info_GraphqlMiddleware(resolve, root, args, context, info) {
 // --------------------------------------------------
 main()
 // --------------------------------------------------
-// setInterval(() => {
-//   log("send")
-//   try {
-//     const payload = { sender_id: 1, receiver_id: 2, title: "title", content: "content" }
-//     pubsub.publish("user_notification_sender", payload);
-//   } catch (error) { }
-// }, 5000);

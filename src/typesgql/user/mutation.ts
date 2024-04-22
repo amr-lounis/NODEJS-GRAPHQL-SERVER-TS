@@ -1,30 +1,46 @@
 import { extendType, nonNull, nullable, objectType, scalarType, stringArg } from 'nexus';
 import { db_user } from '../../data';
+import { pubsub } from '../../utils';
 
 export const UserMutation = extendType({
     type: 'Mutation',
     definition(t) {
         // **************************************************************************************************** 
-        t.field('user_create', {
+        t.field('user_send', {
             args: {
-                id: nonNull(stringArg()),
-                password: stringArg(),
-                // roleId: stringArg(),
-                description: stringArg(),
-                address: stringArg(),
-                first_name: stringArg(),
-                last_name: stringArg(),
-                phone: stringArg(),
-                fax: stringArg(),
-                email: stringArg(),
+                receiver_id: nonNull(stringArg()),
+                title: nonNull(stringArg()),
+                content: nonNull(stringArg()),
             },
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.user_create(args)
+                const payload = { sender_id: context.userThis.id, receiver_id: args.receiver_id, title: args.title, content: args.content }
+                pubsub.publish("user_notification_sender", payload);
+                return "ok"
             },
         }),
+            // **************************************************************************************************** 
+            t.field('user_create', {
+                args: {
+                    id: nonNull(stringArg()),
+                    password: stringArg(),
+                    description: stringArg(),
+                    address: stringArg(),
+                    first_name: stringArg(),
+                    last_name: stringArg(),
+                    phone: stringArg(),
+                    fax: stringArg(),
+                    email: stringArg(),
+                },
+                // ------------------------------
+                type: nonNull("String"),
+                // ------------------------------
+                resolve(parent, args, context, info) {
+                    return db_user.user_create(args)
+                },
+            }),
             // **************************************************************************************************** 
             t.field('user_update', {
                 args: {
