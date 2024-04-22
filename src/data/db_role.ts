@@ -49,10 +49,6 @@ class role_controller {
         await db.u_operations.delete({ where: { id: id } })
         return "ok"
     }
-    async operations_set(listOperationName: string[]): Promise<void> {
-        for (let i = 0; i < listOperationName.length; i++)
-            try { await db.u_operations.create({ data: { id: listOperationName[i] } }) } catch (err) { }
-    }
     // **************************************************************************************************** 
     async authorizations_get(roleId: string) {
         return await db.u_roles_operations.findMany({ where: { roleId: roleId } })
