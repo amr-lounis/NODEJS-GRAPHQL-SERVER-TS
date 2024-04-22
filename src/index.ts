@@ -11,10 +11,6 @@ import { makeSchema } from 'nexus';
 import * as types_gql from './typesgql';
 import { MyToken, myLog } from './utils';
 import { db_role, db_init } from './data';
-
-import 'dotenv/config'
-console.log(`The connection URL is ${process.env.DATABASE_UR}`)
-
 // --------------------------------------------------
 export const schema = makeSchema({
   types: types_gql,
