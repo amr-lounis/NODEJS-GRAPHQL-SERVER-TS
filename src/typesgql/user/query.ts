@@ -20,13 +20,13 @@ export const UserQuery = extendType({
         // **************************************************************************************************** 
         t.field('userRole_get', {
             args: {
-                userId: nonNull(stringArg()),
+                id: nonNull(stringArg()),
             },
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.userRole_get(args.userId)
+                return db_user.userRole_get(args.id)
             },
         });
         // **************************************************************************************************** 
@@ -44,17 +44,17 @@ export const UserQuery = extendType({
         // **************************************************************************************************** 
         t.field('user_get', {
             args: {
-                userId: nonNull(stringArg()),
+                id: nonNull(stringArg()),
             },
             // ------------------------------
             type: objectType({
                 name: 'user_get_out',
                 definition(t) {
                     ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
-                        t.nullable.string(x)
+                        t.nonNull.string(x)
                     );
                     ["createdAt", "updatedAt"].map(x =>
-                        t.nullable.float(x)
+                        t.nonNull.float(x)
                     );
                 },
             }),
