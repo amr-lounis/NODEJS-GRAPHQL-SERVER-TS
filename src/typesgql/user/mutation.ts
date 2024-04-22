@@ -2,13 +2,20 @@ import { extendType, nonNull, nullable, objectType, scalarType, stringArg } from
 import { db_user } from '../../data';
 import { pubsub } from '../../utils';
 
+type payloadType = {
+    senderId: string,
+    receiverId: string,
+    title: string,
+    content: string
+}
+
 export const UserMutation = extendType({
     type: 'Mutation',
     definition(t) {
         // **************************************************************************************************** 
         t.field('user_send', {
             args: {
-                receiver_id: nonNull(stringArg()),
+                receiverId: nonNull(stringArg()),
                 title: nonNull(stringArg()),
                 content: nonNull(stringArg()),
             },
@@ -16,7 +23,7 @@ export const UserMutation = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                const payload = { sender_id: context.userThis.id, receiver_id: args.receiver_id, title: args.title, content: args.content }
+                const payload: payloadType = { senderId: context.userThis.id, receiverId: args.receiverId, title: args.title, content: args.content }
                 pubsub.publish("user_notification_sender", payload);
                 return "ok"
             },

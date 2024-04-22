@@ -13,7 +13,7 @@ class user_controller {
     async user_signin(id: string, password: string): Promise<String> {//Authorization
         try {
             var u = await db.users.findFirst({ where: { id: id, password: password } })
-            return MyToken.Token_Create(u.id, u.first_name + u.last_name, u.roleId)
+            return MyToken.Token_Create(u.id, u.roleId)
         } catch (error) {
             return ""
         }

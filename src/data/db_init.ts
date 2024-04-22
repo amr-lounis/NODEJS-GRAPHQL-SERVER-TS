@@ -1,8 +1,9 @@
+import { myLog } from "../utils"
 import { db_role } from "./db_role"
 import { db_user } from "./db_user"
 
 export const db_init = async () => {
-    console.log(" +++++ initDB +++++")
+    myLog(" +++++ initDB +++++")
     const admin = 'admin'
     const employee = 'employee'
     // --------------------------------------------------
@@ -33,7 +34,7 @@ export const db_init = async () => {
         // stor matrix in database
         await db_role.storeMatrix()
     } catch (err) {
-        console.log(err.message)
+        myLog(err.message)
     }
     // --------------------------------------------------
 }

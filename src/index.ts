@@ -7,10 +7,9 @@ import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { WebSocketServer } from 'ws'
 import { applyMiddleware } from 'graphql-middleware'
-import * as types_gql from './typesgql';
-import { MyToken } from './utils';
 import { makeSchema } from 'nexus';
-import { myLog } from './utils';
+import * as types_gql from './typesgql';
+import { MyToken, myLog } from './utils';
 import { db_role, db_init } from './data';
 // --------------------------------------------------
 export const schema = makeSchema({
