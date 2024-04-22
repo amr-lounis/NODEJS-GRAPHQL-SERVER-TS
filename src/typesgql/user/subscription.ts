@@ -1,6 +1,6 @@
 import { extendType, objectType } from 'nexus';
 import { withFilter } from 'graphql-subscriptions';
-import { myLog, pubsub } from '../../utils'
+import { pubsub } from '../../utils'
 
 export const UserSubscription = extendType({
     type: 'Subscription',
@@ -25,7 +25,7 @@ export const UserSubscription = extendType({
             async resolve(payload, args, context, info) {
                 return new Promise((resolve, reject) => {
                     try {
-                        myLog("user_notification_receiver : payload:  =>  " + JSON.stringify(payload));
+                        // myLog("user_notification_receiver : payload:  =>  " + JSON.stringify(payload));
                         resolve(payload);
                     } catch (error) {
                         reject(new Error('---- ERROR : subscription .'));
