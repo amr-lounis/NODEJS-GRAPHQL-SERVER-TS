@@ -1,4 +1,4 @@
-import { booleanArg, extendType, nonNull, nullable, objectType, stringArg } from 'nexus';
+import { extendType, nonNull, stringArg } from 'nexus';
 import { db_setting } from '../../data/db_setting';
 
 export const settingMutation = extendType({

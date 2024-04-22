@@ -1,4 +1,4 @@
-import { extendType, nonNull, nullable, objectType, scalarType, stringArg } from 'nexus';
+import { extendType, nonNull, nullable, stringArg } from 'nexus';
 import { db_user } from '../../data';
 import { pubsub } from '../../utils';
 

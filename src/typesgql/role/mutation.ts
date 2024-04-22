@@ -1,4 +1,4 @@
-import { booleanArg, extendType, nonNull, nullable, objectType, stringArg } from 'nexus';
+import { booleanArg, extendType, nonNull, stringArg } from 'nexus';
 import { db_role } from '../../data';
 
 export const roleMutation = extendType({
