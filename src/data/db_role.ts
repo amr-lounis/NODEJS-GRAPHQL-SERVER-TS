@@ -87,7 +87,7 @@ class role_controller {
     }
     // **************************************************************************************************** 
     authorization_get(role: string, operationName: string): boolean {
-        if (operationName == 'user_signin') return true;
+        if (operationName == 'user_authentication') return true;
         if (this.matrix.hasOwnProperty(role) && this.matrix[role].hasOwnProperty(operationName)) {
             return this.matrix[role][operationName];
         } else {

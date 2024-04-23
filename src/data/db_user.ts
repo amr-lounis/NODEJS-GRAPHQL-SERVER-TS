@@ -10,10 +10,17 @@ class user_controller {
     async user_get(id: string) {
         return await db.users.findUnique({ where: { id: id } });
     }
-    async user_signin(id: string, password: string): Promise<String> {//Authorization
+    async user_authentication(id: string, password: string): Promise<String> {//Authorization
         try {
             var u = await db.users.findFirst({ where: { id: id, password: password } })
             return MyToken.Token_Create(u.id, u.roleId)
+        } catch (error) {
+            return ""
+        }
+    }
+    async user_authentication_renewal(id: string, roleId: string): Promise<String> {//Authorization
+        try {
+            return MyToken.Token_Create(id, roleId)
         } catch (error) {
             return ""
         }
@@ -36,7 +43,7 @@ class user_controller {
         return r.roleId
     }
     async userRole_update(id: string, roleId: string): Promise<String> {
-        const r = await db.users.update({
+        await db.users.update({
             where: {
                 id: id
             },

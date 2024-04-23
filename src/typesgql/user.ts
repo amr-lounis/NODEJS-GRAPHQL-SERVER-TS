@@ -15,7 +15,7 @@ export const UserQuery = extendType({
     type: 'Query',
     definition(t) {
         // **************************************************************************************************** 
-        t.field('user_signin', {
+        t.field('user_authentication', {
             args: {
                 id: nonNull(stringArg()),
                 password: nonNull(stringArg())
@@ -24,7 +24,17 @@ export const UserQuery = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.user_signin(args.id, args.password)
+                return db_user.user_authentication(args.id, args.password)
+            },
+        });
+        // **************************************************************************************************** 
+        t.field('user_authentication_renewal', {
+            args: {},
+            // ------------------------------
+            type: nonNull("String"),
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                return db_user.user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
             },
         });
         // **************************************************************************************************** 
