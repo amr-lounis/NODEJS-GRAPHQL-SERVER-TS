@@ -159,6 +159,8 @@ model invoices {
   money_required      Float        @default(0)
   money_paid          Float        @default(0)
   money_unpaid        Float        @default(0)
+  money_expenses      Float        @default(0)
+  money_margin        Float        @default(0)
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 }
@@ -193,10 +195,10 @@ model todos {
   // 
   valid          String    @default("NEW") //{NEW,COMPLITED}
   description    String    @default("")
-  money_expenses Float     @default(0)
   money_required Float     @default(0)
   money_paid     Float     @default(0)
   money_unpaid   Float     @default(0)
+  money_expenses Float     @default(0)
   money_margin   Float     @default(0)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
