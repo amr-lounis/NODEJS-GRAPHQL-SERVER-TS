@@ -48,7 +48,7 @@ export const UserQuery = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.Photo_get(args.userId)
+                return db_user.userPhoto_get(args.userId)
             },
         });
         // **************************************************************************************************** 
@@ -180,7 +180,7 @@ export const UserMutation = extendType({
                 // ------------------------------
                 resolve(parent, args, context, info) {
                     if (args?.userId != context?.jwt?.id) throw new Error(` ${args.userId} not match  ${context?.jwt?.id}.`)
-                    return db_user.Photo_set(args.userId, args.photo)
+                    return db_user.userPhoto_set(args.userId, args.photo)
                 },
             });
         // ****************************************************************************************************  

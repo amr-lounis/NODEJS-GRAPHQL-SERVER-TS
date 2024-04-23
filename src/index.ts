@@ -101,10 +101,8 @@ const ws_server = (_server, _schema) => {
 async function info_GraphqlMiddleware(resolve, root, args, context, info) {
   if ((info?.parentType?.name == 'Query') || (info?.parentType?.name == 'Mutation')) {
     const operationName = info?.fieldName || ''
-    const operationType = info?.parentType?.name || '';
-    const jwt = context.jwt;
-    const r = db_role.authorization_get(jwt.role, operationName)
-    if (!r) throw Error(`role:${jwt.role} --- operationName:${operationName} not authorized .`)
+    const r = db_role.authorization_get(context.jwt.role, operationName)
+    if (!r) throw Error(`role:${context.jwt.role} --- operationName:${operationName} not authorized .`)
     if (args?.id?.length < 3) return new Error("id length smal then 3 ")
     myLog(`context :${JSON.stringify(context)} --- args : [${Object.keys(args)}] `)
   }

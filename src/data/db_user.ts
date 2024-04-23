@@ -47,12 +47,12 @@ class user_controller {
         return "ok"
     }
     // ****************************************************************************************************
-    async Photo_get(userId: string): Promise<String> {
+    async userPhoto_get(userId: string): Promise<String> {
         const p = await db.u_photos.findFirst({ where: { userId: userId } },);
         return p?.photo?.toString() ?? ""
     }
-    async Photo_set(userId: string, photo: string): Promise<String | Error> {
-        if (photo.length > 524288) return new Error("The size is greater than the maximum value");
+    async userPhoto_set(userId: string, photo: string): Promise<String> {
+        if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
         const photpBytes = Buffer.from(photo ?? "", 'utf8')
         // 
         const exist = await db.u_photos.findFirst({ select: { userId: true }, where: { userId: userId } }) ? true : false

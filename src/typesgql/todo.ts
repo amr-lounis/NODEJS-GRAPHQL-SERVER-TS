@@ -11,12 +11,29 @@ export const todoQuery = extendType({
                 name: 'todos_get_out',
                 definition(t) {
                     ["id", "employeeId", "agentId", "valid", "description"].map((x) => t.nullable.string(x));
-                    ["money_expenses", "money_required", "money_paid", "money_unpaid", "createdAt", "updatedAt"].map((x) => t.nullable.float(x));
+                    ["money_expenses", "money_required", "money_paid", "money_unpaid", "money_margin", "createdAt", "updatedAt"].map((x) => t.nullable.float(x));
                 },
             })),
             // ------------------------------
             resolve(parent, args, context, info) {
                 return db_todo.todos_get()
+            },
+        });
+        t.field('todo_get', {
+            args: {
+                id: nonNull(stringArg())
+            },
+            // ------------------------------
+            type: objectType({
+                name: 'todo_get_out',
+                definition(t) {
+                    ["id", "employeeId", "agentId", "valid", "description"].map((x) => t.nullable.string(x));
+                    ["money_expenses", "money_required", "money_paid", "money_unpaid", "money_margin", "createdAt", "updatedAt"].map((x) => t.nullable.float(x));
+                },
+            }),
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                return db_todo.todo_get(args.id)
             },
         });
     }
@@ -35,14 +52,69 @@ export const todoMutation = extendType({
                 money_expenses: nullable(floatArg()),
                 money_required: nullable(floatArg()),
                 money_paid: nullable(floatArg()),
-                money_unpaid: nullable(floatArg()),
+                // money_unpaid: nullable(floatArg()),
+                // money_margin: nullable(floatArg())
             },
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
             resolve(parent, args, context, info) {
                 if (args.employeeId != context?.jwt?.id) throw new Error(`${args.employeeId} not match ${context?.jwt?.id}.`)
+                args.money_unpaid = args.money_required - args.money_paid;
+                args.money_margin = args.money_paid - args.money_expenses;
                 return db_todo.todo_create(args)
+            },
+        });
+        // **************************************************************************************************** 
+        t.field('todo_update', {
+            args: {
+                id: nonNull(stringArg()),
+                employeeId: nonNull(stringArg()),
+                agentId: nullable(stringArg()),
+                valid: nullable(stringArg()),
+                description: nullable(stringArg()),
+                money_expenses: nullable(floatArg()),
+                money_required: nullable(floatArg()),
+                money_paid: nullable(floatArg()),
+                // money_unpaid: nullable(floatArg()),
+                // money_margin: nullable(floatArg())
+            },
+            // ------------------------------
+            type: nonNull('String'),
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                if (args.employeeId != context?.jwt?.id) throw new Error(`${args.employeeId} not match ${context?.jwt?.id}.`)
+                args.money_unpaid = args.money_required - args.money_paid;
+                args.money_margin = args.money_paid - args.money_expenses;
+                return db_todo.todo_update(args.id, args)
+            },
+        });
+
+        // **************************************************************************************************** 
+        t.field('todo_delete', {
+            args: {
+                id: nonNull(stringArg()),
+            },
+            // ------------------------------
+            type: nonNull('String'),
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                if (args.employeeId != context?.jwt?.id) throw new Error(`${args.employeeId} not match ${context?.jwt?.id}.`)
+                return db_todo.todo_delete(args.id)
+            },
+        });
+        // **************************************************************************************************** 
+        t.field('todoPhoto_update', {
+            args: {
+                todoId: nonNull(stringArg()),
+                photo: nonNull(stringArg()),
+            },
+            // ------------------------------
+            type: nonNull("String"),
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                if (args?.employeeId != context?.jwt?.id) throw new Error(` ${args.userId} not match  ${context?.jwt?.id}.`)
+                return db_todo.todoPhoto_set(args.todoId, args.photo)
             },
         });
     }
