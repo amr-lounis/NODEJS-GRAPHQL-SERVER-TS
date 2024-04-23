@@ -45,21 +45,18 @@ export const todoMutation = extendType({
         // **************************************************************************************************** 
         t.field('todo_create', {
             args: {
-                employeeId: nonNull(stringArg()),
                 agentId: nullable(stringArg()),
                 valid: nullable(stringArg()),
                 description: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
                 money_required: nullable(floatArg()),
-                money_paid: nullable(floatArg()),
-                // money_unpaid: nullable(floatArg()),
-                // money_margin: nullable(floatArg())
+                money_paid: nullable(floatArg())
             },
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
             resolve(parent, args, context, info) {
-                if (args.employeeId != context?.jwt?.id) throw new Error(`${args.employeeId} not match ${context?.jwt?.id}.`)
+                args.employeeId = context?.jwt?.id
                 args.money_unpaid = args.money_required - args.money_paid;
                 args.money_margin = args.money_paid - args.money_expenses;
                 return db_todo.todo_create(args)
@@ -69,21 +66,18 @@ export const todoMutation = extendType({
         t.field('todo_update', {
             args: {
                 id: nonNull(stringArg()),
-                employeeId: nonNull(stringArg()),
                 agentId: nullable(stringArg()),
                 valid: nullable(stringArg()),
                 description: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
                 money_required: nullable(floatArg()),
-                money_paid: nullable(floatArg()),
-                // money_unpaid: nullable(floatArg()),
-                // money_margin: nullable(floatArg())
+                money_paid: nullable(floatArg())
             },
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
             resolve(parent, args, context, info) {
-                if (args.employeeId != context?.jwt?.id) throw new Error(`${args.employeeId} not match ${context?.jwt?.id}.`)
+                args.employeeId = context?.jwt?.id
                 args.money_unpaid = args.money_required - args.money_paid;
                 args.money_margin = args.money_paid - args.money_expenses;
                 return db_todo.todo_update(args.id, args)
@@ -99,7 +93,6 @@ export const todoMutation = extendType({
             type: nonNull('String'),
             // ------------------------------
             resolve(parent, args, context, info) {
-                if (args.employeeId != context?.jwt?.id) throw new Error(`${args.employeeId} not match ${context?.jwt?.id}.`)
                 return db_todo.todo_delete(args.id)
             },
         });
@@ -113,7 +106,6 @@ export const todoMutation = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                if (args?.employeeId != context?.jwt?.id) throw new Error(` ${args.userId} not match  ${context?.jwt?.id}.`)
                 return db_todo.todoPhoto_set(args.todoId, args.photo)
             },
         });

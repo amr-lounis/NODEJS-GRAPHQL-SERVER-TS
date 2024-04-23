@@ -111,7 +111,7 @@ export const UserMutation = extendType({
     type: 'Mutation',
     definition(t) {
         // **************************************************************************************************** 
-        t.field('user_send', {
+        t.field('user_notification_send', {
             args: {
                 receiverId: nonNull(stringArg()),
                 title: nonNull(stringArg()),
@@ -147,9 +147,8 @@ export const UserMutation = extendType({
                 },
             }),
             // **************************************************************************************************** 
-            t.field('user_update', {
+            t.field('user_update_self', {
                 args: {
-                    id: nonNull(stringArg()),
                     password: stringArg(),
                     description: stringArg(),
                     address: stringArg(),
@@ -163,49 +162,46 @@ export const UserMutation = extendType({
                 type: nonNull('String'),
                 // ------------------------------
                 resolve(parent, args, context, info) {
-                    if (args?.id != context?.jwt?.id) throw new Error(`${args.id} not match ${context?.jwt?.id} .`)
-                    else return db_user.user_update(args.id, args)
+                    return db_user.user_update(context?.jwt?.id, args)
                 },
             }),
             // **************************************************************************************************** 
-            t.field('user_delete', {
+            t.field('userPhoto_update_self', {
                 args: {
-                    id: nonNull(stringArg())
-                },
-                // ------------------------------
-                type: nonNull("String"),
-                // ------------------------------
-                resolve(parent, args, context, info) {
-                    return db_user.user_delete(args.id)
-                },
-            }),
-            // **************************************************************************************************** 
-            t.field('userPhoto_update', {
-                args: {
-                    userId: nonNull(stringArg()),
                     photo: nonNull(stringArg()),
                 },
                 // ------------------------------
                 type: nonNull("String"),
                 // ------------------------------
                 resolve(parent, args, context, info) {
-                    if (args?.userId != context?.jwt?.id) throw new Error(` ${args.userId} not match  ${context?.jwt?.id}.`)
-                    return db_user.userPhoto_set(args.userId, args.photo)
+                    return db_user.userPhoto_set(context?.jwt?.id, args.photo)
                 },
             });
-        // ****************************************************************************************************  
-        t.field('userRole_update', {
+        // **************************************************************************************************** 
+        t.field('user_delete', {
             args: {
-                id: nonNull(stringArg()),
-                roleId: nullable(stringArg()),
+                id: nonNull(stringArg())
             },
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args, context, info) {
-                return db_user.userRole_update(args.id, args.roleId)
-            }
-        });
+                return db_user.user_delete(args.id)
+            },
+        }),
+            // ****************************************************************************************************  
+            t.field('userRole_update', {
+                args: {
+                    id: nonNull(stringArg()),
+                    roleId: nullable(stringArg()),
+                },
+                // ------------------------------
+                type: nonNull("String"),
+                // ------------------------------
+                resolve(parent, args, context, info) {
+                    return db_user.userRole_update(args.id, args.roleId)
+                }
+            });
         // **************************************************************************************************** 
     },
 });
