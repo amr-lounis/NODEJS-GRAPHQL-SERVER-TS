@@ -150,7 +150,7 @@ model invoices {
   // 
   i_products          i_products[]
   // 
-  valid               String       @default("NEW") //{NEW,COMPLITED}
+  validation          String       @default("") //{NEW,COMPLITED}
   type                String       @default("SALE") //{SALE,PURCHASE,LOSS}
   description         String       @default("")
   money_without_added Float        @default(0)
@@ -193,7 +193,7 @@ model todos {
   // 
   photo          t_photos?
   // 
-  valid          String    @default("NEW") //{NEW,COMPLITED}
+  validation     String    @default("")
   description    String    @default("")
   money_required Float     @default(0)
   money_paid     Float     @default(0)

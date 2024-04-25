@@ -1,19 +1,68 @@
+import { toPage } from '../utils/';
 import { db } from './db';
 
+type todosInType = {
+    id?: string,
+    employeeId?: string,
+    agentId?: string,
+    validation?: string,
+    filter_text?: string,
+    filter_date_min?: string,
+    filter_date_max?: string,
+    pageNumber?: number,
+    pageSizeMax?: number,
+    skip?: number,
+    take?: number
+}
 class todo_controller {
-    async todos_get() {
+    async todos_get(args: todosInType) {
         return await db.todos.findMany({
             orderBy: {
                 createdAt: 'desc'
-            }
-        });
-    }
-    async todo_get(id: string) {
-        return await db.todos.findUnique({
-            where: {
-                id: id
+            }, where: {
+                id: args.id,
+                employeeId: args.employeeId,
+                agentId: args.agentId,
+                validation: args.validation,
+                createdAt: {
+                    gte: args.filter_date_min, lte: args.filter_date_max
+                },
+                description: {
+                    contains: args.filter_text
+                },
             },
-        });
+            skip: args.skip,
+            take: args.take,
+        })
+    }
+
+
+    async todos_page_get(args: todosInType) {
+        const where = {
+            id: args.id,
+            employeeId: args.employeeId,
+            agentId: args.agentId,
+            validation: args.validation,
+            createdAt: {
+                gte: args.filter_date_min, lte: args.filter_date_max
+            },
+            description: {
+                contains: args.filter_text
+            },
+        };
+
+        const itemsCountAll = (await await db.todos.aggregate({ _count: { id: true }, where }))._count.id
+        const p = toPage({ items_count_all: itemsCountAll, page_number: args.pageNumber, page_size_max: args.pageSizeMax })
+        const items = await db.todos.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.skip, take: p.take })
+
+        return {
+            itemsCountAll: itemsCountAll,
+            pagesCountAll: p.pages_count_all,
+            pageSizeMax: p.take,
+            pageNumber: p.page_number,
+            pageSize: items.length,
+            items: items
+        }
     }
     async todo_create(data): Promise<string> {
         const r = await db.todos.create({ data: data })

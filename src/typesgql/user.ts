@@ -1,5 +1,5 @@
 import { extendType, list, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db_user } from '../data';
+import { db_user, userType } from '../data';
 import { pubsub } from '../utils';
 import { withFilter } from 'graphql-subscriptions';
 
@@ -62,47 +62,47 @@ export const UserQuery = extendType({
             },
         });
         // **************************************************************************************************** 
-        t.field('user_get', {
-            args: {
-                id: nonNull(stringArg()),
-            },
-            // ------------------------------
-            type: objectType({
-                name: 'user_get_out',
-                definition(t) {
-                    ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
-                        t.nonNull.string(x)
-                    );
-                    ["createdAt", "updatedAt"].map(x =>
-                        t.nonNull.float(x)
-                    );
-                },
-            }),
-            // ------------------------------
-            resolve(parent, args, context, info) {
-                return db_user.user_get(args.id)
-            },
-        });
+        // t.field('user_get', {
+        //     args: {
+        //         id: nonNull(stringArg()),
+        //     },
+        //     // ------------------------------
+        //     type: objectType({
+        //         name: 'user_get_out',
+        //         definition(t) {
+        //             ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
+        //                 t.nonNull.string(x)
+        //             );
+        //             ["createdAt", "updatedAt"].map(x =>
+        //                 t.nonNull.float(x)
+        //             );
+        //         },
+        //     }),
+        //     // ------------------------------
+        //     resolve(parent, args, context, info) {
+        //         return db_user.user_get(args.id)
+        //     },
+        // });
         // **************************************************************************************************** 
-        t.field('users_get', {
-            args: {},
-            // ------------------------------
-            type: list(objectType({
-                name: 'users_get_out',
-                definition(t) {
-                    ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
-                        t.nullable.string(x)
-                    );
-                    ["createdAt", "updatedAt"].map(x =>
-                        t.nullable.float(x)
-                    );
-                },
-            })),
-            // ------------------------------
-            resolve(parent, args, context, info) {
-                return db_user.users_get()
-            },
-        });
+        // t.field('users_get', {
+        //     args: {},
+        //     // ------------------------------
+        //     type: list(objectType({
+        //         name: 'users_get_out',
+        //         definition(t) {
+        //             ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
+        //                 t.nullable.string(x)
+        //             );
+        //             ["createdAt", "updatedAt"].map(x =>
+        //                 t.nullable.float(x)
+        //             );
+        //         },
+        //     })),
+        //     // ------------------------------
+        //     resolve(parent, args, context, info) {
+        //         return db_user.users_get()
+        //     },
+        // });
         // **************************************************************************************************** 
     }
 });
@@ -142,7 +142,7 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull("String"),
                 // ------------------------------
-                resolve(parent, args, context, info) {
+                resolve(parent, args: userType, context, info) {
                     return db_user.user_create(args)
                 },
             }),
@@ -161,7 +161,7 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull('String'),
                 // ------------------------------
-                resolve(parent, args, context, info) {
+                resolve(parent, args: userType, context, info) {
                     return db_user.user_update(context?.jwt?.id, args)
                 },
             }),

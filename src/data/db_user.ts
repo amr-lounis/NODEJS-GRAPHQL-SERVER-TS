@@ -1,14 +1,36 @@
 import { MyToken } from '../utils';
 import { db } from './db';
 
+export type userType = {
+    id: string,
+    roleId?: string,
+    password?: string,
+    description?: string,
+    address?: string,
+    first_name?: string,
+    last_name?: string,
+    phone?: string,
+    fax?: string,
+    email?: string,
+}
 class user_controller {
     // ****************************************************************************************************
-
-    async users_get() {
-        return await db.users.findMany({});
-    }
-    async user_get(id: string) {
-        return await db.users.findUnique({ where: { id: id } });
+    async users_get(args: { id?: string, filter_text?: string, filter_date_min?: string, filter_date_max?: string, skip?: number, take?: number }) {
+        return await db.todos.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            }, where: {
+                id: args.id,
+                createdAt: {
+                    gte: args.filter_date_min, lte: args.filter_date_max
+                },
+                description: {
+                    contains: args.filter_text
+                },
+            },
+            skip: args.skip,
+            take: args.take,
+        })
     }
     async user_authentication(id: string, password: string): Promise<String> {//Authorization
         try {
@@ -25,11 +47,11 @@ class user_controller {
             return ""
         }
     }
-    async user_create(data: any): Promise<String> {
+    async user_create(data: userType): Promise<String> {
         await db.users.create({ data: data })
         return "ok"
     }
-    async user_update(id: string, data: any): Promise<String> {
+    async user_update(id: string, data: userType): Promise<String> {
         await db.users.update({ where: { id: id }, data: data })
         return "ok"
     }

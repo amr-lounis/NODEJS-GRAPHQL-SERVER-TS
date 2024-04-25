@@ -1,6 +1,8 @@
 import { myLog } from "../utils"
 import { db_role } from "./db_role"
+import { db_todo } from "./db_todo"
 import { db_user } from "./db_user"
+import { faker } from '@faker-js/faker';
 
 export const db_init = async (listOperationName: string[]) => {
     myLog(" +++++ initDB +++++")
@@ -35,5 +37,4 @@ export const db_init = async (listOperationName: string[]) => {
     } catch (err) {
         myLog(err.message)
     }
-    // --------------------------------------------------
 }
