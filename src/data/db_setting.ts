@@ -1,4 +1,3 @@
-import { MyToken } from '../utils';
 import { db } from './db';
 
 class setting_controller {

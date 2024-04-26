@@ -35,7 +35,6 @@ class todo_controller {
         })
     }
 
-
     async todos_page_get(args: todosInType) {
         const where = {
             id: args.id,
