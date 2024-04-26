@@ -1,8 +1,8 @@
-import { MyToken } from '../utils';
+import { MyToken, toPage } from '../utils';
 import { db } from './db';
 
 export type userType = {
-    id: string,
+    id?: string,
     roleId?: string,
     password?: string,
     description?: string,
@@ -12,26 +12,77 @@ export type userType = {
     phone?: string,
     fax?: string,
     email?: string,
+    filter_id?: string,
+    filter_description?: string,
+    filter_date_min?: string,
+    filter_date_max?: string,
+    pageNumber?: number,
+    itemsTake?: number,
+    itemsSkip?: number,
 }
 class user_controller {
     // ****************************************************************************************************
-    async users_get(args: { id?: string, filter_text?: string, filter_date_min?: string, filter_date_max?: string, skip?: number, take?: number }) {
-        return await db.todos.findMany({
+    async users_get(args: userType) {
+        return await db.users.findMany({
             orderBy: {
                 createdAt: 'desc'
             }, where: {
-                id: args.id,
+                OR: [
+                    {
+                        id: args.id
+                    },
+                    {
+                        id: {
+                            contains: args.filter_id
+                        }
+                    },
+                ],
                 createdAt: {
                     gte: args.filter_date_min, lte: args.filter_date_max
                 },
                 description: {
-                    contains: args.filter_text
+                    contains: args.filter_description
                 },
             },
-            skip: args.skip,
-            take: args.take,
+            skip: args.itemsSkip,
+            take: args.itemsTake,
         })
     }
+    async users_page_get(args: userType) {
+        const where = {
+            OR: [
+                {
+                    id: args.id
+                },
+                {
+                    id: {
+                        contains: args.filter_id
+                    }
+                },
+            ],
+            createdAt: {
+                gte: args.filter_date_min, lte: args.filter_date_max
+            },
+            description: {
+                contains: args.filter_description
+            },
+        };
+
+        const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where }))._count.id
+        const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
+        const items = await db.users.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
+
+        return {
+            allItemsCount: itemsCountAll,
+            allPagesCount: p.pagesCountAll,
+            itemsSkip: p.itemsSkip,
+            itemsTake: p.itemsTake,
+            pageNumber: p.pageNumber,
+            itemsCount: items.length,
+            items: items
+        }
+    }
+
     async user_authentication(id: string, password: string): Promise<String> {//Authorization
         try {
             var u = await db.users.findFirst({ where: { id: id, password: password } })
@@ -47,7 +98,7 @@ class user_controller {
             return ""
         }
     }
-    async user_create(data: userType): Promise<String> {
+    async user_create(data): Promise<String> {
         await db.users.create({ data: data })
         return "ok"
     }

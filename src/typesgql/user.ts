@@ -1,4 +1,4 @@
-import { extendType, list, nonNull, nullable, objectType, stringArg } from 'nexus';
+import { extendType, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
 import { db_user, userType } from '../data';
 import { pubsub } from '../utils';
 import { withFilter } from 'graphql-subscriptions';
@@ -10,6 +10,31 @@ type payloadType = {
     title: string,
     content: string
 }
+
+export const user_get_out = objectType({
+    name: 'user_get_out',
+    definition(t) {
+        ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
+            t.nullable.string(x)
+        );
+        ["createdAt", "updatedAt"].map(x =>
+            t.nullable.float(x)
+        );
+    },
+});
+
+export const users_page_out = objectType({
+    name: 'users_page_out',
+    definition(t) {
+        t.nullable.int('allItemsCount')
+        t.nullable.int('allPagesCount')
+        t.nullable.int('pageNumber')
+        t.nullable.int('itemsTake')
+        t.nullable.int('itemsSkip')
+        t.nullable.int('itemsCount')
+        t.nullable.list.field('items', { type: 'user_get_out' })
+    },
+});
 
 export const UserQuery = extendType({
     type: 'Query',
@@ -62,47 +87,26 @@ export const UserQuery = extendType({
             },
         });
         // **************************************************************************************************** 
-        // t.field('user_get', {
-        //     args: {
-        //         id: nonNull(stringArg()),
-        //     },
-        //     // ------------------------------
-        //     type: objectType({
-        //         name: 'user_get_out',
-        //         definition(t) {
-        //             ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
-        //                 t.nonNull.string(x)
-        //             );
-        //             ["createdAt", "updatedAt"].map(x =>
-        //                 t.nonNull.float(x)
-        //             );
-        //         },
-        //     }),
-        //     // ------------------------------
-        //     resolve(parent, args, context, info) {
-        //         return db_user.user_get(args.id)
-        //     },
-        // });
-        // **************************************************************************************************** 
-        // t.field('users_get', {
-        //     args: {},
-        //     // ------------------------------
-        //     type: list(objectType({
-        //         name: 'users_get_out',
-        //         definition(t) {
-        //             ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
-        //                 t.nullable.string(x)
-        //             );
-        //             ["createdAt", "updatedAt"].map(x =>
-        //                 t.nullable.float(x)
-        //             );
-        //         },
-        //     })),
-        //     // ------------------------------
-        //     resolve(parent, args, context, info) {
-        //         return db_user.users_get()
-        //     },
-        // });
+        t.field('users_page_get', {
+            args: {
+                id: nullable(stringArg()),
+                employeeId: nullable(stringArg()),
+                agentId: nullable(stringArg()),
+                validation: nullable(stringArg()),
+                filter_text: nullable(stringArg()),
+                filter_date_min: nullable(stringArg()),
+                filter_date_max: nullable(stringArg()),
+                pageNumber: nullable(intArg()),
+                itemsTake: nullable(intArg()),
+            },
+            // ------------------------------
+            type: list(users_page_out),
+            description: "date format : 2000-01-01T00:00:00Z",
+            // ------------------------------
+            resolve(parent, args, context, info) {
+                return db_user.users_page_get(args)
+            },
+        });
         // **************************************************************************************************** 
     }
 });

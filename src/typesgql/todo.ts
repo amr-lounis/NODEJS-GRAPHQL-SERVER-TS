@@ -28,10 +28,8 @@ export const todoQuery = extendType({
         t.field('todos_page_get', {
             args: {
                 id: nullable(stringArg()),
-                employeeId: nullable(stringArg()),
-                agentId: nullable(stringArg()),
-                validation: nullable(stringArg()),
-                filter_text: nullable(stringArg()),
+                filter_id: nullable(stringArg()),
+                filter_description: nullable(stringArg()),
                 filter_date_min: nullable(stringArg()),
                 filter_date_max: nullable(stringArg()),
                 pageNumber: nullable(intArg()),
@@ -43,6 +41,17 @@ export const todoQuery = extendType({
             // ------------------------------
             resolve(parent, args, context, info) {
                 return db_todo.todos_page_get(args)
+            },
+        });
+        t.field('todoPhoto_get', {
+            args: {
+                todoId: nonNull(stringArg())
+            },
+            // ------------------------------
+            type: nonNull("String"),
+            // ------------------------------
+            async resolve(parent, args, context, info) {
+                return db_todo.todoPhoto_get(args.todoId)
             },
         });
     }
@@ -87,9 +96,7 @@ export const todoMutation = extendType({
             // ------------------------------
             async resolve(parent, args, context, info) {
                 const r = (await db_todo.todos_get({ id: args.id }))[0]
-                const notMatch = (r.employeeId != context?.jwt?.id)
-                const notAdmin = (context?.jwt?.role != 'admin')
-                if (notMatch || notAdmin) throw new Error('not authorized');
+                if (r.employeeId != context?.jwt?.id) throw new Error('not authorized');
                 // 
                 args.money_unpaid = args.money_required - args.money_paid;
                 args.money_margin = args.money_paid - args.money_expenses;
@@ -107,9 +114,7 @@ export const todoMutation = extendType({
             // ------------------------------
             async resolve(parent, args, context, info) {
                 const r = await db_todo.todos_get({ id: args.id })[0]
-                const notMatch = (r.employeeId != context?.jwt?.id)
-                const notAdmin = (context?.jwt?.role != 'admin')
-                if (notMatch || notAdmin) throw new Error('not authorized');
+                if (r.employeeId != context?.jwt?.id) throw new Error('not authorized');
                 // 
                 return db_todo.todo_delete(args.id)
             },
@@ -125,9 +130,7 @@ export const todoMutation = extendType({
             // ------------------------------
             async resolve(parent, args, context, info) {
                 const r = await db_todo.todos_get({ id: args.todoId })[0]
-                const notMatch = (r.employeeId != context?.jwt?.id)
-                const notAdmin = (context?.jwt?.role != 'admin')
-                if (notMatch || notAdmin) throw new Error('not authorized');
+                if (r.employeeId != context?.jwt?.id) throw new Error('not authorized');
                 // 
                 return db_todo.todoPhoto_set(args.todoId, args.photo)
             },
