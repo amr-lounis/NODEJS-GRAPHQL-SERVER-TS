@@ -10,9 +10,8 @@ type todosInType = {
     filter_date_min?: string,
     filter_date_max?: string,
     pageNumber?: number,
-    pageSizeMax?: number,
-    skip?: number,
-    take?: number
+    itemsTake?: number,
+    itemsSkip?: number,
 }
 class todo_controller {
     async todos_get(args: todosInType) {
@@ -31,8 +30,8 @@ class todo_controller {
                     contains: args.filter_text
                 },
             },
-            skip: args.skip,
-            take: args.take,
+            skip: args.itemsSkip,
+            take: args.itemsTake,
         })
     }
 
@@ -51,16 +50,17 @@ class todo_controller {
             },
         };
 
-        const itemsCountAll = (await await db.todos.aggregate({ _count: { id: true }, where }))._count.id
-        const p = toPage({ items_count_all: itemsCountAll, page_number: args.pageNumber, page_size_max: args.pageSizeMax })
-        const items = await db.todos.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.skip, take: p.take })
+        const itemsCountAll = (await db.todos.aggregate({ _count: { id: true }, where }))._count.id
+        const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
+        const items = await db.todos.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
 
         return {
-            itemsCountAll: itemsCountAll,
-            pagesCountAll: p.pages_count_all,
-            pageSizeMax: p.take,
-            pageNumber: p.page_number,
-            pageSize: items.length,
+            allItemsCount: itemsCountAll,
+            allPagesCount: p.pagesCountAll,
+            itemsSkip: p.itemsSkip,
+            itemsTake: p.itemsTake,
+            pageNumber: p.pageNumber,
+            itemsCount: items.length,
             items: items
         }
     }

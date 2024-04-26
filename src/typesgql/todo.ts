@@ -12,11 +12,12 @@ export const todo_get_out = objectType({
 export const todos_page_out = objectType({
     name: 'todos_page_out',
     definition(t) {
-        t.nullable.int('itemsCountAll')
-        t.nullable.int('pagesCountAll')
-        t.nullable.int('pageSizeMax')
+        t.nullable.int('allItemsCount')
+        t.nullable.int('allPagesCount')
         t.nullable.int('pageNumber')
-        t.nullable.int('pageSize')
+        t.nullable.int('itemsTake')
+        t.nullable.int('itemsSkip')
+        t.nullable.int('itemsCount')
         t.nullable.list.field('items', { type: 'todo_get_out' })
     },
 });
@@ -34,7 +35,7 @@ export const todoQuery = extendType({
                 filter_date_min: nullable(stringArg()),
                 filter_date_max: nullable(stringArg()),
                 pageNumber: nullable(intArg()),
-                pageSizeMax: nullable(intArg()),
+                itemsTake: nullable(intArg()),
             },
             description: "date format : 2000-01-01T00:00:00Z",
             // ------------------------------

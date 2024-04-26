@@ -7,7 +7,7 @@
     "c": "npx tsc",
     "start": "nodemon ./dist/index.js",
     "dev": "npx nodemon --exec ts-node src/index.ts",
-    "test": "npx nodemon --exec ts-node src/test.ts",
+    "test": "npx nodemon --exec ts-node src/test/test.ts",
     "db": "npx prisma migrate dev --name init"
   },
   "keywords": [],
