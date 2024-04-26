@@ -28,7 +28,6 @@ export const todoQuery = extendType({
         t.field('todos_page_get', {
             args: {
                 id: nullable(stringArg()),
-                filter_id: nullable(stringArg()),
                 filter_description: nullable(stringArg()),
                 filter_date_min: nullable(stringArg()),
                 filter_date_max: nullable(stringArg()),

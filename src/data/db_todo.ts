@@ -6,7 +6,7 @@ type todosInType = {
     employeeId?: string,
     agentId?: string,
     validation?: string,
-    filter_text?: string,
+    filter_description?: string,
     filter_date_min?: string,
     filter_date_max?: string,
     pageNumber?: number,
@@ -27,7 +27,7 @@ class todo_controller {
                     gte: args.filter_date_min, lte: args.filter_date_max
                 },
                 description: {
-                    contains: args.filter_text
+                    contains: args.filter_description
                 },
             },
             skip: args.itemsSkip,
@@ -45,7 +45,7 @@ class todo_controller {
                 gte: args.filter_date_min, lte: args.filter_date_max
             },
             description: {
-                contains: args.filter_text
+                contains: args.filter_description
             },
         };
 
