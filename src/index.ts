@@ -12,7 +12,6 @@ import * as types_gql from './typesgql';
 import { MyToken, myLog } from './utils';
 import { db_role, db_init } from './data';
 import { myConfig } from './config';
-import { config } from 'process';
 // --------------------------------------------------
 const main = async () => {
   // -----------------------
@@ -37,8 +36,8 @@ const main = async () => {
       return new Error(err.message);
     },
     context: (ctx) => {
-      const token = ctx?.req?.headers?.authorization || '';
-      return { jwt: MyToken.Token_Verifay(token) };
+      const headerToken = ctx?.req?.headers?.token || '';
+      return { jwt: MyToken.Token_Verifay(headerToken) };
     },
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer: server }),
@@ -89,12 +88,12 @@ const ws_server = (_server, _schema) => {
   return useServer({
     schema: _schema,
     context: (ctx, msg, args) => {
-      const token = ctx?.connectionParams?.Authorization || ''
-      return { jwt: MyToken.Token_Verifay(token) };
+      const headerToken = ctx?.connectionParams?.token || ''
+      return { jwt: MyToken.Token_Verifay(headerToken) };
     },
     onConnect: async (ctx) => {
-      const token = ctx?.connectionParams?.Authorization || ''
-      const jwt = MyToken.Token_Verifay(token);
+      const headerToken = ctx?.connectionParams?.token || ''
+      const jwt = MyToken.Token_Verifay(headerToken);
 
       if (jwt.id == null) {// return false to sertver disconnect ro throw new Error('')
         myLog(`-------------- WS : token not authorized : [${JSON.stringify(jwt)}]`)

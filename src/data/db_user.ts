@@ -54,7 +54,6 @@ class user_controller {
         };
 
         const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where: where }))._count.id
-        console.log(itemsCountAll)
         const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
         const items = await db.users.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
 
