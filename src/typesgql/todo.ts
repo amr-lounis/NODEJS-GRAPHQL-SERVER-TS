@@ -1,5 +1,38 @@
 import { arg, extendType, floatArg, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db_todo, todosInType } from '../data/db_todo';
+import { db_todo } from '../data/db_todo';
+
+export type ArgsTodosQ = {
+    id?: string,
+    todoId?: string,
+    employeeId?: string,
+    agentId?: string,
+    validation?: string,
+    filter_description?: string,
+    filter_create_min?: string,
+    filter_create_max?: string,
+    pageNumber?: number,
+    itemsTake?: number,
+    itemsSkip?: number,
+}
+
+export type ArgsTodosM = {
+    id?: string,
+    todoId?: string,
+    employeeId?: string,
+    agentId?: string,
+    money_margin?: number,
+    money_required?: number,
+    money_paid?: number,
+    money_unpaid?: number,
+    money_expenses?: number,
+    validation?: string,
+    filter_description?: string,
+    filter_create_min?: string,
+    filter_create_max?: string,
+    pageNumber?: number,
+    itemsTake?: number,
+    photo?: string,
+}
 
 export const todo_get_out = objectType({
     name: 'todo_get_out',
@@ -28,7 +61,9 @@ export const todoQuery = extendType({
         t.field('todos_page_get', {
             args: {
                 id: nullable(stringArg()),
-                filter_description: nullable(stringArg()),
+                employeeId: nullable(stringArg()),
+                agentId: nullable(stringArg()),
+                validation: nullable(stringArg()),
                 filter_create_min: nullable(stringArg()),
                 filter_create_max: nullable(stringArg()),
                 pageNumber: nullable(intArg()),
@@ -38,7 +73,7 @@ export const todoQuery = extendType({
             // ------------------------------
             type: todos_page_out,
             // ------------------------------
-            resolve(parent, args: todosInType, context, info) {
+            resolve(parent, args: ArgsTodosQ, context, info) {
                 return db_todo.todos_page_get(args)
             },
         });
@@ -49,7 +84,7 @@ export const todoQuery = extendType({
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
-            async resolve(parent, args: todosInType, context, info) {
+            async resolve(parent, args: ArgsTodosQ, context, info) {
                 return db_todo.todoPhoto_get(args.todoId)
             },
         });
@@ -72,7 +107,7 @@ export const todoMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            resolve(parent, args: todosInType, context, info) {
+            resolve(parent, args: ArgsTodosM, context, info) {
                 args.employeeId = context?.jwt?.id
                 args.money_unpaid = args.money_required - args.money_paid;
                 args.money_margin = args.money_paid - args.money_expenses;
@@ -93,7 +128,7 @@ export const todoMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            async resolve(parent, args: todosInType, context, info) {
+            async resolve(parent, args: ArgsTodosM, context, info) {
                 const r = (await db_todo.todos_get({ id: args.id }))[0]
                 if (r.employeeId != context?.jwt?.id) throw new Error('not authorized');
                 // 
@@ -111,7 +146,7 @@ export const todoMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            async resolve(parent, args: todosInType, context, info) {
+            async resolve(parent, args: ArgsTodosM, context, info) {
                 const r = (await db_todo.todos_get({ id: args.id }))[0]
                 if (r.employeeId != context?.jwt?.id) throw new Error('not authorized');
                 // 
@@ -127,7 +162,7 @@ export const todoMutation = extendType({
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
-            async resolve(parent, args: todosInType, context, info) {
+            async resolve(parent, args: ArgsTodosM, context, info) {
                 const r = (await db_todo.todos_get({ id: args.todoId }))[0]
                 if (r.employeeId != context?.jwt?.id) throw new Error('not authorized');
                 // 

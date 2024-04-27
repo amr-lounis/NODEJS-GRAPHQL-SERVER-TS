@@ -1,28 +1,9 @@
+import { ArgsTodosM, ArgsTodosQ } from 'src/typesgql';
 import { toPage } from '../utils/';
 import { db } from './db';
 
-export type todosInType = {
-    id?: string,
-    todoId?: string,
-    employeeId?: string,
-    agentId?: string,
-    money_unpaid?: number,
-    money_margin?: number,
-    money_required?: number,
-    money_paid?: number,
-    money_expenses?: number,
-    validation?: string,
-    filter_description?: string,
-    filter_create_min?: string,
-    filter_create_max?: string,
-    pageNumber?: number,
-    itemsTake?: number,
-    itemsSkip?: number,
-    photo?: string,
-}
-
 class todo_controller {
-    async todos_get(args: todosInType) {
+    async todos_get(args: ArgsTodosQ) {
         return await db.todos.findMany({
             orderBy: {
                 createdAt: 'desc'
@@ -43,7 +24,7 @@ class todo_controller {
         })
     }
 
-    async todos_page_get(args: todosInType) {
+    async todos_page_get(args: ArgsTodosQ) {
         const where = {
             id: args.id,
             employeeId: args.employeeId,

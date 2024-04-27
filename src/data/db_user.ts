@@ -1,31 +1,12 @@
+import { ArgsUserQ } from 'src/typesgql';
 import { MyToken, toPage } from '../utils';
 import { db } from './db';
 
-export type userInType = {
-    id?: string,
-    userId?: string,
-    roleId?: string,
-    password?: string,
-    description?: string,
-    address?: string,
-    first_name?: string,
-    last_name?: string,
-    phone?: string,
-    fax?: string,
-    email?: string,
-    filter_id?: string,
-    filter_description?: string,
-    filter_create_min?: string,
-    filter_create_max?: string,
-    pageNumber?: number,
-    itemsTake?: number,
-    itemsSkip?: number,
-    photo?: string
-}
 
 class user_controller {
     // ****************************************************************************************************
-    async users_get(args: userInType) {
+    async users_get(args: ArgsUserQ) {
+        args.filter_id = args.filter_id ?? ""
         return await db.users.findMany({
             orderBy: {
                 createdAt: 'desc'
@@ -51,7 +32,7 @@ class user_controller {
             take: args.itemsTake,
         })
     }
-    async users_page_get(args: userInType) {
+    async users_page_get(args: ArgsUserQ) {
         args.filter_id = args.filter_id ?? ""
         const where = {
             OR: [

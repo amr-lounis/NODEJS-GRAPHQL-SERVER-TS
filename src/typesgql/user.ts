@@ -1,7 +1,34 @@
 import { extendType, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db_user, userInType } from '../data';
+import { db_user } from '../data';
 import { pubsub } from '../utils';
 import { withFilter } from 'graphql-subscriptions';
+
+export type ArgsUserM = {
+    id?: string,
+    roleId?: string,
+    password?: string,
+    description?: string,
+    address?: string,
+    first_name?: string,
+    last_name?: string,
+    phone?: string,
+    fax?: string,
+    email?: string,
+    photo?: string,
+}
+
+export type ArgsUserQ = {
+    id?: string,
+    userId?: string,
+    password?: string,
+    filter_id?: string,
+    filter_description?: string,
+    filter_create_min?: string,
+    filter_create_max?: string,
+    itemsTake?: number,
+    itemsSkip?: number,
+    pageNumber?: number,
+}
 
 export type payloadType = {
     senderId: string,
@@ -47,7 +74,7 @@ export const UserQuery = extendType({
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
-            resolve(parent, args: userInType, context, info) {
+            resolve(parent, args: ArgsUserQ, context, info) {
                 return db_user.user_authentication(args.id, args.password)
             },
         });
@@ -57,7 +84,7 @@ export const UserQuery = extendType({
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
-            resolve(parent, args: userInType, context, info) {
+            resolve(parent, args: void, context, info) {
                 return db_user.user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
             },
         });
@@ -69,7 +96,7 @@ export const UserQuery = extendType({
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
-            resolve(parent, args: userInType, context, info) {
+            resolve(parent, args: ArgsUserQ, context, info) {
                 return db_user.userRole_get(args.id)
             },
         });
@@ -81,7 +108,7 @@ export const UserQuery = extendType({
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
-            resolve(parent, args, context, info) {
+            resolve(parent, args: ArgsUserQ, context, info) {
                 return db_user.userPhoto_get(args.userId)
             },
         });
@@ -100,7 +127,7 @@ export const UserQuery = extendType({
             type: users_page_out,
             description: "date format : 2000-01-01T00:00:00Z",
             // ------------------------------
-            async resolve(parent, args: userInType, context, info) {
+            async resolve(parent, args: ArgsUserQ, context, info) {
                 return db_user.users_page_get(args)
             },
         });
@@ -143,7 +170,7 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull("String"),
                 // ------------------------------
-                resolve(parent, args: userInType, context, info) {
+                resolve(parent, args: ArgsUserM, context, info) {
                     return db_user.user_create(args)
                 },
             }),
@@ -162,7 +189,7 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull('String'),
                 // ------------------------------
-                resolve(parent, args: userInType, context, info) {
+                resolve(parent, args: ArgsUserM, context, info) {
                     return db_user.user_update(context?.jwt?.id, args)
                 },
             }),
@@ -174,7 +201,7 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull("String"),
                 // ------------------------------
-                resolve(parent, args: userInType, context, info) {
+                resolve(parent, args: ArgsUserM, context, info) {
                     return db_user.userPhoto_set(context?.jwt?.id, args.photo)
                 },
             });
@@ -186,7 +213,7 @@ export const UserMutation = extendType({
             // ------------------------------
             type: nonNull("String"),
             // ------------------------------
-            resolve(parent, args: userInType, context, info) {
+            resolve(parent, args: ArgsUserM, context, info) {
                 return db_user.user_delete(args.id)
             },
         }),
@@ -199,7 +226,7 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull("String"),
                 // ------------------------------
-                resolve(parent, args: userInType, context, info) {
+                resolve(parent, args: ArgsUserM, context, info) {
                     return db_user.userRole_update(args.id, args.roleId)
                 }
             });
