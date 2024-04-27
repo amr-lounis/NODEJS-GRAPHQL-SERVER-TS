@@ -1,6 +1,6 @@
 import { extendType, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
 import { db, db_user } from '../data';
-import { pubsub } from '../utils';
+import { pubsub, toPage } from '../utils';
 import { withFilter } from 'graphql-subscriptions';
 
 export type ArgsUserQ = {
@@ -9,8 +9,8 @@ export type ArgsUserQ = {
     password?: string,
     filter_id?: string,
     filter_description?: string,
-    filter_create_min?: string,
-    filter_create_max?: string,
+    filter_create_gte?: string,
+    filter_create_lte?: string,
     itemsTake?: number,
     itemsSkip?: number,
     pageNumber?: number,
@@ -118,8 +118,8 @@ export const UserQuery = extendType({
                 id: nullable(stringArg()),
                 filter_id: nullable(stringArg()),
                 filter_description: nullable(stringArg()),
-                filter_create_min: nullable(stringArg()),
-                filter_create_max: nullable(stringArg()),
+                filter_create_gte: nullable(stringArg()),
+                filter_create_lte: nullable(stringArg()),
                 pageNumber: nullable(intArg()),
                 itemsTake: nullable(intArg()),
             },
@@ -128,7 +128,26 @@ export const UserQuery = extendType({
             description: "date format : 2000-01-01T00:00:00Z",
             // ------------------------------
             async resolve(parent, args: ArgsUserQ, context, info) {
-                return db_user.users_page_get(args)
+                args.filter_id = args.filter_id ?? ""
+                const where = {
+                    OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
+                    createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+                    description: { contains: args.filter_description },
+                };
+
+                const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where: where }))._count.id
+                const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
+                const items = await db.users.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
+
+                return {
+                    allItemsCount: itemsCountAll,
+                    allPagesCount: p.allPagesCount,
+                    itemsSkip: p.itemsSkip,
+                    itemsTake: p.itemsTake,
+                    pageNumber: p.pageNumber,
+                    itemsCount: items.length,
+                    items: items
+                }
             },
         });
         // **************************************************************************************************** 

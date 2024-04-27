@@ -4,54 +4,6 @@ import { db } from './db';
 
 class todo_controller {
     // **************************************************************************************************** Q
-    async todos_get(args: ArgsTodosQ) {
-        return await db.todos.findMany({
-            orderBy: {
-                createdAt: 'desc'
-            }, where: {
-                id: args.id,
-                employeeId: args.employeeId,
-                agentId: args.agentId,
-                validation: args.validation,
-                createdAt: {
-                    gte: args.filter_create_min, lte: args.filter_create_max
-                },
-                description: {
-                    contains: args.filter_description
-                },
-            },
-            skip: args.itemsSkip,
-            take: args.itemsTake,
-        })
-    }
-    async todos_page_get(args: ArgsTodosQ) {
-        const where = {
-            id: args.id,
-            employeeId: args.employeeId,
-            agentId: args.agentId,
-            validation: args.validation,
-            createdAt: {
-                gte: args.filter_create_min, lte: args.filter_create_max
-            },
-            description: {
-                contains: args.filter_description
-            },
-        };
-
-        const itemsCountAll = (await db.todos.aggregate({ _count: { id: true }, where }))._count.id
-        const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-        const items = await db.todos.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
-
-        return {
-            allItemsCount: itemsCountAll,
-            allPagesCount: p.allPagesCount,
-            itemsSkip: p.itemsSkip,
-            itemsTake: p.itemsTake,
-            pageNumber: p.pageNumber,
-            itemsCount: items.length,
-            items: items
-        }
-    }
     async todoPhoto_get(todoId: string): Promise<string> {
         const p = await db.t_photos.findFirst({ where: { todoId: todoId } },);
         return p?.photo?.toString() ?? ""

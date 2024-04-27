@@ -1,72 +1,8 @@
-import { ArgsUserQ } from '../typesgql';
 import { MyToken, toPage } from '../utils';
 import { db } from './db';
 
-
 class user_controller {
     // **************************************************************************************************** Q
-    async users_get(args: ArgsUserQ) {
-        args.filter_id = args.filter_id ?? ""
-        return await db.users.findMany({
-            orderBy: {
-                createdAt: 'desc'
-            }, where: {
-                OR: [
-                    {
-                        id: args.id
-                    },
-                    {
-                        id: {
-                            contains: args.filter_id
-                        }
-                    },
-                ],
-                createdAt: {
-                    gte: args.filter_create_min, lte: args.filter_create_max
-                },
-                description: {
-                    contains: args.filter_description
-                },
-            },
-            skip: args.itemsSkip,
-            take: args.itemsTake,
-        })
-    }
-    async users_page_get(args: ArgsUserQ) {
-        args.filter_id = args.filter_id ?? ""
-        const where = {
-            OR: [
-                {
-                    id: args.id
-                },
-                {
-                    id: {
-                        contains: args.filter_id
-                    }
-                },
-            ],
-            createdAt: {
-                gte: args.filter_create_min, lte: args.filter_create_max
-            },
-            description: {
-                contains: args.filter_description
-            },
-        };
-
-        const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where: where }))._count.id
-        const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-        const items = await db.users.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
-
-        return {
-            allItemsCount: itemsCountAll,
-            allPagesCount: p.allPagesCount,
-            itemsSkip: p.itemsSkip,
-            itemsTake: p.itemsTake,
-            pageNumber: p.pageNumber,
-            itemsCount: items.length,
-            items: items
-        }
-    }
     async user_authentication(id: string, password: string): Promise<String> {//Authorization
         try {
             var u = await db.users.findFirst({ where: { id: id, password: password } })
@@ -84,7 +20,7 @@ class user_controller {
     }
     async userRole_get(id: string): Promise<String> {
         const r = await db.users.findUnique({ where: { id: id } });
-        return r.roleId
+        return r?.roleId
     }
     async userPhoto_get(userId: string): Promise<String> {
         const p = await db.u_photos.findFirst({ where: { userId: userId } },);
