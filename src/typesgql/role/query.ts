@@ -1,5 +1,5 @@
 import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
-import { db_role } from '../../data';
+import { db_role } from './controller';
 
 export type ArgsRolesQ = {
     roleId?: string,

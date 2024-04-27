@@ -1,6 +1,6 @@
 import { myLog } from "../utils"
 import { db } from "./db";
-import { db_role } from "./db_role"
+import { db_role } from "../typesgql/role/controller"
 import { faker } from '@faker-js/faker';
 
 export const db_init = async (listOperationName: string[]) => {

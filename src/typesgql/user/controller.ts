@@ -1,5 +1,7 @@
-import { MyToken, toPage } from '../utils';
-import { db } from './db';
+import { MyToken, toPage } from '../../utils';
+import { db } from '../../data/db';
+export { db }
+
 
 class user_controller {
     // **************************************************************************************************** Q

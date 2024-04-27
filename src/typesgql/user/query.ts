@@ -1,5 +1,5 @@
 import { extendType, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db, db_user } from '../../data';
+import { db, db_user } from './controller';
 import { toPage } from '../../utils';
 
 export type ArgsUserQ = {

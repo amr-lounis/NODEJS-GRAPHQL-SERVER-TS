@@ -1,5 +1,5 @@
 import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
-import { db_setting } from '../../data';
+import { db_setting } from './controller';
 
 export type ArgsSettingQ = {
     key?: string,

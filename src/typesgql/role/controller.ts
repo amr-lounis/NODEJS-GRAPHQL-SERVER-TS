@@ -1,4 +1,4 @@
-import { db } from './db';
+import { db } from '../../data/db';
 
 interface Role {
     id: string;

@@ -1,5 +1,5 @@
 import { extendType, floatArg, nonNull, nullable, stringArg } from 'nexus';
-import { db_todo } from '../../data';
+import { db_todo } from './controller';
 import { db } from '../../data';
 
 export type ArgsTodosM = {

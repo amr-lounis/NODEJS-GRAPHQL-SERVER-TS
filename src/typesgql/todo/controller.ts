@@ -1,6 +1,6 @@
-import { ArgsTodosQ } from '../typesgql';
-import { toPage } from '../utils/';
-import { db } from './db';
+import { ArgsTodosQ } from '..';
+import { toPage } from '../../utils';
+import { db } from '../../data/db';
 
 class todo_controller {
     // **************************************************************************************************** Q

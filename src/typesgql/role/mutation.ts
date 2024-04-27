@@ -1,5 +1,5 @@
 import { booleanArg, extendType, nonNull, stringArg } from 'nexus';
-import { db_role } from '../../data';
+import { db_role } from './controller';
 
 export type ArgsRolesM = {
     id: string,

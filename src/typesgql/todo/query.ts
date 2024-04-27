@@ -1,5 +1,5 @@
 import { extendType, floatArg, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db_todo } from '../../data';
+import { db_todo } from './controller';
 import { db } from '../../data';
 import { toPage } from '../../utils';
 
