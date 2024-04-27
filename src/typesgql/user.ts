@@ -49,8 +49,8 @@ export const user_get_out = objectType({
     },
 });
 
-export const users_page_out = objectType({
-    name: 'users_page_out',
+export const users_out = objectType({
+    name: 'users_out',
     definition(t) {
         t.nullable.int('allItemsCount')
         t.nullable.int('allPagesCount')
@@ -113,7 +113,7 @@ export const UserQuery = extendType({
             },
         });
         // **************************************************************************************************** 
-        t.field('users_page_get', {
+        t.field('users_get', {
             args: {
                 id: nullable(stringArg()),
                 filter_id: nullable(stringArg()),
@@ -124,7 +124,7 @@ export const UserQuery = extendType({
                 itemsTake: nullable(intArg()),
             },
             // ------------------------------
-            type: users_page_out,
+            type: users_out,
             description: "date format : 2000-01-01T00:00:00Z",
             // ------------------------------
             async resolve(parent, args: ArgsUserQ, context, info) {
@@ -216,7 +216,7 @@ export const UserMutation = extendType({
                             email: args.email,
                         }
                     })
-                    return ""
+                    return "ok"
                 }
             })
         // **************************************************************************************************** 

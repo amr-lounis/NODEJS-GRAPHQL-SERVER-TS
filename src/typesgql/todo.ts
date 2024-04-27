@@ -44,8 +44,8 @@ export const todo_get_out = objectType({
     },
 });
 
-export const todos_page_out = objectType({
-    name: 'todos_page_out',
+export const todos_out = objectType({
+    name: 'todos_get_out',
     definition(t) {
         t.nullable.int('allItemsCount')
         t.nullable.int('allPagesCount')
@@ -60,7 +60,7 @@ export const todos_page_out = objectType({
 export const todoQuery = extendType({
     type: 'Query',
     definition(t) {
-        t.field('todos_page_get', {
+        t.field('todos_get', {
             args: {
                 id: nullable(stringArg()),
                 employeeId: nullable(stringArg()),
@@ -73,7 +73,7 @@ export const todoQuery = extendType({
             },
             description: "date format : 2000-01-01T00:00:00Z",
             // ------------------------------
-            type: todos_page_out,
+            type: todos_out,
             // ------------------------------
             resolve(parent, args: ArgsTodosQ, context, info) {
                 return db_todo.todos_page_get(args)
@@ -110,20 +110,17 @@ export const todoMutation = extendType({
             type: nonNull('String'),
             // ------------------------------
             async resolve(parent, args: ArgsTodosM, context, info) {
-                args.employeeId = context?.jwt?.id
-                args.money_unpaid = args.money_required - args.money_paid;
-                args.money_margin = args.money_paid - args.money_expenses;
                 await db.todos.create({
                     data: {
-                        employeeId: args.employeeId,
+                        employeeId: context?.jwt?.id,
                         agentId: args.agentId,
                         description: args.description,
                         validation: args.validation,
                         money_expenses: args.money_expenses,
                         money_required: args.money_required,
                         money_paid: args.money_paid,
-                        money_unpaid: args.money_unpaid,
-                        money_margin: args.money_margin,
+                        money_unpaid: args.money_required - args.money_paid,
+                        money_margin: args.money_paid - args.money_expenses
                     }
                 })
                 return "ok"
@@ -134,8 +131,8 @@ export const todoMutation = extendType({
             args: {
                 id: nonNull(stringArg()),
                 agentId: nullable(stringArg()),
-                valid: nullable(stringArg()),
                 description: nullable(stringArg()),
+                validation: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
                 money_required: nullable(floatArg()),
                 money_paid: nullable(floatArg())
@@ -147,27 +144,23 @@ export const todoMutation = extendType({
                 const r = (await db_todo.todos_get({ id: args.id }))[0]
                 if (r.employeeId != context?.jwt?.id) throw new Error('not authorized');
                 // 
-                args.money_unpaid = args.money_required - args.money_paid;
-                args.money_margin = args.money_paid - args.money_expenses;
                 return db.todos.update({
                     where: {
                         id: args.id
                     },
                     data: {
-                        employeeId: args.employeeId,
                         agentId: args.agentId,
                         description: args.description,
                         validation: args.validation,
                         money_expenses: args.money_expenses,
                         money_required: args.money_required,
                         money_paid: args.money_paid,
-                        money_unpaid: args.money_unpaid,
-                        money_margin: args.money_margin,
+                        money_unpaid: args.money_required - args.money_paid,
+                        money_margin: args.money_paid - args.money_expenses
                     }
                 })
             },
         });
-
         // ****************************************************************************************************  //delete only by owner
         t.field('todo_delete', {
             args: {

@@ -12,6 +12,7 @@ import * as types_gql from './typesgql';
 import { MyToken, myLog } from './utils';
 import { db_role, db_init } from './data';
 import { myConfig } from './config';
+import { NexusGraphQLSchema } from 'nexus/dist/core';
 // --------------------------------------------------
 const main = async () => {
   // -----------------------
@@ -66,7 +67,7 @@ const main = async () => {
   }
 };
 // -------------------------------------------------- https_server
-const https_server = (_app_express, _path_cert, _path_key) => {
+const https_server = (_app_express: any, _path_cert: string, _path_key: string) => {
   myLog(" +++++ https_server +++++ ")
   const serverOptions = {
     cert: fs.readFileSync(_path_cert),
@@ -75,12 +76,12 @@ const https_server = (_app_express, _path_cert, _path_key) => {
   return https.createServer(serverOptions, _app_express);
 }
 // -------------------------------------------------- http_server
-const http_server = (_app_express) => {
+const http_server = (_app_express: any) => {
   myLog(" +++++ http_server +++++ ")
   return http.createServer(_app_express);
 }
 // -------------------------------------------------- ws_server
-const ws_server = (_server, _schema) => {
+const ws_server = (_server: any, _schema: NexusGraphQLSchema) => {
   const wsServer = new WebSocketServer({
     server: _server,
 
@@ -105,7 +106,7 @@ const ws_server = (_server, _schema) => {
     , wsServer);
 }
 //-------------- Middlewares
-async function info_GraphqlMiddleware(resolve, root, args, context, info) {
+async function info_GraphqlMiddleware(resolve: any, root: any, args: any, context: any, info: any) {
   if ((info?.parentType?.name == 'Query') || (info?.parentType?.name == 'Mutation')) {
     const operationName = info?.fieldName || ''
     const r = db_role.authorization_get(context.jwt.role, operationName)
