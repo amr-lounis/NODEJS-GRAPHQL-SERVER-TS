@@ -3,6 +3,19 @@ import { db_user } from '../data';
 import { pubsub } from '../utils';
 import { withFilter } from 'graphql-subscriptions';
 
+export type ArgsUserQ = {
+    id?: string,
+    userId?: string,
+    password?: string,
+    filter_id?: string,
+    filter_description?: string,
+    filter_create_min?: string,
+    filter_create_max?: string,
+    itemsTake?: number,
+    itemsSkip?: number,
+    pageNumber?: number,
+}
+
 export type ArgsUserM = {
     id?: string,
     roleId?: string,
@@ -15,19 +28,6 @@ export type ArgsUserM = {
     fax?: string,
     email?: string,
     photo?: string,
-}
-
-export type ArgsUserQ = {
-    id?: string,
-    userId?: string,
-    password?: string,
-    filter_id?: string,
-    filter_description?: string,
-    filter_create_min?: string,
-    filter_create_max?: string,
-    itemsTake?: number,
-    itemsSkip?: number,
-    pageNumber?: number,
 }
 
 export type payloadType = {
