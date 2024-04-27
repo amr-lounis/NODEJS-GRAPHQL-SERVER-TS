@@ -89,6 +89,20 @@ export const UserQuery = extendType({
             },
         });
         // **************************************************************************************************** 
+        t.field('user_authentication_info', {
+            args: {},
+            // ------------------------------
+            type: nonNull("String"),
+            // ------------------------------
+            resolve(parent, args: ArgsUserQ, context, info) {
+                const id = context.jwt.id
+                const role = context.jwt.role
+                const iat = new Date(context.jwt.iat * 1000).toISOString()
+                const exp = new Date(context.jwt.exp * 1000).toISOString()
+                return `{id:${id},role:${role},iat:${iat},exp:${exp}}`
+            },
+        });
+        // **************************************************************************************************** 
         t.field('userRole_get', {
             args: {
                 id: nonNull(stringArg()),
