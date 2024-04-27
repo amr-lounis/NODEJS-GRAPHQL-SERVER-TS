@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { myConfig } from "./";
+import { myConfig } from "../config";
 
 export type jwtType = {
     id: string,

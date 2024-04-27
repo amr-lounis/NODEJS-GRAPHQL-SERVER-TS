@@ -9,8 +9,10 @@ import { WebSocketServer } from 'ws'
 import { applyMiddleware } from 'graphql-middleware'
 import { makeSchema } from 'nexus';
 import * as types_gql from './typesgql';
-import { MyToken, myConfig, myLog } from './utils';
+import { MyToken, myLog } from './utils';
 import { db_role, db_init } from './data';
+import { myConfig } from './config';
+import { config } from 'process';
 // --------------------------------------------------
 const main = async () => {
   // -----------------------
@@ -54,9 +56,15 @@ const main = async () => {
   await apolloServer.start();
   apolloServer.applyMiddleware({ app, path: "/graphql" })
   // ------------------------------------------------ listen
-  server.listen(myConfig.PORT_HTTP, () => {
-    myLog(`localhost:${myConfig.PORT_HTTP}/graphql`);
-  });
+  if (myConfig.SERVER_SSL) {
+    server.listen(myConfig.PORT_HTTPS, () => {
+      myLog(`https://localhost:${myConfig.PORT_HTTPS}/graphql`);
+    });
+  } else {
+    server.listen(myConfig.PORT_HTTP, () => {
+      myLog(`http://localhost:${myConfig.PORT_HTTP}/graphql`);
+    });
+  }
 };
 // -------------------------------------------------- https_server
 const https_server = (_app_express, _path_cert, _path_key) => {
