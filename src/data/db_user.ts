@@ -1,8 +1,9 @@
 import { MyToken, toPage } from '../utils';
 import { db } from './db';
 
-export type userType = {
+export type userInType = {
     id?: string,
+    userId?: string,
     roleId?: string,
     password?: string,
     description?: string,
@@ -14,15 +15,17 @@ export type userType = {
     email?: string,
     filter_id?: string,
     filter_description?: string,
-    filter_date_min?: string,
-    filter_date_max?: string,
+    filter_create_min?: string,
+    filter_create_max?: string,
     pageNumber?: number,
     itemsTake?: number,
     itemsSkip?: number,
+    photo?: string
 }
+
 class user_controller {
     // ****************************************************************************************************
-    async users_get(args: userType) {
+    async users_get(args: userInType) {
         return await db.users.findMany({
             orderBy: {
                 createdAt: 'desc'
@@ -38,7 +41,7 @@ class user_controller {
                     },
                 ],
                 createdAt: {
-                    gte: args.filter_date_min, lte: args.filter_date_max
+                    gte: args.filter_create_min, lte: args.filter_create_max
                 },
                 description: {
                     contains: args.filter_description
@@ -48,7 +51,8 @@ class user_controller {
             take: args.itemsTake,
         })
     }
-    async users_page_get(args: userType) {
+    async users_page_get(args: userInType) {
+        args.filter_id = args.filter_id ?? ""
         const where = {
             OR: [
                 {
@@ -61,20 +65,21 @@ class user_controller {
                 },
             ],
             createdAt: {
-                gte: args.filter_date_min, lte: args.filter_date_max
+                gte: args.filter_create_min, lte: args.filter_create_max
             },
             description: {
                 contains: args.filter_description
             },
         };
 
-        const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where }))._count.id
+        const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where: where }))._count.id
+        console.log(itemsCountAll)
         const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
         const items = await db.users.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
 
         return {
             allItemsCount: itemsCountAll,
-            allPagesCount: p.pagesCountAll,
+            allPagesCount: p.allPagesCount,
             itemsSkip: p.itemsSkip,
             itemsTake: p.itemsTake,
             pageNumber: p.pageNumber,
@@ -98,11 +103,11 @@ class user_controller {
             return ""
         }
     }
-    async user_create(data): Promise<String> {
+    async user_create(data: any): Promise<String> {
         await db.users.create({ data: data })
         return "ok"
     }
-    async user_update(id: string, data: userType): Promise<String> {
+    async user_update(id: string, data: any): Promise<String> {
         await db.users.update({ where: { id: id }, data: data })
         return "ok"
     }

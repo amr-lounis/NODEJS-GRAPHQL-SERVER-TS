@@ -1,18 +1,26 @@
 import { toPage } from '../utils/';
 import { db } from './db';
 
-type todosInType = {
+export type todosInType = {
     id?: string,
+    todoId?: string,
     employeeId?: string,
     agentId?: string,
+    money_unpaid?: number,
+    money_margin?: number,
+    money_required?: number,
+    money_paid?: number,
+    money_expenses?: number,
     validation?: string,
     filter_description?: string,
-    filter_date_min?: string,
-    filter_date_max?: string,
+    filter_create_min?: string,
+    filter_create_max?: string,
     pageNumber?: number,
     itemsTake?: number,
     itemsSkip?: number,
+    photo?: string,
 }
+
 class todo_controller {
     async todos_get(args: todosInType) {
         return await db.todos.findMany({
@@ -24,7 +32,7 @@ class todo_controller {
                 agentId: args.agentId,
                 validation: args.validation,
                 createdAt: {
-                    gte: args.filter_date_min, lte: args.filter_date_max
+                    gte: args.filter_create_min, lte: args.filter_create_max
                 },
                 description: {
                     contains: args.filter_description
@@ -42,7 +50,7 @@ class todo_controller {
             agentId: args.agentId,
             validation: args.validation,
             createdAt: {
-                gte: args.filter_date_min, lte: args.filter_date_max
+                gte: args.filter_create_min, lte: args.filter_create_max
             },
             description: {
                 contains: args.filter_description
@@ -55,7 +63,7 @@ class todo_controller {
 
         return {
             allItemsCount: itemsCountAll,
-            allPagesCount: p.pagesCountAll,
+            allPagesCount: p.allPagesCount,
             itemsSkip: p.itemsSkip,
             itemsTake: p.itemsTake,
             pageNumber: p.pageNumber,
@@ -63,7 +71,7 @@ class todo_controller {
             items: items
         }
     }
-    async todo_create(data): Promise<string> {
+    async todo_create(data: any): Promise<string> {
         const r = await db.todos.create({ data: data })
         return r.id
     }

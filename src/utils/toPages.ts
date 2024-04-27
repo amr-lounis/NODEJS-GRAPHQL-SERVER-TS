@@ -6,12 +6,12 @@ export const toPage = (itemsCountAll: number, pageNumber?: number, itemsTake?: n
     pageNumber = pageNumber ?? -10;
     pageNumber = pageNumber < 1 ? 1 : pageNumber;
     // 
-    let pagesCountAll = Math.ceil(itemsCountAll / itemsTake);
-    pageNumber = pageNumber > pagesCountAll ? pagesCountAll : pageNumber;
+    let allPagesCount = Math.ceil(itemsCountAll / itemsTake);
+    pageNumber = pageNumber > allPagesCount ? allPagesCount : pageNumber;
     // 
-    pagesCountAll = pagesCountAll < 1 ? 1 : pagesCountAll;
+    allPagesCount = allPagesCount < 1 ? 1 : allPagesCount;
     pageNumber = pageNumber < 1 ? 1 : pageNumber;
     // 
     const itemsSkip = (pageNumber - 1) * itemsTake;
-    return { pagesCountAll, itemsTake, pageNumber, itemsSkip };
+    return { allPagesCount, itemsTake, pageNumber, itemsSkip };
 }
