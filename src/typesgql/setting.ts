@@ -1,6 +1,15 @@
 import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
 import { db_setting } from '../data';
 
+export type ArgsSettingQ = {
+    key?: string,
+}
+
+export type ArgsSettingM = {
+    key?: string,
+    value?: string,
+}
+
 export const settingQuery = extendType({
     type: 'Query',
     definition(t) {

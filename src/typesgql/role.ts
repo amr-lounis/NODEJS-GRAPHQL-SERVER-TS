@@ -1,6 +1,18 @@
 import { booleanArg, extendType, list, nonNull, objectType, stringArg } from 'nexus';
 import { db_role } from '../data';
 
+export type ArgsRolesQ = {
+    roleId?: string,
+}
+
+export type ArgsRolesM = {
+    id: string,
+    idNew: string,
+    roleId: string,
+    operationId: string,
+    value: boolean,
+}
+
 export const RoleQuery = extendType({
     type: 'Query',
     definition(t) {
@@ -10,7 +22,7 @@ export const RoleQuery = extendType({
             // ------------------------------
             type: list('String'),
             // ------------------------------
-            resolve(parent, args, context, info) {
+            resolve(parent, args: void, context, info) {
                 return db_role.operations_get()
             },
         });
@@ -20,7 +32,7 @@ export const RoleQuery = extendType({
             // ------------------------------
             type: list('String'),
             // ------------------------------
-            resolve(parent, args, context, info) {
+            resolve(parent, args: void, context, info) {
                 return db_role.roles_get()
             },
         });
@@ -38,7 +50,7 @@ export const RoleQuery = extendType({
                 },
             })),
             // ------------------------------
-            resolve(parent, args, context, info) {
+            resolve(parent, args: ArgsRolesQ, context, info) {
                 return db_role.authorizations_get(args.roleId)
             }
         });
@@ -56,8 +68,8 @@ export const roleMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            resolve(parent, args, context, info) {
-                return db_role.role_create(args)
+            resolve(parent, args: ArgsRolesM, context, info) {
+                return db_role.role_create(args.id)
             },
         });
         // **************************************************************************************************** 
@@ -69,7 +81,7 @@ export const roleMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            resolve(parent, args, context, info) {
+            resolve(parent, args: ArgsRolesM, context, info) {
                 return db_role.role_update(args.id, args.idNew)
             }
         });
@@ -81,7 +93,7 @@ export const roleMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            resolve(parent, args, context, info) {
+            resolve(parent, args: ArgsRolesM, context, info) {
                 return db_role.role_delete(args.id)
             }
         });
@@ -95,7 +107,7 @@ export const roleMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            resolve(parent, args, context, info) {
+            resolve(parent, args: ArgsRolesM, context, info) {
                 return db_role.authorization_set(args.roleId, args.operationId, args.value)
             }
         });
