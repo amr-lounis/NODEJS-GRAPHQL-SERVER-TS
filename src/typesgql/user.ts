@@ -1,5 +1,5 @@
 import { extendType, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db_user } from '../data';
+import { db, db_user } from '../data';
 import { pubsub } from '../utils';
 import { withFilter } from 'graphql-subscriptions';
 
@@ -170,8 +170,21 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull("String"),
                 // ------------------------------
-                resolve(parent, args: ArgsUserM, context, info) {
-                    return db_user.user_create(args)
+                async resolve(parent, args: ArgsUserM, context, info) {
+                    await db.users.create({
+                        data: {
+                            id: args.id,
+                            password: args.password,
+                            description: args.description,
+                            address: args.address,
+                            first_name: args.first_name,
+                            last_name: args.last_name,
+                            phone: args.phone,
+                            fax: args.fax,
+                            email: args.email,
+                        }
+                    })
+                    return "ok"
                 },
             }),
             // **************************************************************************************************** 
@@ -189,23 +202,36 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull('String'),
                 // ------------------------------
-                resolve(parent, args: ArgsUserM, context, info) {
-                    return db_user.user_update(context?.jwt?.id, args)
-                },
-            }),
-            // **************************************************************************************************** 
-            t.field('userPhoto_update_self', {
-                args: {
-                    photo: nonNull(stringArg()),
-                },
-                // ------------------------------
-                type: nonNull("String"),
-                // ------------------------------
-                resolve(parent, args: ArgsUserM, context, info) {
-                    return db_user.userPhoto_set(context?.jwt?.id, args.photo)
-                },
-            });
+                async resolve(parent, args: ArgsUserM, context, info) {
+                    await db.users.update({
+                        where: { id: context?.jwt?.id },
+                        data: {
+                            password: args.password,
+                            description: args.description,
+                            address: args.address,
+                            first_name: args.first_name,
+                            last_name: args.last_name,
+                            phone: args.phone,
+                            fax: args.fax,
+                            email: args.email,
+                        }
+                    })
+                    return ""
+                }
+            })
         // **************************************************************************************************** 
+        t.field('userPhoto_update_self', {
+            args: {
+                photo: nonNull(stringArg()),
+            },
+            // ------------------------------
+            type: nonNull("String"),
+            // ------------------------------
+            resolve(parent, args: ArgsUserM, context, info) {
+                return db_user.userPhoto_set(context?.jwt?.id, args.photo)
+            },
+        });
+        // ****************************************************************************************************
         t.field('user_delete', {
             args: {
                 id: nonNull(stringArg())

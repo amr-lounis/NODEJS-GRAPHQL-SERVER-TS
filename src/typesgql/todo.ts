@@ -1,5 +1,6 @@
-import { arg, extendType, floatArg, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
+import { extendType, floatArg, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
 import { db_todo } from '../data/db_todo';
+import { db } from '../data';
 
 export type ArgsTodosQ = {
     id?: string,
@@ -18,6 +19,7 @@ export type ArgsTodosQ = {
 export type ArgsTodosM = {
     id?: string,
     todoId?: string,
+    description: string,
     employeeId?: string,
     agentId?: string,
     money_margin?: number,
@@ -98,8 +100,8 @@ export const todoMutation = extendType({
         t.field('todo_create', {
             args: {
                 agentId: nullable(stringArg()),
-                valid: nullable(stringArg()),
                 description: nullable(stringArg()),
+                valid: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
                 money_required: nullable(floatArg()),
                 money_paid: nullable(floatArg())
@@ -107,11 +109,24 @@ export const todoMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            resolve(parent, args: ArgsTodosM, context, info) {
+            async resolve(parent, args: ArgsTodosM, context, info) {
                 args.employeeId = context?.jwt?.id
                 args.money_unpaid = args.money_required - args.money_paid;
                 args.money_margin = args.money_paid - args.money_expenses;
-                return db_todo.todo_create(args)
+                await db.todos.create({
+                    data: {
+                        employeeId: args.employeeId,
+                        agentId: args.agentId,
+                        description: args.description,
+                        validation: args.validation,
+                        money_expenses: args.money_expenses,
+                        money_required: args.money_required,
+                        money_paid: args.money_paid,
+                        money_unpaid: args.money_unpaid,
+                        money_margin: args.money_margin,
+                    }
+                })
+                return "ok"
             },
         });
         // ****************************************************************************************************  //update only by owner
@@ -134,7 +149,22 @@ export const todoMutation = extendType({
                 // 
                 args.money_unpaid = args.money_required - args.money_paid;
                 args.money_margin = args.money_paid - args.money_expenses;
-                return db_todo.todo_update(args.id, args)
+                return db.todos.update({
+                    where: {
+                        id: args.id
+                    },
+                    data: {
+                        employeeId: args.employeeId,
+                        agentId: args.agentId,
+                        description: args.description,
+                        validation: args.validation,
+                        money_expenses: args.money_expenses,
+                        money_required: args.money_required,
+                        money_paid: args.money_paid,
+                        money_unpaid: args.money_unpaid,
+                        money_margin: args.money_margin,
+                    }
+                })
             },
         });
 

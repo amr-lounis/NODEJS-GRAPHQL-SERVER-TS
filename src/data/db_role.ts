@@ -16,12 +16,29 @@ interface Matrix {
 
 class role_controller {
     matrix: Matrix = {};
+    // **************************************************************************************************** Q
     async roles_get(): Promise<String[]> {
         const r = await db.u_roles.findMany({ select: { id: true } });
         return r.map((x) => x.id)
     }
+    async operations_get(): Promise<String[]> {
+        const r = await db.u_operations.findMany({});
+        return r.map((x) => x.id)
+    }
+    async authorizations_get(roleId: string) {
+        return await db.u_roles_operations.findMany({ where: { roleId: roleId } })
+    }
+    // **************************************************************************************************** 
     async role_create(id: string): Promise<String> {
         await db.u_roles.create({ data: { id: id } })
+        return "ok"
+    }
+    async operation_create(id: string): Promise<String> {
+        await db.u_operations.create({ data: { id: id } })
+        return "ok"
+    }
+    async operation_update(id: string, idNew: string): Promise<String> {
+        await db.u_operations.update({ where: { id: id }, data: { id: idNew } })
         return "ok"
     }
     async role_update(id: string, idNew: string): Promise<String> {
@@ -32,26 +49,9 @@ class role_controller {
         await db.u_roles.delete({ where: { id: id } })
         return "ok"
     }
-    // **************************************************************************************************** 
-    async operations_get(): Promise<String[]> {
-        const r = await db.u_operations.findMany({});
-        return r.map((x) => x.id)
-    }
-    async operation_create(id: string): Promise<String> {
-        await db.u_operations.create({ data: { id: id } })
-        return "ok"
-    }
-    async operation_update(id: string, idNew: string): Promise<String> {
-        await db.u_operations.update({ where: { id: id }, data: { id: idNew } })
-        return "ok"
-    }
     async operation_delete(id: string): Promise<String> {
         await db.u_operations.delete({ where: { id: id } })
         return "ok"
-    }
-    // **************************************************************************************************** 
-    async authorizations_get(roleId: string) {
-        return await db.u_roles_operations.findMany({ where: { roleId: roleId } })
     }
     async authorization_set(roleId: string, operationId: string, value: boolean): Promise<String> {
         const exist = await db.u_roles_operations.findFirst({ where: { operationId: operationId, roleId: roleId } }) ? true : false

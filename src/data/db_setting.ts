@@ -1,6 +1,7 @@
 import { db } from './db';
 
 class setting_controller {
+    // **************************************************************************************************** Q
     async settings_get() {
         return await db.settings.findMany({});
     }
@@ -12,6 +13,7 @@ class setting_controller {
         })
         return r.value
     }
+    // **************************************************************************************************** M
     async setting_set(key: string, value: string): Promise<string> {
         const exist = await db.settings.findFirst({ select: { key: true }, where: { key: key } }) ? true : false
         if (!exist) {

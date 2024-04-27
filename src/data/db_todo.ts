@@ -1,8 +1,9 @@
-import { ArgsTodosM, ArgsTodosQ } from 'src/typesgql';
+import { ArgsTodosQ } from '../typesgql';
 import { toPage } from '../utils/';
 import { db } from './db';
 
 class todo_controller {
+    // **************************************************************************************************** Q
     async todos_get(args: ArgsTodosQ) {
         return await db.todos.findMany({
             orderBy: {
@@ -23,7 +24,6 @@ class todo_controller {
             take: args.itemsTake,
         })
     }
-
     async todos_page_get(args: ArgsTodosQ) {
         const where = {
             id: args.id,
@@ -52,22 +52,14 @@ class todo_controller {
             items: items
         }
     }
-    async todo_create(data: any): Promise<string> {
-        const r = await db.todos.create({ data: data })
-        return r.id
-    }
-    async todo_update(id: string, data: any): Promise<string> {
-        await db.todos.update({ where: { id: id }, data: data })
-        return "ok"
-    }
-    async todo_delete(id: string): Promise<string> {
-        await db.todos.delete({ where: { id: id } })
-        return "ok"
-    }
-    // ****************************************************************************************************
     async todoPhoto_get(todoId: string): Promise<string> {
         const p = await db.t_photos.findFirst({ where: { todoId: todoId } },);
         return p?.photo?.toString() ?? ""
+    }
+    // **************************************************************************************************** M
+    async todo_delete(id: string): Promise<string> {
+        await db.todos.delete({ where: { id: id } })
+        return "ok"
     }
     async todoPhoto_set(todoId: string, photo: string): Promise<string> {
         if (photo.length > 524288) throw new Error("The size is greater than the maximum value");

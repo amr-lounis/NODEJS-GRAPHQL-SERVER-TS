@@ -1,10 +1,10 @@
-import { ArgsUserQ } from 'src/typesgql';
+import { ArgsUserQ } from '../typesgql';
 import { MyToken, toPage } from '../utils';
 import { db } from './db';
 
 
 class user_controller {
-    // ****************************************************************************************************
+    // **************************************************************************************************** Q
     async users_get(args: ArgsUserQ) {
         args.filter_id = args.filter_id ?? ""
         return await db.users.findMany({
@@ -67,7 +67,6 @@ class user_controller {
             items: items
         }
     }
-
     async user_authentication(id: string, password: string): Promise<String> {//Authorization
         try {
             var u = await db.users.findFirst({ where: { id: id, password: password } })
@@ -83,22 +82,18 @@ class user_controller {
             return ""
         }
     }
-    async user_create(data: any): Promise<String> {
-        await db.users.create({ data: data })
-        return "ok"
-    }
-    async user_update(id: string, data: any): Promise<String> {
-        await db.users.update({ where: { id: id }, data: data })
-        return "ok"
-    }
-    async user_delete(id: string): Promise<String> {
-        await db.users.delete({ where: { id: id } })
-        return "ok"
-    }
-
     async userRole_get(id: string): Promise<String> {
         const r = await db.users.findUnique({ where: { id: id } });
         return r.roleId
+    }
+    async userPhoto_get(userId: string): Promise<String> {
+        const p = await db.u_photos.findFirst({ where: { userId: userId } },);
+        return p?.photo?.toString() ?? ""
+    }
+    // **************************************************************************************************** M
+    async user_delete(id: string): Promise<String> {
+        await db.users.delete({ where: { id: id } })
+        return "ok"
     }
     async userRole_update(id: string, roleId: string): Promise<String> {
         await db.users.update({
@@ -110,11 +105,6 @@ class user_controller {
             }
         })
         return "ok"
-    }
-    // ****************************************************************************************************
-    async userPhoto_get(userId: string): Promise<String> {
-        const p = await db.u_photos.findFirst({ where: { userId: userId } },);
-        return p?.photo?.toString() ?? ""
     }
     async userPhoto_set(userId: string, photo: string): Promise<String> {
         if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
