@@ -1,10 +1,9 @@
 import { extendType, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
 import { db, MyToken, toPage, ContextType } from '../../utils';
-
+// **************************************************************************************************** 
 export const UserQuery = extendType({
     type: 'Query',
     definition(t) {
-        // **************************************************************************************************** 
         t.field('user_authentication', {
             args: { id: nonNull(stringArg()), password: nonNull(stringArg()) },
             type: nonNull("String"),
@@ -12,7 +11,7 @@ export const UserQuery = extendType({
                 return user_authentication(args.id, args.password)
             },
         });
-        // **************************************************************************************************** 
+        // --------------------------------------------------
         t.field('user_authentication_renewal', {
             args: {},
             type: nonNull("String"),
@@ -20,7 +19,7 @@ export const UserQuery = extendType({
                 return user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
             },
         });
-        // **************************************************************************************************** 
+        // -------------------------------------------------- 
         t.field('user_authentication_info', {
             args: {},
             type: nonNull("String"),
@@ -32,7 +31,7 @@ export const UserQuery = extendType({
                 return `{id:${id},role:${role},iat:${iat},exp:${exp}}`
             },
         });
-        // **************************************************************************************************** 
+        // --------------------------------------------------
         t.field('userRole_get', {
             args: { id: nonNull(stringArg()), },
             type: nonNull("String"),
@@ -40,7 +39,7 @@ export const UserQuery = extendType({
                 return userRole_get(args.id)
             },
         });
-        // **************************************************************************************************** 
+        // --------------------------------------------------
         t.field('userPhoto_get', {
             args: { userId: nonNull(stringArg()), },
             type: nonNull("String"),
@@ -48,7 +47,7 @@ export const UserQuery = extendType({
                 return userPhoto_get(args.userId)
             },
         });
-        // **************************************************************************************************** 
+        // --------------------------------------------------
         t.field('users_get', {
             args: {
                 id: nullable(stringArg()),
@@ -61,16 +60,14 @@ export const UserQuery = extendType({
             },
             type: users_out,
             description: "date format : 2000-01-01T00:00:00Z",
-            // ------------------------------
             resolve(parent, args: ArgsUserQ, context, info) {
                 return users_get(args)
             },
         });
-        // **************************************************************************************************** 
     }
 });
-
-export const user_authentication = async (id: string, password: string): Promise<String> => {//Authorization
+// **************************************************************************************************** 
+export const user_authentication = async (id: string, password: string): Promise<String> => {
     try {
         var u = await db.users.findFirst({ where: { id: id, password: password } })
         return MyToken.Token_Create(u.id, u.roleId)
@@ -78,7 +75,7 @@ export const user_authentication = async (id: string, password: string): Promise
         return ""
     }
 }
-export const user_authentication_renewal = async (id: string, roleId: string): Promise<String> => {//Authorization
+export const user_authentication_renewal = async (id: string, roleId: string): Promise<String> => {
     try {
         return MyToken.Token_Create(id, roleId)
     } catch (error) {
@@ -116,7 +113,7 @@ export const users_get = async (args: ArgsUserQ) => {
         items: items
     }
 }
-
+// **************************************************************************************************** 
 export type ArgsUserQ = {
     id?: string,
     userId?: string,
@@ -152,3 +149,4 @@ export const users_out = objectType({
         t.nullable.list.field('items', { type: 'user_get_out' })
     },
 });
+// **************************************************************************************************** 

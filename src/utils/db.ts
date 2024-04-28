@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { myLog } from '.';
+import { getImageAsBase64, myLog } from '.';
 import { faker } from '@faker-js/faker';
 import { authorization_matrix } from './authorization_matrix';
+import { todoPhoto_set, todo_create } from '../gql';
 
 class Models {
     private static instance = new PrismaClient()
@@ -46,25 +47,24 @@ export const db_init = async (listOperationName: string[]) => {
     } catch (err) {
         myLog(err.message)
     }
+    // -------------------------------------------------- init todo
     try {
         for (let i = 0; i < 100; i++) {
             const l = await (await db.todos.aggregate({ _count: { id: true } }))._count.id
             if (l < 100) {
-                await db.todos.create({
-                    data: {
-                        employeeId: Math.random() > 0.5 ? 'admin' : 'employee',
-                        agentId: Math.random() > 0.5 ? 'admin' : 'employee',
-                        validation: Math.random() > 0.5 ? 'new' : 'complited',
-                        description: faker.lorem.sentence({ min: 5, max: 10 }),
-                        money_required: faker.number.int({ min: 5, max: 10 }),
-                        money_paid: faker.number.int({ min: 5, max: 10 }),
-                        money_unpaid: faker.number.int({ min: 5, max: 10 }),
-                        money_expenses: faker.number.int({ min: 5, max: 10 }),
-                        money_margin: faker.number.int({ min: 5, max: 10 }),
-                        createdAt: faker.date.anytime(),
-                        updatedAt: faker.date.anytime(),
-                    }
+                const money_required = faker.number.int({ min: 0, max: 100 })
+                const money_expenses = faker.number.int({ min: 0, max: money_required })
+                const money_paid = faker.number.int({ min: 0, max: money_required })
+                const r = await todo_create({
+                    employeeId: Math.random() > 0.5 ? 'admin' : 'employee',
+                    agentId: Math.random() > 0.5 ? 'admin' : 'employee',
+                    validation: Math.random() > 0.5 ? 'new' : 'complited',
+                    description: faker.lorem.sentence({ min: 5, max: 10 }),
+                    money_required: money_required,
+                    money_expenses: money_expenses,
+                    money_paid: money_paid,
                 })
+                todoPhoto_set(r.id, await getImageAsBase64(faker.image.avatar()))
             }
         }
     } catch (error) { }
