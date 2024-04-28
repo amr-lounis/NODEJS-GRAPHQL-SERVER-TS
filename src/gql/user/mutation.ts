@@ -1,25 +1,9 @@
 import { extendType, nonNull, nullable, stringArg } from 'nexus';
 import { db, pubsub } from '../../utils';
 
-export type ArgsUserM = {
-    id?: string,
-    userId?: string,
-    roleId?: string,
-    password?: string,
-    description?: string,
-    address?: string,
-    first_name?: string,
-    last_name?: string,
-    phone?: string,
-    fax?: string,
-    email?: string,
-    photo?: string,
-}
-
 export const UserMutation = extendType({
     type: 'Mutation',
     definition(t) {
-        // **************************************************************************************************** 
         t.field('user_notification_send', {
             args: {
                 receiverId: nonNull(stringArg()),
@@ -48,9 +32,7 @@ export const UserMutation = extendType({
                     fax: stringArg(),
                     email: stringArg(),
                 },
-                // ------------------------------
                 type: nonNull("String"),
-                // ------------------------------
                 resolve(parent, args: ArgsUserM, context, info) {
                     return user_create(args)
                 }
@@ -67,46 +49,31 @@ export const UserMutation = extendType({
                     fax: stringArg(),
                     email: stringArg(),
                 },
-                // ------------------------------
                 type: nonNull('String'),
-                // ------------------------------
                 resolve(parent, args: ArgsUserM, context, info) {
                     return user_update(context?.jwt?.id, args)
                 }
             })
         // **************************************************************************************************** 
         t.field('userPhoto_update_self', {
-            args: {
-                photo: nonNull(stringArg()),
-            },
-            // ------------------------------
+            args: { photo: nonNull(stringArg()), },
             type: nonNull("String"),
-            // ------------------------------
             resolve(parent, args: ArgsUserM, context, info) {
                 return userPhoto_set(context?.jwt?.id, args.photo)
             },
         });
         // ****************************************************************************************************
         t.field('user_delete', {
-            args: {
-                id: nonNull(stringArg())
-            },
-            // ------------------------------
+            args: { id: nonNull(stringArg()) },
             type: nonNull("String"),
-            // ------------------------------
             resolve(parent, args: ArgsUserM, context, info) {
                 return user_delete(args.id)
             },
         }),
             // ****************************************************************************************************  
             t.field('userRole_update', {
-                args: {
-                    id: nonNull(stringArg()),
-                    roleId: nullable(stringArg()),
-                },
-                // ------------------------------
+                args: { id: nonNull(stringArg()), roleId: nullable(stringArg()) },
                 type: nonNull("String"),
-                // ------------------------------
                 resolve(parent, args: ArgsUserM, context, info) {
                     return userRole_update(args.id, args.roleId)
                 }
@@ -163,4 +130,18 @@ export const user_create = async (args: ArgsUserM) => {
         }
     })
     return "ok"
+}
+export type ArgsUserM = {
+    id?: string,
+    userId?: string,
+    roleId?: string,
+    password?: string,
+    description?: string,
+    address?: string,
+    first_name?: string,
+    last_name?: string,
+    phone?: string,
+    fax?: string,
+    email?: string,
+    photo?: string,
 }

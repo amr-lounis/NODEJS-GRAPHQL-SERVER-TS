@@ -1,53 +1,13 @@
 import { extendType, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
 import { db, MyToken, toPage } from '../../utils';
 
-export type ArgsUserQ = {
-    id?: string,
-    userId?: string,
-    password?: string,
-    filter_id?: string,
-    filter_description?: string,
-    filter_create_gte?: string,
-    filter_create_lte?: string,
-    itemsTake?: number,
-    itemsSkip?: number,
-    pageNumber?: number,
-}
-export const user_get_out = objectType({
-    name: 'user_get_out',
-    definition(t) {
-        ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
-            t.nullable.string(x)
-        );
-        ["createdAt", "updatedAt"].map(x =>
-            t.nullable.float(x)
-        );
-    },
-});
-export const users_out = objectType({
-    name: 'users_out',
-    definition(t) {
-        t.nullable.int('allItemsCount')
-        t.nullable.int('allPagesCount')
-        t.nullable.int('pageNumber')
-        t.nullable.int('itemsTake')
-        t.nullable.int('itemsSkip')
-        t.nullable.int('itemsCount')
-        t.nullable.list.field('items', { type: 'user_get_out' })
-    },
-});
 export const UserQuery = extendType({
     type: 'Query',
     definition(t) {
         // **************************************************************************************************** 
         t.field('user_authentication', {
-            args: {
-                id: nonNull(stringArg()),
-                password: nonNull(stringArg())
-            },
-            // ------------------------------
+            args: { id: nonNull(stringArg()), password: nonNull(stringArg()) },
             type: nonNull("String"),
-            // ------------------------------
             resolve(parent, args: ArgsUserQ, context, info) {
                 return user_authentication(args.id, args.password)
             },
@@ -55,9 +15,7 @@ export const UserQuery = extendType({
         // **************************************************************************************************** 
         t.field('user_authentication_renewal', {
             args: {},
-            // ------------------------------
             type: nonNull("String"),
-            // ------------------------------
             resolve(parent, args: void, context, info) {
                 return user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
             },
@@ -65,9 +23,7 @@ export const UserQuery = extendType({
         // **************************************************************************************************** 
         t.field('user_authentication_info', {
             args: {},
-            // ------------------------------
             type: nonNull("String"),
-            // ------------------------------
             resolve(parent, args: ArgsUserQ, context, info) {
                 const id = context.jwt.id
                 const role = context.jwt.role
@@ -78,24 +34,16 @@ export const UserQuery = extendType({
         });
         // **************************************************************************************************** 
         t.field('userRole_get', {
-            args: {
-                id: nonNull(stringArg()),
-            },
-            // ------------------------------
+            args: { id: nonNull(stringArg()), },
             type: nonNull("String"),
-            // ------------------------------
             resolve(parent, args: ArgsUserQ, context, info) {
                 return userRole_get(args.id)
             },
         });
         // **************************************************************************************************** 
         t.field('userPhoto_get', {
-            args: {
-                userId: nonNull(stringArg()),
-            },
-            // ------------------------------
+            args: { userId: nonNull(stringArg()), },
             type: nonNull("String"),
-            // ------------------------------
             resolve(parent, args: ArgsUserQ, context, info) {
                 return userPhoto_get(args.userId)
             },
@@ -111,7 +59,6 @@ export const UserQuery = extendType({
                 pageNumber: nullable(intArg()),
                 itemsTake: nullable(intArg()),
             },
-            // ------------------------------
             type: users_out,
             description: "date format : 2000-01-01T00:00:00Z",
             // ------------------------------
@@ -169,3 +116,39 @@ export const users_get = async (args: ArgsUserQ) => {
         items: items
     }
 }
+
+export type ArgsUserQ = {
+    id?: string,
+    userId?: string,
+    password?: string,
+    filter_id?: string,
+    filter_description?: string,
+    filter_create_gte?: string,
+    filter_create_lte?: string,
+    itemsTake?: number,
+    itemsSkip?: number,
+    pageNumber?: number,
+}
+export const user_get_out = objectType({
+    name: 'user_get_out',
+    definition(t) {
+        ["id", "description", "address", "first_name", "last_name", "phone", "fax", "email"].map(x =>
+            t.nullable.string(x)
+        );
+        ["createdAt", "updatedAt"].map(x =>
+            t.nullable.float(x)
+        );
+    },
+});
+export const users_out = objectType({
+    name: 'users_out',
+    definition(t) {
+        t.nullable.int('allItemsCount')
+        t.nullable.int('allPagesCount')
+        t.nullable.int('pageNumber')
+        t.nullable.int('itemsTake')
+        t.nullable.int('itemsSkip')
+        t.nullable.int('itemsCount')
+        t.nullable.list.field('items', { type: 'user_get_out' })
+    },
+});
