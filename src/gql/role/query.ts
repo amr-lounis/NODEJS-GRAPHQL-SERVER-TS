@@ -1,5 +1,5 @@
 import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
-import { authorization_matrix } from '../../utils';
+import { db } from '../../utils';
 // **************************************************************************************************** 
 export const RoleQuery = extendType({
     type: 'Query',
@@ -8,7 +8,7 @@ export const RoleQuery = extendType({
             args: {},
             type: list('String'),
             resolve(parent, args: void, context, info) {
-                return authorization_matrix.operations_get()
+                return operations_get()
             },
         });
         // --------------------------------------------------
@@ -16,7 +16,7 @@ export const RoleQuery = extendType({
             args: {},
             type: list('String'),
             resolve(parent, args: void, context, info) {
-                return authorization_matrix.roles_get()
+                return roles_get()
             },
         });
         // --------------------------------------------------
@@ -24,11 +24,26 @@ export const RoleQuery = extendType({
             args: { roleId: nonNull(stringArg()) },
             type: list(authorizations_get_out),
             resolve(parent, args: { roleId?: string }, context, info) {
-                return authorization_matrix.authorizations_get(args.roleId)
+                return authorizations_get(args.roleId)
             }
         });
     }
 });
+// **************************************************************************************************** 
+export const authorizations_get = async (roleId: string) => {
+    return await db.u_roles_operations.findMany({ where: { roleId: roleId } })
+}
+export const authorizations_all_get = async () => {
+    return await db.u_roles_operations.findMany({})
+}
+export const operations_get = async (): Promise<String[]> => {
+    const r = await db.u_operations.findMany({});
+    return r.map((x) => x.id)
+}
+export const roles_get = async (): Promise<String[]> => {
+    const r = await db.u_roles.findMany({ select: { id: true } });
+    return r.map((x) => x.id)
+}
 // **************************************************************************************************** 
 const authorizations_get_out = objectType({
     name: 'authorizations_get_out',

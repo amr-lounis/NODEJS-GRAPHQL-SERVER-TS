@@ -5,7 +5,7 @@ import { applyMiddleware } from 'graphql-middleware'
 import { makeSchema } from 'nexus';
 import * as types_gql from './gql';
 import { myConfig } from './config';
-import { db_init, MyToken, myLog, https_server, myMiddleware, ws_server, http_server } from './utils';
+import { MyToken, myLog, https_server, myMiddleware, ws_server, http_server, db_init } from './utils';
 // --------------------------------------------------
 const main = async () => {
   // -----------------------
