@@ -46,7 +46,7 @@ export const ws_server = (_server: any, _schema: any) => {
         , wsServer);
 }
 //-------------- Middlewares
-export async function info_GraphqlMiddleware(resolve: any, root: any, args: any, context: any, info: any) {
+export const myMiddleware = async (resolve: any, root: any, args: any, context: any, info: any) => {
     if ((info?.parentType?.name == 'Query') || (info?.parentType?.name == 'Mutation')) {
         const operationName = info?.fieldName || ''
         const r = authorization_matrix.authorization_test(context.jwt.role, operationName)

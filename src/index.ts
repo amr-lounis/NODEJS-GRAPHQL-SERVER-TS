@@ -4,7 +4,7 @@ import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import { applyMiddleware } from 'graphql-middleware'
 import { makeSchema } from 'nexus';
 import * as types_gql from './gql';
-import { db_init, MyToken, myLog, https_server, info_GraphqlMiddleware, ws_server, http_server } from './utils';
+import { db_init, MyToken, myLog, https_server, myMiddleware, ws_server, http_server } from './utils';
 import { myConfig } from './config';
 // --------------------------------------------------
 const main = async () => {
@@ -17,7 +17,7 @@ const main = async () => {
   // -----------------------
   const app = express();
   //
-  const schemaWithMiddleware = applyMiddleware(schema, info_GraphqlMiddleware)
+  const schemaWithMiddleware = applyMiddleware(schema, myMiddleware)
   // ----------------------- https or http
   const server = myConfig.SERVER_SSL ? https_server(app, "./assets/cert.pem", "./assets/key.pem") : http_server(app);
   // ----------------------- ws
