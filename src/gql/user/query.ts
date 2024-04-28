@@ -1,5 +1,5 @@
 import { extendType, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db, MyToken, toPage } from '../../utils';
+import { db, MyToken, toPage, ContextType } from '../../utils';
 
 export const UserQuery = extendType({
     type: 'Query',
@@ -16,7 +16,7 @@ export const UserQuery = extendType({
         t.field('user_authentication_renewal', {
             args: {},
             type: nonNull("String"),
-            resolve(parent, args: void, context, info) {
+            resolve(parent, args: void, context: ContextType, info) {
                 return user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
             },
         });
@@ -24,7 +24,7 @@ export const UserQuery = extendType({
         t.field('user_authentication_info', {
             args: {},
             type: nonNull("String"),
-            resolve(parent, args: ArgsUserQ, context, info) {
+            resolve(parent, args: ArgsUserQ, context: ContextType, info) {
                 const id = context.jwt.id
                 const role = context.jwt.role
                 const iat = new Date(context.jwt.iat * 1000).toISOString()

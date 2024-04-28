@@ -17,20 +17,20 @@ export const db_init = async (listOperationName: string[]) => {
     myLog(" +++++ initDB +++++")
     const admin = 'admin'
     const employee = 'employee'
-    // --------------------------------------------------
+    // -------------------------------------------------- create all operations
     for (let i = 0; i < listOperationName.length; i++)
         try { await db.u_operations.create({ data: { id: listOperationName[i] } }) } catch (err) { }
-    // --------------------------------------------------
+    // -------------------------------------------------- create all roles
     try {
         await db.u_roles.create({ data: { id: admin } })
         await db.u_roles.create({ data: { id: employee } })
     } catch (err) { }
-    // --------------------------------------------------
+    // -------------------------------------------------- create all users
     try {
         await db.users.create({ data: { id: admin, password: admin, roleId: admin } })
         await db.users.create({ data: { id: employee, password: employee, roleId: employee } })
     } catch (err) { }
-    // --------------------------------------------------
+    // -------------------------------------------------- init autorisation matrix
     try {
         // init matrix roles
         await authorization_matrix.initMatrix()

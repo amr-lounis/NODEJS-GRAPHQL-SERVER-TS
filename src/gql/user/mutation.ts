@@ -1,5 +1,5 @@
 import { extendType, nonNull, nullable, stringArg } from 'nexus';
-import { db, pubsub } from '../../utils';
+import { db, pubsub, ContextType } from '../../utils';
 
 export const UserMutation = extendType({
     type: 'Mutation',
@@ -50,7 +50,7 @@ export const UserMutation = extendType({
                     email: stringArg(),
                 },
                 type: nonNull('String'),
-                resolve(parent, args: ArgsUserM, context, info) {
+                resolve(parent, args: ArgsUserM, context: ContextType, info) {
                     return user_update(context?.jwt?.id, args)
                 }
             })
@@ -58,7 +58,7 @@ export const UserMutation = extendType({
         t.field('userPhoto_update_self', {
             args: { photo: nonNull(stringArg()), },
             type: nonNull("String"),
-            resolve(parent, args: ArgsUserM, context, info) {
+            resolve(parent, args: ArgsUserM, context: ContextType, info) {
                 return userPhoto_set(context?.jwt?.id, args.photo)
             },
         });

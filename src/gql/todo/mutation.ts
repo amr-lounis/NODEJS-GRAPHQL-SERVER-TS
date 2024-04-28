@@ -1,5 +1,5 @@
 import { extendType, floatArg, nonNull, nullable, stringArg } from 'nexus';
-import { db } from '../../utils';
+import { db, ContextType } from '../../utils';
 
 export const TodoMutation = extendType({
     type: 'Mutation',
@@ -15,7 +15,7 @@ export const TodoMutation = extendType({
                 money_paid: nullable(floatArg())
             },
             type: nonNull('String'),
-            resolve(parent, args: ArgsTodosM, context, info) {
+            resolve(parent, args: ArgsTodosM, context: ContextType, info) {
                 return todo_create(context?.jwt?.id, args)
             }
         });
@@ -31,7 +31,7 @@ export const TodoMutation = extendType({
                 money_paid: nullable(floatArg())
             },
             type: nonNull('String'),
-            resolve(parent, args: ArgsTodosM, context, info) {
+            resolve(parent, args: ArgsTodosM, context: ContextType, info) {
                 return todo_update(context?.jwt?.id, args)
             },
         });
@@ -39,7 +39,7 @@ export const TodoMutation = extendType({
         t.field('todo_delete', {
             args: { id: nonNull(stringArg()), },
             type: nonNull('String'),
-            async resolve(parent, args: ArgsTodosM, context, info) {
+            async resolve(parent, args: ArgsTodosM, context: ContextType, info) {
                 return todo_delete(context?.jwt?.id, args)
             },
         });

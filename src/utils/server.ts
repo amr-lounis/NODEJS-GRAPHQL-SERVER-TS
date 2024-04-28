@@ -2,10 +2,10 @@ import { useServer } from "graphql-ws/lib/use/ws";
 import { WebSocketServer } from 'ws'
 import https from "https";
 import http from "http";
-import { authorization_matrix } from "./authorization_matrix"
-import { myLog } from "./log"
 import fs from "fs"
+import { myLog } from "./log"
 import { MyToken } from "./token_controller";
+import { authorization_matrix } from "./authorization_matrix"
 // -------------------------------------------------- https_server
 export const https_server = (_app_express: any, _path_cert: string, _path_key: string) => {
     myLog(" +++++ https_server +++++ ")
@@ -46,13 +46,25 @@ export const ws_server = (_server: any, _schema: any) => {
         , wsServer);
 }
 //-------------- Middlewares
-export const myMiddleware = async (resolve: any, root: any, args: any, context: any, info: any) => {
+export const myMiddleware = async (resolve: any, root: any, args: any, context: ContextType, info: any) => {
     if ((info?.parentType?.name == 'Query') || (info?.parentType?.name == 'Mutation')) {
-        const operationName = info?.fieldName || ''
-        const r = authorization_matrix.authorization_test(context.jwt.role, operationName)
-        if (!r) throw Error(`role:${context.jwt.role} --- operationName:${operationName} not authorized .`)
+        context.operation = info?.fieldName || ''
+        context.fields = info.fieldNodes[0].selectionSet?.selections?.map((field) => field.name.value);
+        const r = authorization_matrix.authorization_test(context.jwt.role, context.operation)
+        if (!r) throw Error(`role:${context.jwt.role} --- operation:${context.operation} not authorized .`)
         if (args?.id?.length < 3) return new Error("id length smal then 3 ")
-        myLog(`context :${JSON.stringify(context)} --- args : [${Object.keys(args)}] `)
+        myLog(`context:${JSON.stringify(context)} --- args:[${Object.keys(args)}]`)
     }
     return await resolve(root, args, context, info)
+}
+
+export type ContextType = {
+    operation?: string,
+    fields?: string[],
+    jwt?: {
+        id: string,
+        role: string,
+        iat: number,
+        exp: number
+    }
 }

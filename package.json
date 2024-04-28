@@ -7,7 +7,7 @@
     "c": "npx tsc",
     "start": "nodemon ./dist/index.js",
     "dev": "npx nodemon --exec ts-node src/index.ts",
-    "test": "npx nodemon --exec ts-node src/test/test.ts",
+    "test": "npx nodemon --exec ts-node test/test.ts",
     "db": "npx prisma migrate dev --name init"
   },
   "keywords": [],
@@ -22,7 +22,6 @@
     "apollo-server-express": "^3.13.0",
     "express": "^4.19.2",
     "graphql": "^16.8.1",
-    "graphql-fields": "^2.0.3",
     "graphql-middleware": "^6.1.35",
     "graphql-subscriptions": "^2.0.0",
     "graphql-tools": "^9.0.1",

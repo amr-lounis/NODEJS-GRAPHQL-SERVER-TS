@@ -4,8 +4,8 @@ import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import { applyMiddleware } from 'graphql-middleware'
 import { makeSchema } from 'nexus';
 import * as types_gql from './gql';
-import { db_init, MyToken, myLog, https_server, myMiddleware, ws_server, http_server } from './utils';
 import { myConfig } from './config';
+import { db_init, MyToken, myLog, https_server, myMiddleware, ws_server, http_server } from './utils';
 // --------------------------------------------------
 const main = async () => {
   // -----------------------
