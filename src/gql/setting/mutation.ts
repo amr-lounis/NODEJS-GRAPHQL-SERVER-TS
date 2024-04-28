@@ -15,9 +15,11 @@ export const SettingMutation = extendType({
 });
 
 export const setting_set = async (key: string, value: string): Promise<string> => {
-    const exist = await db.settings.findFirst({ select: { key: true }, where: { key: key } }) ? true : false
-    if (!exist) await db.settings.create({ data: { key: key, value: value } })
-    else await db.settings.update({ where: { key: key }, data: { key: key, value: value } })
+    await db.$transaction(async (t) => {
+        const exist = await t.settings.findFirst({ select: { key: true }, where: { key: key } }) ? true : false
+        if (!exist) await t.settings.create({ data: { key: key, value: value } })
+        else await t.settings.update({ where: { key: key }, data: { key: key, value: value } })
+    })
     return "ok"
 }
 

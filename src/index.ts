@@ -9,11 +9,8 @@ import { WebSocketServer } from 'ws'
 import { applyMiddleware } from 'graphql-middleware'
 import { makeSchema } from 'nexus';
 import * as types_gql from './gql';
-import { MyToken, myLog } from './utils';
+import { db_init, MyToken, authorization_matrix, myLog } from './utils';
 import { myConfig } from './config';
-import { NexusGraphQLSchema } from 'nexus/dist/core';
-import { db_role } from './gql/role/controller';
-import { db_init } from './utils/db';
 // --------------------------------------------------
 const main = async () => {
   // -----------------------
@@ -82,7 +79,7 @@ const http_server = (_app_express: any) => {
   return http.createServer(_app_express);
 }
 // -------------------------------------------------- ws_server
-const ws_server = (_server: any, _schema: NexusGraphQLSchema) => {
+const ws_server = (_server: any, _schema: any) => {
   const wsServer = new WebSocketServer({
     server: _server,
 
@@ -110,7 +107,7 @@ const ws_server = (_server: any, _schema: NexusGraphQLSchema) => {
 async function info_GraphqlMiddleware(resolve: any, root: any, args: any, context: any, info: any) {
   if ((info?.parentType?.name == 'Query') || (info?.parentType?.name == 'Mutation')) {
     const operationName = info?.fieldName || ''
-    const r = db_role.authorization_get(context.jwt.role, operationName)
+    const r = authorization_matrix.authorization_test(context.jwt.role, operationName)
     if (!r) throw Error(`role:${context.jwt.role} --- operationName:${operationName} not authorized .`)
     if (args?.id?.length < 3) return new Error("id length smal then 3 ")
     myLog(`context :${JSON.stringify(context)} --- args : [${Object.keys(args)}] `)
