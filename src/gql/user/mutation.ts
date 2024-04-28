@@ -1,9 +1,9 @@
 import { extendType, nonNull, nullable, stringArg } from 'nexus';
-import { db, db_user } from './controller';
-import { pubsub } from '../../utils';
+import { db, pubsub } from '../../utils';
 
 export type ArgsUserM = {
     id?: string,
+    userId?: string,
     roleId?: string,
     password?: string,
     description?: string,
@@ -51,22 +51,9 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull("String"),
                 // ------------------------------
-                async resolve(parent, args: ArgsUserM, context, info) {
-                    await db.users.create({
-                        data: {
-                            id: args.id,
-                            password: args.password,
-                            description: args.description,
-                            address: args.address,
-                            first_name: args.first_name,
-                            last_name: args.last_name,
-                            phone: args.phone,
-                            fax: args.fax,
-                            email: args.email,
-                        }
-                    })
-                    return "ok"
-                },
+                resolve(parent, args: ArgsUserM, context, info) {
+                    return user_create(args)
+                }
             }),
             // **************************************************************************************************** 
             t.field('user_update_self', {
@@ -83,21 +70,8 @@ export const UserMutation = extendType({
                 // ------------------------------
                 type: nonNull('String'),
                 // ------------------------------
-                async resolve(parent, args: ArgsUserM, context, info) {
-                    await db.users.update({
-                        where: { id: context?.jwt?.id },
-                        data: {
-                            password: args.password,
-                            description: args.description,
-                            address: args.address,
-                            first_name: args.first_name,
-                            last_name: args.last_name,
-                            phone: args.phone,
-                            fax: args.fax,
-                            email: args.email,
-                        }
-                    })
-                    return "ok"
+                resolve(parent, args: ArgsUserM, context, info) {
+                    return user_update(context?.jwt?.id, args)
                 }
             })
         // **************************************************************************************************** 
@@ -109,7 +83,7 @@ export const UserMutation = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args: ArgsUserM, context, info) {
-                return db_user.userPhoto_set(context?.jwt?.id, args.photo)
+                return userPhoto_set(context?.jwt?.id, args.photo)
             },
         });
         // ****************************************************************************************************
@@ -121,7 +95,7 @@ export const UserMutation = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args: ArgsUserM, context, info) {
-                return db_user.user_delete(args.id)
+                return user_delete(args.id)
             },
         }),
             // ****************************************************************************************************  
@@ -134,9 +108,59 @@ export const UserMutation = extendType({
                 type: nonNull("String"),
                 // ------------------------------
                 resolve(parent, args: ArgsUserM, context, info) {
-                    return db_user.userRole_update(args.id, args.roleId)
+                    return userRole_update(args.id, args.roleId)
                 }
             });
         // **************************************************************************************************** 
     },
 });
+
+export const user_delete = async (id: string): Promise<String> => {
+    await db.users.delete({ where: { id: id } })
+    return "ok"
+}
+export const userRole_update = async (id: string, roleId: string): Promise<String> => {
+    await db.users.update({ where: { id: id }, data: { roleId: roleId } })
+    return "ok"
+}
+export const userPhoto_set = async (userId: string, photo: string): Promise<String> => {
+    if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
+    const photpBytes = Buffer.from(photo ?? "", 'utf8')
+    // 
+    const exist = await db.u_photos.findFirst({ select: { userId: true }, where: { userId: userId } }) ? true : false
+    if (!await exist) await db.u_photos.create({ data: { userId: userId, photo: photpBytes } },);
+    else await db.u_photos.update({ where: { userId: userId }, data: { photo: photpBytes } },);
+    return "ok"
+}
+export const user_update = async (id: string, args: ArgsUserM): Promise<string> => {
+    await db.users.update({
+        where: { id: id },
+        data: {
+            password: args.password,
+            description: args.description,
+            address: args.address,
+            first_name: args.first_name,
+            last_name: args.last_name,
+            phone: args.phone,
+            fax: args.fax,
+            email: args.email,
+        }
+    })
+    return "ok"
+}
+export const user_create = async (args: ArgsUserM) => {
+    await db.users.create({
+        data: {
+            id: args.id,
+            password: args.password,
+            description: args.description,
+            address: args.address,
+            first_name: args.first_name,
+            last_name: args.last_name,
+            phone: args.phone,
+            fax: args.fax,
+            email: args.email,
+        }
+    })
+    return "ok"
+}

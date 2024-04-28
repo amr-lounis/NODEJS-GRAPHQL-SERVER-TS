@@ -1,5 +1,5 @@
 import { booleanArg, extendType, nonNull, stringArg } from 'nexus';
-import { db_role } from './controller';
+import { authorization_matrix } from '../../utils';
 
 export type ArgsRolesM = {
     id: string,
@@ -21,7 +21,7 @@ export const RoleMutation = extendType({
             type: nonNull('String'),
             // ------------------------------
             resolve(parent, args: ArgsRolesM, context, info) {
-                return db_role.role_create(args.id)
+                return authorization_matrix.role_create(args.id)
             },
         });
         // **************************************************************************************************** 
@@ -34,7 +34,7 @@ export const RoleMutation = extendType({
             type: nonNull('String'),
             // ------------------------------
             resolve(parent, args: ArgsRolesM, context, info) {
-                return db_role.role_update(args.id, args.idNew)
+                return authorization_matrix.role_update(args.id, args.idNew)
             }
         });
         // **************************************************************************************************** 
@@ -46,7 +46,7 @@ export const RoleMutation = extendType({
             type: nonNull('String'),
             // ------------------------------
             resolve(parent, args: ArgsRolesM, context, info) {
-                return db_role.role_delete(args.id)
+                return authorization_matrix.role_delete(args.id)
             }
         });
         // **************************************************************************************************** 
@@ -60,7 +60,7 @@ export const RoleMutation = extendType({
             type: nonNull('String'),
             // ------------------------------
             resolve(parent, args: ArgsRolesM, context, info) {
-                return db_role.authorization_set(args.roleId, args.operationId, args.value)
+                return authorization_matrix.authorization_set(args.roleId, args.operationId, args.value)
             }
         });
         // **************************************************************************************************** 

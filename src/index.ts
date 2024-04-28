@@ -8,11 +8,12 @@ import { useServer } from 'graphql-ws/lib/use/ws'
 import { WebSocketServer } from 'ws'
 import { applyMiddleware } from 'graphql-middleware'
 import { makeSchema } from 'nexus';
-import * as types_gql from './typesgql';
+import * as types_gql from './gql';
 import { MyToken, myLog } from './utils';
-import { db_role, db_init } from './data';
 import { myConfig } from './config';
 import { NexusGraphQLSchema } from 'nexus/dist/core';
+import { db_role } from './gql/role/controller';
+import { db_init } from './utils/db';
 // --------------------------------------------------
 const main = async () => {
   // -----------------------

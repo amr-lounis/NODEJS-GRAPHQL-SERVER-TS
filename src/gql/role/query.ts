@@ -1,6 +1,5 @@
 import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
-import { db_role } from './controller';
-
+import { authorization_matrix } from '../../utils';
 export type ArgsRolesQ = {
     roleId?: string,
 }
@@ -15,7 +14,7 @@ export const RoleQuery = extendType({
             type: list('String'),
             // ------------------------------
             resolve(parent, args: void, context, info) {
-                return db_role.operations_get()
+                return authorization_matrix.operations_get()
             },
         });
         // **************************************************************************************************** 
@@ -25,7 +24,7 @@ export const RoleQuery = extendType({
             type: list('String'),
             // ------------------------------
             resolve(parent, args: void, context, info) {
-                return db_role.roles_get()
+                return authorization_matrix.roles_get()
             },
         });
         // **************************************************************************************************** 
@@ -43,7 +42,7 @@ export const RoleQuery = extendType({
             })),
             // ------------------------------
             resolve(parent, args: ArgsRolesQ, context, info) {
-                return db_role.authorizations_get(args.roleId)
+                return authorization_matrix.authorizations_get(args.roleId)
             }
         });
     }

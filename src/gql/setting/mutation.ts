@@ -1,5 +1,5 @@
-import { extendType, list, nonNull, stringArg } from 'nexus';
-import { db_setting } from './controller';
+import { extendType, nonNull, stringArg } from 'nexus';
+import { db } from '../../utils';
 
 export type ArgsSettingM = {
     key?: string,
@@ -18,8 +18,11 @@ export const SettingMutation = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            resolve(parent, args, context, info) {
-                return db_setting.setting_set(args.key, args.value)
+            async resolve(parent, args, context, info) {
+                const exist = await db.settings.findFirst({ select: { key: true }, where: { key: args.key } }) ? true : false
+                if (!exist) await db.settings.create({ data: { key: args.key, value: args.value } })
+                else await db.settings.update({ where: { key: args.key }, data: { key: args.key, value: args.value } })
+                return "ok"
             },
         });
     }

@@ -1,7 +1,5 @@
 import { extendType, floatArg, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db_todo } from './controller';
-import { db } from '../../data';
-import { toPage } from '../../utils';
+import { db, toPage } from '../../utils';
 
 export type ArgsTodosQ = {
     id?: string,
@@ -95,7 +93,8 @@ export const TodoQuery = extendType({
             type: nonNull("String"),
             // ------------------------------
             async resolve(parent, args: ArgsTodosQ, context, info) {
-                return db_todo.todoPhoto_get(args.todoId)
+                const p = await db.t_photos.findFirst({ where: { todoId: args.todoId } },);
+                return p?.photo?.toString() ?? ""
             },
         });
     }

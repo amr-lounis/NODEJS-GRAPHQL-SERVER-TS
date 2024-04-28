@@ -1,5 +1,5 @@
 import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
-import { db_setting } from './controller';
+import { db } from '../../utils';
 
 export type ArgsSettingQ = {
     key?: string,
@@ -19,8 +19,8 @@ export const SettingQuery = extendType({
                 },
             })),
             // ------------------------------
-            resolve(parent, args, context, info) {
-                return db_setting.settings_get()
+            async resolve(parent, args: ArgsSettingQ, context, info) {
+                return await db.settings.findMany({});
             },
         });
         // **************************************************************************************************** 
@@ -31,8 +31,9 @@ export const SettingQuery = extendType({
             // ------------------------------
             type: nonNull('String'),
             // ------------------------------
-            resolve(parent, args, context, info) {
-                return db_setting.setting_get(args.key)
+            async resolve(parent, args: ArgsSettingQ, context, info) {
+                const r = await db.settings.findUnique({ where: { key: args.key } })
+                return r.value
             },
         });
     }

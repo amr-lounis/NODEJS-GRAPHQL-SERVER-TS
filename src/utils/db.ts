@@ -1,7 +1,17 @@
-import { myLog } from "../utils"
-import { db } from "./db";
-import { db_role } from "../typesgql/role/controller"
+import { PrismaClient } from '@prisma/client';
+import { myLog } from '.';
 import { faker } from '@faker-js/faker';
+import { authorization_matrix } from './authorization_matrix';
+
+class Models {
+    private static instance = new PrismaClient()
+    public static getInstance = () => Models.instance;
+    constructor() {
+        myLog(" ----- PrismaClient init")
+    }
+}
+export const db = Models.getInstance();
+
 
 export const db_init = async (listOperationName: string[]) => {
     myLog(" +++++ initDB +++++")
@@ -9,11 +19,11 @@ export const db_init = async (listOperationName: string[]) => {
     const employee = 'employee'
     // --------------------------------------------------
     for (let i = 0; i < listOperationName.length; i++)
-        try { await db_role.operation_create(listOperationName[i]) } catch (err) { }
+        try { await db.u_operations.create({ data: { id: listOperationName[i] } }) } catch (err) { }
     // --------------------------------------------------
     try {
-        await db_role.role_create(admin)
-        await db_role.role_create(employee)
+        await db.u_roles.create({ data: { id: admin } })
+        await db.u_roles.create({ data: { id: employee } })
     } catch (err) { }
     // --------------------------------------------------
     try {
@@ -23,16 +33,16 @@ export const db_init = async (listOperationName: string[]) => {
     // --------------------------------------------------
     try {
         // init matrix roles
-        await db_role.initMatrix()
+        await authorization_matrix.initMatrix()
         // admin set allow for all operation
-        if (db_role.matrix.hasOwnProperty(admin)) {
-            const operationIds = Object.keys(db_role?.matrix[admin]);
+        if (authorization_matrix.matrix.hasOwnProperty(admin)) {
+            const operationIds = Object.keys(authorization_matrix?.matrix[admin]);
             for (const OperationId of operationIds) {
-                db_role.matrix[admin][OperationId] = true;
+                authorization_matrix.matrix[admin][OperationId] = true;
             }
         }
         // stor matrix in database
-        await db_role.storeMatrix()
+        await authorization_matrix.storeMatrix()
     } catch (err) {
         myLog(err.message)
     }

@@ -1,6 +1,5 @@
 import { extendType, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db, db_user } from './controller';
-import { toPage } from '../../utils';
+import { db, MyToken, toPage } from '../../utils';
 
 export type ArgsUserQ = {
     id?: string,
@@ -50,7 +49,7 @@ export const UserQuery = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args: ArgsUserQ, context, info) {
-                return db_user.user_authentication(args.id, args.password)
+                return user_authentication(args.id, args.password)
             },
         });
         // **************************************************************************************************** 
@@ -60,7 +59,7 @@ export const UserQuery = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args: void, context, info) {
-                return db_user.user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
+                return user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
             },
         });
         // **************************************************************************************************** 
@@ -86,7 +85,7 @@ export const UserQuery = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args: ArgsUserQ, context, info) {
-                return db_user.userRole_get(args.id)
+                return userRole_get(args.id)
             },
         });
         // **************************************************************************************************** 
@@ -98,7 +97,7 @@ export const UserQuery = extendType({
             type: nonNull("String"),
             // ------------------------------
             resolve(parent, args: ArgsUserQ, context, info) {
-                return db_user.userPhoto_get(args.userId)
+                return userPhoto_get(args.userId)
             },
         });
         // **************************************************************************************************** 
@@ -116,29 +115,57 @@ export const UserQuery = extendType({
             type: users_out,
             description: "date format : 2000-01-01T00:00:00Z",
             // ------------------------------
-            async resolve(parent, args: ArgsUserQ, context, info) {
-                args.filter_id = args.filter_id ?? ""
-                const where = {
-                    OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
-                    createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
-                    description: { contains: args.filter_description },
-                };
-
-                const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where: where }))._count.id
-                const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-                const items = await db.users.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
-
-                return {
-                    allItemsCount: itemsCountAll,
-                    allPagesCount: p.allPagesCount,
-                    itemsSkip: p.itemsSkip,
-                    itemsTake: p.itemsTake,
-                    pageNumber: p.pageNumber,
-                    itemsCount: items.length,
-                    items: items
-                }
+            resolve(parent, args: ArgsUserQ, context, info) {
+                return users_get(args)
             },
         });
         // **************************************************************************************************** 
     }
 });
+
+export const user_authentication = async (id: string, password: string): Promise<String> => {//Authorization
+    try {
+        var u = await db.users.findFirst({ where: { id: id, password: password } })
+        return MyToken.Token_Create(u.id, u.roleId)
+    } catch (error) {
+        return ""
+    }
+}
+export const user_authentication_renewal = async (id: string, roleId: string): Promise<String> => {//Authorization
+    try {
+        return MyToken.Token_Create(id, roleId)
+    } catch (error) {
+        return ""
+    }
+}
+export const userRole_get = async (id: string): Promise<String> => {
+    const r = await db.users.findUnique({ where: { id: id } });
+    return r?.roleId
+}
+export const userPhoto_get = async (userId: string): Promise<String> => {
+    const p = await db.u_photos.findFirst({ where: { userId: userId } },);
+    return p?.photo?.toString() ?? ""
+}
+
+export const users_get = async (args: ArgsUserQ) => {
+    args.filter_id = args.filter_id ?? ""
+    const where = {
+        OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
+        createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+        description: { contains: args.filter_description },
+    };
+
+    const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where: where }))._count.id
+    const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
+    const items = await db.users.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
+
+    return {
+        allItemsCount: itemsCountAll,
+        allPagesCount: p.allPagesCount,
+        itemsSkip: p.itemsSkip,
+        itemsTake: p.itemsTake,
+        pageNumber: p.pageNumber,
+        itemsCount: items.length,
+        items: items
+    }
+}
