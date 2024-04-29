@@ -1,4 +1,4 @@
-import { authorization_set, authorizations_all_get, operations_get, roles_get } from "../gql";
+import { role_authorization_set, authorizations_all_get, operations_get, roles_get } from "../gql";
 interface Matrix {
     [roleId: string]: {
         [operationId: string]: boolean;
@@ -37,7 +37,7 @@ class authorization_matrix_controller {
             const operationIds = Object.keys(this.matrix[roleId]);
             for (const operationId of operationIds) {
                 const value = this.matrix[roleId][operationId];
-                await authorization_set(roleId, operationId, value)
+                await role_authorization_set(roleId, operationId, value)
             }
         }
     }

@@ -35,7 +35,7 @@ export const TodoMutation = extendType({
                 const r = await db.todos.findUnique({ where: { id: args.id } })
                 if (r.employeeId != context.jwt.id) throw new Error('not authorized');//update only by owner
                 //   
-                return todo_update(args)
+                return todo_update(args.id, args)
             },
         });
         // --------------------------------------------------
@@ -50,14 +50,14 @@ export const TodoMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('todoPhoto_update', {
+        t.field('todo_photo_update', {
             args: { todoId: nonNull(stringArg()), photo: nonNull(stringArg()) },
             type: nonNull("String"),
             async resolve(parent: any, args: { todoId: string, photo: string }, context: ContextType, info: any) {
                 const r = await db.todos.findUnique({ where: { id: args.todoId } })
                 if (r.employeeId != context.jwt.id) throw new Error('not authorized');
                 // 
-                return todoPhoto_set(args.todoId, args.photo)
+                return todo_photo_set(args.todoId, args.photo)
             },
         });
     }
@@ -83,14 +83,14 @@ export const todo_create = async (args: ArgsTodoM) => {
     })
 }
 
-export const todo_update = async (args: ArgsTodoM) => {
-    if (args.id == undefined) throw new Error('id is required');
+export const todo_update = async (id: string, args: ArgsTodoM) => {
+    if (id == undefined) throw new Error('id is required');
     if (args?.money_expenses < 0) throw new Error("error : money_expenses")
     if (args?.money_required < 0) throw new Error("error : money_required")
     if ((args?.money_paid < 0) || (args?.money_paid > args?.money_required)) throw new Error("error : money_paid")
     return db.todos.update({
         where: {
-            id: args.id
+            id: id
         },
         data: {
             employeeId: args.employeeId,
@@ -105,13 +105,15 @@ export const todo_update = async (args: ArgsTodoM) => {
         }
     })
 }
-export const todoPhoto_set = async (id: string, photo: string) => {
+export const todo_photo_set = async (id: string, photo: string) => {
     if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
     const photpBytes = Buffer.from(photo ?? "", 'utf8')
     // 
-    const exist = await db.t_photos.findFirst({ select: { todoId: true }, where: { todoId: id } }) ? true : false
-    if (!await exist) await db.t_photos.create({ data: { todoId: id, photo: photpBytes } },);
-    else await db.t_photos.update({ where: { todoId: id }, data: { photo: photpBytes } },);
+    await db.$transaction(async (t) => {
+        const exist = await t.t_photos.findFirst({ select: { todoId: true }, where: { todoId: id } }) ? true : false
+        if (!exist) await t.t_photos.create({ data: { todoId: id, photo: photpBytes } },);
+        else await t.t_photos.update({ where: { todoId: id }, data: { photo: photpBytes } },);
+    })
     return "ok"
 }
 export const todo_delete = async (id: string) => {

@@ -20,9 +20,15 @@ export const RoleQuery = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('authorizations_get', {
+        t.field('role_authorizations_get', {
             args: { roleId: nonNull(stringArg()) },
-            type: list(authorizations_get_out),
+            type: list(objectType({
+                name: 'authorizations_get_out',
+                definition(t) {
+                    t.nullable.string("operationId")
+                    t.nullable.boolean("value")
+                },
+            })),
             resolve(parent, args: { roleId?: string }, context, info) {
                 return authorizations_get(args.roleId)
             }
@@ -44,12 +50,4 @@ export const roles_get = async (): Promise<String[]> => {
     const r = await db.u_roles.findMany({ select: { id: true } });
     return r.map((x) => x.id)
 }
-// **************************************************************************************************** 
-const authorizations_get_out = objectType({
-    name: 'authorizations_get_out',
-    definition(t) {
-        t.nullable.string("operationId")
-        t.nullable.boolean("value")
-    },
-})
 // **************************************************************************************************** 

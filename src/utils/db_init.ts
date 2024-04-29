@@ -4,7 +4,7 @@ import { authorization_matrix } from "./authorization_matrix"
 import { myLog } from "./log"
 import { db } from "./db"
 import { getImageAsBase64 } from "./files"
-import { operation_create, role_create, todoPhoto_set, todo_create, user_create } from "../gql"
+import { operation_create, role_create, todo_photo_set, todo_create, user_create } from "../gql"
 
 export const db_init = async (listOperationName: string[]) => {
     myLog(" +++++ initDB +++++")
@@ -57,7 +57,7 @@ export const db_init = async (listOperationName: string[]) => {
                     money_expenses: money_expenses,
                     money_paid: money_paid,
                 })
-                todoPhoto_set(r.id, await getImageAsBase64(faker.image.avatar()))
+                todo_photo_set(r.id, await getImageAsBase64(faker.image.avatar()))
             }
         }
     } catch (error) { }

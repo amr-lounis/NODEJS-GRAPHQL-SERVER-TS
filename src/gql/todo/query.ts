@@ -25,11 +25,11 @@ export const TodoQuery = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('todoPhoto_get', {
+        t.field('todo_photo_get', {
             args: { todoId: nonNull(stringArg()) },
             type: nonNull("String"),
             async resolve(parent, args: ArgsTodoQ, context, info) {
-                return todoPhoto_get(args)
+                return todo_photo_get(args)
             },
         });
     }
@@ -60,7 +60,7 @@ export const todos_get = async (args: ArgsTodoQ) => {
         items: items
     }
 }
-export const todoPhoto_get = async (args: ArgsTodoQ) => {
+export const todo_photo_get = async (args: ArgsTodoQ) => {
     const p = await db.t_photos.findFirst({ where: { todoId: args.todoId } },);
     return p?.photo?.toString() ?? ""
 }

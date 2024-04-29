@@ -53,11 +53,11 @@ export const UserMutation = extendType({
                 }
             })
         // --------------------------------------------------
-        t.field('userPhoto_update_self', {
+        t.field('user_photo_update_self', {
             args: { photo: nonNull(stringArg()), },
             type: nonNull("String"),
             resolve(parent, args: ArgsUserM, context: ContextType, info) {
-                return userPhoto_set(context?.jwt?.id, args.photo)
+                return user_photo_set(context?.jwt?.id, args.photo)
             },
         });
         // --------------------------------------------------
@@ -87,19 +87,22 @@ export const userRole_update = async (id: string, roleId: string): Promise<Strin
     await db.users.update({ where: { id: id }, data: { roleId: roleId } })
     return "ok"
 }
-export const userPhoto_set = async (userId: string, photo: string): Promise<String> => {
+export const user_photo_set = async (id: string, photo: string): Promise<String> => {
     if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
     const photpBytes = Buffer.from(photo ?? "", 'utf8')
     // 
-    const exist = await db.u_photos.findFirst({ select: { userId: true }, where: { userId: userId } }) ? true : false
-    if (!await exist) await db.u_photos.create({ data: { userId: userId, photo: photpBytes } },);
-    else await db.u_photos.update({ where: { userId: userId }, data: { photo: photpBytes } },);
+    await db.$transaction(async (t) => {
+        const exist = await t.u_photos.findFirst({ select: { userId: true }, where: { userId: id } }) ? true : false
+        if (!exist) await t.u_photos.create({ data: { userId: id, photo: photpBytes } },);
+        else await t.u_photos.update({ where: { userId: id }, data: { photo: photpBytes } },);
+    })
     return "ok"
 }
 export const user_update = async (id: string, args: ArgsUserM): Promise<string> => {
     await db.users.update({
         where: { id: id },
         data: {
+            id: args.id,
             password: args.password,
             description: args.description,
             address: args.address,

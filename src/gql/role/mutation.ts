@@ -7,7 +7,7 @@ export const RoleMutation = extendType({
         t.field('role_create', {
             args: { id: nonNull(stringArg()), },
             type: nonNull('String'),
-            resolve(parent, args: ArgsRolesM, context, info) {
+            resolve(parent, args: { id: string }, context, info) {
                 return role_create(args.id)
             },
         });
@@ -15,7 +15,7 @@ export const RoleMutation = extendType({
         t.field('role_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
             type: nonNull('String'),
-            resolve(parent, args: ArgsRolesM, context, info) {
+            resolve(parent, args: { id: string, idNew: string }, context, info) {
                 return role_update(args.id, args.idNew)
             }
         });
@@ -23,16 +23,16 @@ export const RoleMutation = extendType({
         t.field('role_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('String'),
-            resolve(parent, args: ArgsRolesM, context, info) {
+            resolve(parent, args: { id: string }, context, info) {
                 return role_delete(args.id)
             }
         });
         // --------------------------------------------------
-        t.field('authorization_set', {
+        t.field('role_authorization_set', {
             args: { roleId: nonNull(stringArg()), operationId: nonNull(stringArg()), value: nonNull(booleanArg()) },
             type: nonNull('String'),
-            resolve(parent, args: ArgsRolesM, context, info) {
-                return authorization_set(args.roleId, args.operationId, args.value)
+            resolve(parent, args: { roleId: string, operationId: string, value: boolean }, context, info) {
+                return role_authorization_set(args.roleId, args.operationId, args.value)
             }
         });
     }
@@ -50,6 +50,7 @@ export const operation_delete = async (id: string): Promise<String> => {
     await db.u_operations.delete({ where: { id: id } })
     return "ok"
 }
+// --------------------------------------------------
 export const role_create = async (id: string): Promise<String> => {
     await db.u_roles.create({ data: { id: id } })
     return "ok"
@@ -62,7 +63,8 @@ export const role_delete = async (id: string): Promise<String> => {
     await db.u_roles.delete({ where: { id: id } })
     return "ok"
 }
-export const authorization_set = async (roleId: string, operationId: string, value: boolean): Promise<boolean> => {
+// --------------------------------------------------
+export const role_authorization_set = async (roleId: string, operationId: string, value: boolean): Promise<boolean> => {
     const exist = await db.u_roles_operations.findFirst({ where: { operationId: operationId, roleId: roleId } }) ? true : false
     if (!exist) {
         await db.u_roles_operations.create({
@@ -89,10 +91,3 @@ export const authorization_set = async (roleId: string, operationId: string, val
     return true;
 }
 // **************************************************************************************************** 
-export type ArgsRolesM = {
-    id: string,
-    idNew: string,
-    roleId: string,
-    operationId: string,
-    value: boolean,
-}

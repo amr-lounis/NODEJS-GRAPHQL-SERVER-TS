@@ -32,19 +32,19 @@ export const UserQuery = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('userRole_get', {
+        t.field('user_role_get', {
             args: { id: nonNull(stringArg()), },
             type: nonNull("String"),
             resolve(parent, args: ArgsUserQ, context, info) {
-                return userRole_get(args.id)
+                return user_role_get(args.id)
             },
         });
         // --------------------------------------------------
-        t.field('userPhoto_get', {
+        t.field('user_photo_get', {
             args: { userId: nonNull(stringArg()), },
             type: nonNull("String"),
             resolve(parent, args: ArgsUserQ, context, info) {
-                return userPhoto_get(args.userId)
+                return user_photo_get(args.userId)
             },
         });
         // --------------------------------------------------
@@ -82,11 +82,11 @@ export const user_authentication_renewal = async (id: string, roleId: string): P
         return ""
     }
 }
-export const userRole_get = async (id: string): Promise<String> => {
+export const user_role_get = async (id: string): Promise<String> => {
     const r = await db.users.findUnique({ where: { id: id } });
     return r?.roleId
 }
-export const userPhoto_get = async (userId: string): Promise<String> => {
+export const user_photo_get = async (userId: string): Promise<String> => {
     const p = await db.u_photos.findFirst({ where: { userId: userId } },);
     return p?.photo?.toString() ?? ""
 }
