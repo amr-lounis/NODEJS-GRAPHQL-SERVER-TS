@@ -4,11 +4,11 @@ import { db } from '../../utils';
 export const ProductQuery = extendType({
     type: 'Query',
     definition(t) {
-        t.field('products_get', {
-            args: {},
+        t.field('product_photo_get', {
+            args: { id: nonNull(stringArg()) },
             type: nonNull('String'),
-            async resolve(parent, args, context, info) {
-
+            async resolve(parent, args: { id?: string }, context, info) {
+                return product_photo_get(args.id)
             },
         });
     }
@@ -26,8 +26,8 @@ export const categories_get = async () => {
 export const stocks_get = async () => {
     return await db.p_stocks.findMany({});
 }
-export const productPhoto_get = async (producId: string) => {
-    const p = await db.p_photos.findFirst({ where: { producId: producId } },);
-    return { ...p, photo: p?.photo?.toString() ?? "" }
+export const product_photo_get = async (producId: string): Promise<string> => {
+    const p = await db.p_photos.findUnique({ where: { producId: producId } },);
+    return p?.photo?.toString() ?? ""
 }
 // **************************************************************************************************** 

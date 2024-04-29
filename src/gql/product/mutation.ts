@@ -162,7 +162,7 @@ export const product_update = async (id: string, args: ArgsProductType) => {
 export const product_delete = async (id: string) => {
     await db.products.delete({ where: { id: id } })
 }
-export const productPhoto_set = async (id: string, photo: string): Promise<String> => {
+export const product_photo_set = async (id: string, photo: string): Promise<String> => {
     if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
     const photpBytes = Buffer.from(photo ?? "", 'utf8')
     // 

@@ -87,7 +87,7 @@ export const user_role_get = async (id: string): Promise<String> => {
     return r?.roleId
 }
 export const user_photo_get = async (userId: string): Promise<String> => {
-    const p = await db.u_photos.findFirst({ where: { userId: userId } },);
+    const p = await db.u_photos.findUnique({ where: { userId: userId } },);
     return p?.photo?.toString() ?? ""
 }
 
