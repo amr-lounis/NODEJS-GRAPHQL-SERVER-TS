@@ -103,7 +103,6 @@ model p_stocks {
   money_purchase    Float    @default(0)
   money_selling     Float    @default(0)
   quantity          Float    @default(0)
-  quantity_initial  Float    @default(0)
   quantity_critical Float    @default(0)
   date_production   DateTime @default(now())
   date_purchase     DateTime @default(now())
