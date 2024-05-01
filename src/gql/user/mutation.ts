@@ -16,48 +16,33 @@ export const UserMutation = extendType({
                 pubsub.publish("user_notification_sender", payload);
                 return "ok"
             },
-        }),
-            // --------------------------------------------------
-            t.field('user_create', {
-                args: {
-                    id: nonNull(stringArg()),
-                    password: stringArg(),
-                    description: stringArg(),
-                    address: stringArg(),
-                    first_name: stringArg(),
-                    last_name: stringArg(),
-                    phone: stringArg(),
-                    fax: stringArg(),
-                    email: stringArg(),
-                },
-                type: nonNull("String"),
-                resolve(parent, args: ArgsUserM, context, info) {
-                    return user_create(args)
-                }
-            }),
-            // --------------------------------------------------
-            t.field('user_update_self', {
-                args: {
-                    password: stringArg(),
-                    description: stringArg(),
-                    address: stringArg(),
-                    first_name: stringArg(),
-                    last_name: stringArg(),
-                    phone: stringArg(),
-                    fax: stringArg(),
-                    email: stringArg(),
-                },
-                type: nonNull('String'),
-                resolve(parent, args: ArgsUserM, context: ContextType, info) {
-                    return user_update(context?.jwt?.id, args)
-                }
-            })
+        });
         // --------------------------------------------------
-        t.field('user_photo_update_self', {
-            args: { photo: nonNull(stringArg()), },
+        t.field('user_create', {
+            args: {
+                id: nonNull(stringArg()),
+                password: stringArg(),
+                description: stringArg(),
+                address: stringArg(),
+                first_name: stringArg(),
+                last_name: stringArg(),
+                phone: stringArg(),
+                fax: stringArg(),
+                email: stringArg(),
+            },
             type: nonNull("String"),
-            resolve(parent, args: ArgsUserM, context: ContextType, info) {
-                return user_photo_set(context?.jwt?.id, args.photo)
+            resolve(parent, args: ArgsUserM, context, info) {
+                return user_create(args)
+            }
+        });
+        t.field('user_id_update', {
+            args: {
+                id: nonNull(stringArg()),
+                idNew: nonNull(stringArg()),
+            },
+            type: nonNull('String'),
+            resolve(parent, args: { id: string, idNew: string }, context, info) {
+                return user_update(args.id, { id: args.idNew })
             },
         });
         // --------------------------------------------------
@@ -76,6 +61,31 @@ export const UserMutation = extendType({
                     return userRole_update(args.id, args.roleId)
                 }
             });
+        // --------------------------------------------------
+        t.field('user_update_self', {
+            args: {
+                password: stringArg(),
+                description: stringArg(),
+                address: stringArg(),
+                first_name: stringArg(),
+                last_name: stringArg(),
+                phone: stringArg(),
+                fax: stringArg(),
+                email: stringArg(),
+            },
+            type: nonNull('String'),
+            resolve(parent, args: ArgsUserM, context: ContextType, info) {
+                return user_update(context?.jwt?.id, args)
+            }
+        });
+        // --------------------------------------------------
+        t.field('user_photo_update_self', {
+            args: { photo: nonNull(stringArg()), },
+            type: nonNull("String"),
+            resolve(parent, args: ArgsUserM, context: ContextType, info) {
+                return user_photo_set(context?.jwt?.id, args.photo)
+            },
+        });
     },
 });
 // **************************************************************************************************** 
