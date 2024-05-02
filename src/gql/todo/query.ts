@@ -8,7 +8,7 @@ export const TodoQuery = extendType({
             args: {
                 id: nullable(stringArg()),
                 employeeId: nullable(stringArg()),
-                agentId: nullable(stringArg()),
+                dealerId: nullable(stringArg()),
                 validation: nullable(stringArg()),
                 filter_description: nullable(stringArg()),
                 filter_create_gte: nullable(stringArg()),
@@ -36,19 +36,29 @@ export const TodoQuery = extendType({
 });
 // **************************************************************************************************** 
 export const todos_get = async (args: ArgsTodoQ) => {
-    const where = {
-        id: args.id,
-        employeeId: args.employeeId,
-        agentId: args.agentId,
-        validation: args.validation,
-        createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
-        money_unpaid: { gte: args.money_unpaid_gte, lte: args.money_unpaid_lte },
-        description: { contains: args.filter_description },
-    };
-
-    const itemsCountAll = (await db.todos.aggregate({ _count: { id: true }, where }))._count.id
+    const itemsCountAll = (await db.todos.aggregate({
+        _count: { id: true }, where: {
+            id: args.id,
+            employeeId: args.employeeId,
+            dealerId: args.dealerId,
+            validation: args.validation,
+            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+            money_unpaid: { gte: args.money_unpaid_gte, lte: args.money_unpaid_lte },
+            description: { contains: args.filter_description },
+        }
+    }))._count.id
     const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-    const items = await db.todos.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
+    const items = await db.todos.findMany({
+        orderBy: { createdAt: 'desc' }, where: {
+            id: args.id,
+            employeeId: args.employeeId,
+            dealerId: args.dealerId,
+            validation: args.validation,
+            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+            money_unpaid: { gte: args.money_unpaid_gte, lte: args.money_unpaid_lte },
+            description: { contains: args.filter_description },
+        }, skip: p.itemsSkip, take: p.itemsTake
+    })
 
     return {
         allItemsCount: itemsCountAll,
@@ -68,8 +78,8 @@ export const todo_photo_get = async (args: ArgsTodoQ) => {
 export const todo_get_out = objectType({
     name: 'todo_get_out',
     definition(t) {
-        ["id", "employeeId", "agentId", "validation", "description", "createdAt", "updatedAt"].map((x) => t.nullable.string(x));
-        ["money_expenses", "money_required", "money_paid", "money_unpaid", "money_margin",].map((x) => t.nullable.float(x));
+        ["id", "employeeId", "dealerId", "validation", "description"].map((x) => t.nullable.string(x));
+        ["money_expenses", "money_total", "money_paid", "money_unpaid", "money_margin", "createdAt", "updatedAt"].map((x) => t.nullable.float(x));
     },
 });
 export const todos_out = objectType({
@@ -88,7 +98,7 @@ export type ArgsTodoQ = {
     id?: string,
     todoId?: string,
     employeeId?: string,
-    agentId?: string,
+    dealerId?: string,
     validation?: string,
     filter_description?: string,
     filter_create_gte?: string,

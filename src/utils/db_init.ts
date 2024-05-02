@@ -42,9 +42,9 @@ export const db_init = async (listOperationName: string[]) => {
     }
     // -------------------------------------------------- init todo
     try {
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 10; i++) {
             const l = await (await db.todos.aggregate({ _count: { id: true } }))._count.id
-            if (l < 100) {
+            if (l < 10) {
                 const money_total = faker.number.int({ min: 0, max: 100 })
                 const money_expenses = faker.number.int({ min: 0, max: money_total })
                 const money_paid = faker.number.int({ min: 0, max: money_total })

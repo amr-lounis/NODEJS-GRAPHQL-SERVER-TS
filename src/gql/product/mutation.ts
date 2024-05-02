@@ -100,8 +100,8 @@ export const ProductMutation = extendType({
                 money_selling: nullable(floatArg()),
                 quantity: nullable(floatArg()),
                 quantity_critical: nullable(floatArg()),
-                date_production: nonNull(stringArg()),
-                date_expiration: nonNull(stringArg()),
+                date_production: nullable(stringArg()),
+                date_expiration: nullable(stringArg()),
             },
             type: nonNull('String'),
             resolve(parent, args: ArgsStockType, context, info) {
@@ -197,6 +197,7 @@ export const product_stock_set = async (args: ArgsStockType) => {
             }
         },);
     })
+    return "ok"
 }
 
 export const product_stock_add = async (id: string, quantity_added: number) => {
