@@ -1,4 +1,4 @@
-import { arg, extendType, nonNull, stringArg } from "nexus";
+import { extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
 import { db } from "../../utils";
 
 // **************************************************************************************************** 
@@ -15,14 +15,14 @@ export const ProductMutation = extendType({
         t.field('product_unity_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
             type: nonNull('String'),
-            resolve(parent, args: { id?: string, idNew: string }, context, info) {
+            resolve(parent, args: { id: string, idNew: string }, context, info) {
                 return unity_update(args.id, args.idNew)
             },
         });
         t.field('product_unity_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('String'),
-            resolve(parent, args: { id?: string }, context, info) {
+            resolve(parent, args: { id: string }, context, info) {
                 return unity_delete(args.id)
             },
         });
@@ -93,9 +93,26 @@ export const ProductMutation = extendType({
             },
         });
         // --------------------------------------------------
+        t.field('product_stock_set', {
+            args: {
+                productId: nonNull(stringArg()),
+                money_purchase: nullable(floatArg()),
+                money_selling: nullable(floatArg()),
+                quantity: nullable(floatArg()),
+                quantity_critical: nullable(floatArg()),
+                date_production: nonNull(stringArg()),
+                date_expiration: nonNull(stringArg()),
+            },
+            type: nonNull('String'),
+            resolve(parent, args: ArgsStockType, context, info) {
+                return product_stock_set(args)
+            },
+        });
     }
 });
+
 // **************************************************************************************************** 
+
 export const unity_create = async (id: string): Promise<String> => {
     await db.p_units.create({ data: { id: id } })
     return "ok"
@@ -122,43 +139,84 @@ export const categorie_delete = async (id: string): Promise<String> => {
     return "ok"
 }
 // --------------------------------------------------
-export const stock_delete = async (productId: string): Promise<String> => {
-    await db.p_stocks.delete({ where: { productId: productId } })
-    return "ok"
-}
-// --------------------------------------------------
-type ArgsProductType = {
-    id?: string,
-    categorieId?: string,
-    unityId?: string,
-    code?: string,
-    description?: string
-}
 export const product_create = async (args: ArgsProductType) => {
+    if (args.id == undefined) throw new Error('error : id is required');
     await db.products.create({
         data: {
             id: args.id,
-            categorieId: args.id,
-            unityId: args.id,
-            code: args.id,
-            description: args.id
+            categorieId: args.categorieId,
+            unityId: args.unityId,
+            code: args.code,
+            description: args.description,
         }
     })
 }
 export const product_update = async (id: string, args: ArgsProductType) => {
+    if (args.id == undefined) throw new Error('error : id is required');
     await db.products.update({
         where: {
             id: id
         },
         data: {
             id: args.id,
-            categorieId: args.id,
-            unityId: args.id,
-            code: args.id,
-            description: args.id
+            categorieId: args.categorieId,
+            unityId: args.unityId,
+            code: args.code,
+            description: args.description,
         }
     })
 }
+
+export const product_stock_set = async (args: ArgsStockType) => {
+    if (args.productId == undefined) throw new Error('error : productId is required');
+    if (args.money_purchase < 0) throw new Error('error : money_purchase < 0');
+    if (args.money_selling < 0) throw new Error('error : money_selling < 0');
+    if (args.quantity < 0) throw new Error("error : quantity < 0)");
+    await db.$transaction(async (t) => {
+        const exist_ps = await t.p_stocks.findFirst({ select: { productId: true }, where: { productId: args.productId } }) ? true : false;
+        if (!exist_ps) await t.p_stocks.create({
+            data: {
+                productId: args.productId,
+                money_purchase: args.money_purchase,
+                money_selling: args.money_selling,
+                quantity: args.quantity,
+                quantity_critical: args.quantity_critical,
+                date_production: args.date_production,
+                date_expiration: args.date_expiration,
+            }
+        },);
+        else await t.p_stocks.update({
+            where: { productId: args.productId }, data: {
+                // productId: args.productId,
+                money_purchase: args.money_purchase,
+                money_selling: args.money_selling,
+                quantity: args.quantity,
+                quantity_critical: args.quantity_critical,
+                date_production: args.date_production,
+                date_expiration: args.date_expiration,
+            }
+        },);
+    })
+}
+
+export const product_stock_add = async (id: string, quantity_added: number) => {
+    if (quantity_added < 0) throw new Error(`error : quantity : ${quantity_added}`);
+    product_stock_set({ productId: id })
+    await db.$transaction(async (t) => {
+        const r = await t.p_stocks.findUnique({ select: { quantity: true }, where: { productId: id } })
+        await t.p_stocks.update({ where: { productId: id }, data: { quantity: r.quantity + quantity_added } },);
+    })
+}
+export const product_stock_reduce = async (id: string, quantity_reduce: number) => {
+    if (quantity_reduce < 0) throw new Error(`error : quantity : ${quantity_reduce}`);
+    product_stock_set({ productId: id })
+    await db.$transaction(async (t) => {
+        const r = await t.p_stocks.findUnique({ select: { quantity: true }, where: { productId: id } })
+        if ((r.quantity - quantity_reduce) < 0) throw new Error(`error : quantity : ${quantity_reduce}`);
+        await t.p_stocks.update({ where: { productId: id }, data: { quantity: r.quantity - quantity_reduce } },);
+    })
+}
+
 export const product_delete = async (id: string) => {
     await db.products.delete({ where: { id: id } })
 }
@@ -167,10 +225,27 @@ export const product_photo_set = async (id: string, photo: string): Promise<Stri
     const photpBytes = Buffer.from(photo ?? "", 'utf8')
     // 
     await db.$transaction(async (t) => {
-        const exist = await t.p_photos.findFirst({ select: { producId: true }, where: { producId: id } }) ? true : false
-        if (!exist) await t.p_photos.create({ data: { producId: id, photo: photpBytes } },);
-        else await t.p_photos.update({ where: { producId: id }, data: { photo: photpBytes } },);
+        const exist_pp = await t.p_photos.findFirst({ select: { productId: true }, where: { productId: id } }) ? true : false;
+        if (!exist_pp) await t.p_photos.create({ data: { productId: id, photo: photpBytes } },);
+        else await t.p_photos.update({ where: { productId: id }, data: { photo: photpBytes } },);
     })
     return "ok"
 }
 // --------------------------------------------------
+type ArgsProductType = {
+    id?: string,
+    categorieId?: string,
+    unityId?: string,
+    code?: string,
+    description?: string,
+}
+
+type ArgsStockType = {
+    productId?: string,
+    money_purchase?: number,
+    money_selling?: number,
+    quantity?: number,
+    quantity_critical?: number,
+    date_production?: string,
+    date_expiration?: string,
+}

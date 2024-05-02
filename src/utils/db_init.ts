@@ -45,15 +45,15 @@ export const db_init = async (listOperationName: string[]) => {
         for (let i = 0; i < 100; i++) {
             const l = await (await db.todos.aggregate({ _count: { id: true } }))._count.id
             if (l < 100) {
-                const money_required = faker.number.int({ min: 0, max: 100 })
-                const money_expenses = faker.number.int({ min: 0, max: money_required })
-                const money_paid = faker.number.int({ min: 0, max: money_required })
+                const money_total = faker.number.int({ min: 0, max: 100 })
+                const money_expenses = faker.number.int({ min: 0, max: money_total })
+                const money_paid = faker.number.int({ min: 0, max: money_total })
                 const r = await todo_create({
                     employeeId: Math.random() > 0.5 ? 'admin' : 'employee',
-                    agentId: Math.random() > 0.5 ? 'admin' : 'employee',
+                    dealerId: Math.random() > 0.5 ? 'admin' : 'employee',
                     validation: Math.random() > 0.5 ? 'new' : 'complited',
                     description: faker.lorem.sentence({ min: 5, max: 10 }),
-                    money_required: money_required,
+                    money_total: money_total,
                     money_expenses: money_expenses,
                     money_paid: money_paid,
                 })

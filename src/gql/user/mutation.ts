@@ -18,7 +18,7 @@ export const UserMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('user_create', {
+        t.field('user__create', {
             args: {
                 id: nonNull(stringArg()),
                 password: stringArg(),
@@ -35,7 +35,8 @@ export const UserMutation = extendType({
                 return user_create(args)
             }
         });
-        t.field('user_id_update', {
+        // --------------------------------------------------
+        t.field('user__id_update', {
             args: {
                 id: nonNull(stringArg()),
                 idNew: nonNull(stringArg()),
@@ -46,23 +47,23 @@ export const UserMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('user_delete', {
+        t.field('user__delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull("String"),
             resolve(parent, args: ArgsUserM, context, info) {
                 return user_delete(args.id)
             },
-        }),
-            // --------------------------------------------------
-            t.field('userRole_update', {
-                args: { id: nonNull(stringArg()), roleId: nullable(stringArg()) },
-                type: nonNull("String"),
-                resolve(parent, args: ArgsUserM, context, info) {
-                    return userRole_update(args.id, args.roleId)
-                }
-            });
+        });
         // --------------------------------------------------
-        t.field('user_update_self', {
+        t.field('user_role_update', {
+            args: { id: nonNull(stringArg()), roleId: nullable(stringArg()) },
+            type: nonNull("String"),
+            resolve(parent, args: ArgsUserM, context, info) {
+                return user_role_update(args.id, args.roleId)
+            }
+        });
+        // --------------------------------------------------
+        t.field('user__update_self', {
             args: {
                 password: stringArg(),
                 description: stringArg(),
@@ -93,7 +94,7 @@ export const user_delete = async (id: string): Promise<String> => {
     await db.users.delete({ where: { id: id } })
     return "ok"
 }
-export const userRole_update = async (id: string, roleId: string): Promise<String> => {
+export const user_role_update = async (id: string, roleId: string): Promise<String> => {
     await db.users.update({ where: { id: id }, data: { roleId: roleId } })
     return "ok"
 }

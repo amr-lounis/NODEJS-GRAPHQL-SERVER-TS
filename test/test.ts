@@ -1,19 +1,15 @@
-import { faker } from "@faker-js/faker";
-const axios = require('axios');
+import { myLog } from "../src/utils"
+import { product_create, product_stock_add, product_stock_reduce, product_stock_set } from "../src/gql"
 
-const getImageAsBase64 = async (url) => {
+const main = async () => {
     try {
-        const response = await axios.get(url, {
-            responseType: 'arraybuffer', // Set the response type to arraybuffer to handle binary data
-        });
-        return Buffer.from(response.data, 'binary').toString('base64');
-    } catch (error) { return ""; }
+        // await product_create({ id: "aaaaa" })
+        // await product_stock_set({ productId: "aaaaaa" })
+        await product_stock_reduce("aaaaa", 10)
+    } catch (error) {
+        myLog(error.message)
+    }
+
 }
 
-getImageAsBase64(faker.image.avatar())
-    .then((base64Data) => {
-        console.log('Base64 image data:', base64Data);
-    })
-    .catch((error) => { });
-
-console.log()
+main();

@@ -10,7 +10,7 @@ export const TodoMutation = extendType({
                 description: nullable(stringArg()),
                 validation: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
-                money_required: nullable(floatArg()),
+                money_total: nullable(floatArg()),
                 money_paid: nullable(floatArg())
             },
             type: nonNull('String'),
@@ -27,7 +27,7 @@ export const TodoMutation = extendType({
                 description: nullable(stringArg()),
                 validation: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
-                money_required: nullable(floatArg()),
+                money_total: nullable(floatArg()),
                 money_paid: nullable(floatArg())
             },
             type: nonNull('String'),
@@ -65,19 +65,19 @@ export const TodoMutation = extendType({
 // **************************************************************************************************** 
 export const todo_create = async (args: ArgsTodoM) => {
     if (args.employeeId == undefined) throw new Error('id is required');
-    if (args?.money_expenses < 0) throw new Error("error : money_expenses")
-    if (args?.money_required < 0) throw new Error("error : money_required")
-    if ((args?.money_paid < 0) || (args?.money_paid > args?.money_required)) throw new Error("error : money_paid")
+    if (args.money_expenses < 0) throw new Error("error : money_expenses")
+    if (args.money_total < 0) throw new Error("error : money_total")
+    if ((args.money_paid < 0) || (args.money_paid > args.money_total)) throw new Error("error : money_paid")
     return db.todos.create({
         data: {
             employeeId: args.employeeId,
-            agentId: args.agentId,
+            dealerId: args.dealerId,
             description: args.description,
             validation: args.validation,
             money_expenses: args.money_expenses,
-            money_required: args.money_required,
+            money_total: args.money_total,
             money_paid: args.money_paid,
-            money_unpaid: args.money_required - args.money_paid,
+            money_unpaid: args.money_total - args.money_paid,
             money_margin: args.money_paid - args.money_expenses
         }
     })
@@ -85,22 +85,22 @@ export const todo_create = async (args: ArgsTodoM) => {
 
 export const todo_update = async (id: string, args: ArgsTodoM) => {
     if (id == undefined) throw new Error('id is required');
-    if (args?.money_expenses < 0) throw new Error("error : money_expenses")
-    if (args?.money_required < 0) throw new Error("error : money_required")
-    if ((args?.money_paid < 0) || (args?.money_paid > args?.money_required)) throw new Error("error : money_paid")
+    if (args.money_expenses < 0) throw new Error("error : money_expenses")
+    if (args.money_total < 0) throw new Error("error : money_total")
+    if ((args.money_paid < 0) || (args.money_paid > args.money_total)) throw new Error("error : money_paid")
     return db.todos.update({
         where: {
             id: id
         },
         data: {
             employeeId: args.employeeId,
-            agentId: args.agentId,
+            dealerId: args.dealerId,
             description: args.description,
             validation: args.validation,
             money_expenses: args.money_expenses,
-            money_required: args.money_required,
+            money_total: args.money_total,
             money_paid: args.money_paid,
-            money_unpaid: args.money_required - args.money_paid,
+            money_unpaid: args.money_total - args.money_paid,
             money_margin: args.money_paid - args.money_expenses
         }
     })
@@ -124,11 +124,11 @@ export const todo_delete = async (id: string) => {
 type ArgsTodoM = {
     id?: string,
     employeeId?: string,
-    agentId?: string,
+    dealerId?: string,
     description?: string,
     validation?: string,
     money_expenses?: number,
-    money_required?: number,
+    money_total?: number,
     money_paid?: number,
 }
 // **************************************************************************************************** 

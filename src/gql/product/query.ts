@@ -23,11 +23,8 @@ export const units_get = async () => {
 export const categories_get = async () => {
     return await db.p_categories.findMany({});
 }
-export const stocks_get = async () => {
-    return await db.p_stocks.findMany({});
-}
 export const product_photo_get = async (producId: string): Promise<string> => {
-    const p = await db.p_photos.findUnique({ where: { producId: producId } },);
+    const p = await db.p_photos.findUnique({ where: { productId: producId } },);
     return p?.photo?.toString() ?? ""
 }
 // **************************************************************************************************** 
