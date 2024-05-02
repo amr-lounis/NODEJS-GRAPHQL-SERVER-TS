@@ -108,6 +108,17 @@ export const ProductMutation = extendType({
                 return product_stock_set(args)
             },
         });
+        // --------------------------------------------------
+        t.field('product_stock_quantity_updown', {
+            args: {
+                productId: nonNull(stringArg()),
+                quantity: nullable(floatArg())
+            },
+            type: nonNull('String'),
+            resolve(parent, args: ArgsStockType, context, info) {
+                return product_stock_quantity_updown(args.productId, args.quantity)
+            },
+        });
     }
 });
 
@@ -200,22 +211,14 @@ export const product_stock_set = async (args: ArgsStockType) => {
     return "ok"
 }
 
-export const product_stock_add = async (id: string, quantity_added: number) => {
-    if (quantity_added < 0) throw new Error(`error : quantity : ${quantity_added}`);
+export const product_stock_quantity_updown = async (id: string, quantity: number) => {
     product_stock_set({ productId: id })
     await db.$transaction(async (t) => {
         const r = await t.p_stocks.findUnique({ select: { quantity: true }, where: { productId: id } })
-        await t.p_stocks.update({ where: { productId: id }, data: { quantity: r.quantity + quantity_added } },);
+        if ((r.quantity + quantity) < 0) throw new Error("error : quantity");
+        await t.p_stocks.update({ where: { productId: id }, data: { quantity: r.quantity + quantity } },);
     })
-}
-export const product_stock_reduce = async (id: string, quantity_reduce: number) => {
-    if (quantity_reduce < 0) throw new Error(`error : quantity : ${quantity_reduce}`);
-    product_stock_set({ productId: id })
-    await db.$transaction(async (t) => {
-        const r = await t.p_stocks.findUnique({ select: { quantity: true }, where: { productId: id } })
-        if ((r.quantity - quantity_reduce) < 0) throw new Error(`error : quantity : ${quantity_reduce}`);
-        await t.p_stocks.update({ where: { productId: id }, data: { quantity: r.quantity - quantity_reduce } },);
-    })
+    return "ok"
 }
 
 export const product_delete = async (id: string) => {
