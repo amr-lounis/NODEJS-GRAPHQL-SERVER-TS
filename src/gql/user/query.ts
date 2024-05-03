@@ -1,5 +1,5 @@
 import { extendType, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db, MyToken, toPage, ContextType } from '../../utils';
+import { db, MyToken, toPage, ContextType, myLog } from '../../utils';
 // **************************************************************************************************** 
 export const UserQuery = extendType({
     type: 'Query',
@@ -86,22 +86,28 @@ export const user_role_get = async (id: string): Promise<String> => {
     const r = await db.users.findUnique({ where: { id: id } });
     return r?.roleId
 }
-export const user_photo_get = async (userId: string): Promise<String> => {
-    const p = await db.u_photos.findUnique({ where: { userId: userId } },);
+export const user_photo_get = async (id: string): Promise<String> => {
+    const p = await db.u_photos.findUnique({ where: { userId: id } },);
     return p?.photo?.toString() ?? ""
 }
 
 export const users_get = async (args: ArgsUserQ) => {
     args.filter_id = args.filter_id ?? ""
-    const where = {
-        OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
-        createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
-        description: { contains: args.filter_description },
-    };
-
-    const itemsCountAll = (await db.users.aggregate({ _count: { id: true }, where: where }))._count.id
+    const itemsCountAll = (await db.users.aggregate({
+        _count: { id: true }, where: { // -------------------------------------------------- where for 1
+            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
+            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+            description: { contains: args.filter_description },
+        }
+    }))._count.id
     const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-    const items = await db.users.findMany({ orderBy: { createdAt: 'desc' }, where, skip: p.itemsSkip, take: p.itemsTake })
+    const items = await db.users.findMany({
+        orderBy: { createdAt: 'desc' }, where: {  // -------------------------------------------------- where for 2
+            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
+            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+            description: { contains: args.filter_description },
+        }, skip: p.itemsSkip, take: p.itemsTake
+    })
 
     return {
         allItemsCount: itemsCountAll,

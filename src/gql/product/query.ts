@@ -1,4 +1,4 @@
-import { extendType, list, nonNull, stringArg } from 'nexus';
+import { extendType, nonNull, stringArg } from 'nexus';
 import { db } from '../../utils';
 // **************************************************************************************************** 
 export const ProductQuery = extendType({

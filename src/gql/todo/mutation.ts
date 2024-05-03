@@ -11,7 +11,8 @@ export const TodoMutation = extendType({
                 validation: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
                 money_total: nullable(floatArg()),
-                money_paid: nullable(floatArg())
+                money_paid: nullable(floatArg()),
+                photo: nullable(stringArg()),
             },
             type: nonNull('String'),
             resolve(parent: any, args: ArgsTodoM, context: ContextType, info: any) {
@@ -28,12 +29,13 @@ export const TodoMutation = extendType({
                 validation: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
                 money_total: nullable(floatArg()),
-                money_paid: nullable(floatArg())
+                money_paid: nullable(floatArg()),
+                photo: nullable(stringArg()),
             },
             type: nonNull('String'),
             async resolve(parent: any, args: ArgsTodoM, context: ContextType, info: any) {
                 const r = await db.todos.findUnique({ where: { id: args.id } })
-                if (r.employeeId != context.jwt.id) throw new Error('not authorized');//update only by owner
+                if (r.employeeId != context.jwt.id) throw new Error('not authorized : update only by owner');
                 //   
                 return todo_update(args.id, args)
             },
@@ -44,78 +46,76 @@ export const TodoMutation = extendType({
             type: nonNull('String'),
             async resolve(parent: any, args: { id: string }, context: ContextType, info: any) {
                 const r = await db.todos.findUnique({ where: { id: args.id } })
-                if (r.employeeId != context.jwt.id) throw new Error('not authorized');
+                if (r.employeeId != context.jwt.id) throw new Error('not authorized : update only by owner');
                 // 
                 return todo_delete(args.id)
-            },
-        });
-        // --------------------------------------------------
-        t.field('todo_photo_update', {
-            args: { todoId: nonNull(stringArg()), photo: nonNull(stringArg()) },
-            type: nonNull("String"),
-            async resolve(parent: any, args: { todoId: string, photo: string }, context: ContextType, info: any) {
-                const r = await db.todos.findUnique({ where: { id: args.todoId } })
-                if (r.employeeId != context.jwt.id) throw new Error('not authorized');
-                // 
-                return todo_photo_set(args.todoId, args.photo)
             },
         });
     }
 });
 // **************************************************************************************************** 
-export const todo_create = async (args: ArgsTodoM) => {
+export const todo_create = async (args: ArgsTodoM): Promise<string> => {// return id of todo
     if (args.employeeId == undefined) throw new Error('id is required');
-    if (args.money_expenses < 0) throw new Error("error : money_expenses")
-    if (args.money_total < 0) throw new Error("error : money_total")
-    if ((args.money_paid < 0) || (args.money_paid > args.money_total)) throw new Error("error : money_paid")
-    return db.todos.create({
-        data: {
-            employeeId: args.employeeId,
-            dealerId: args.dealerId,
-            description: args.description,
-            validation: args.validation,
-            money_expenses: args.money_expenses,
-            money_total: args.money_total,
-            money_paid: args.money_paid,
-            money_unpaid: args.money_total - args.money_paid,
-            money_margin: args.money_paid - args.money_expenses
+    if (args.money_expenses < 0) throw new Error("error : money_expenses < 0")
+    if (args.money_total < 0) throw new Error("error : money_total < 0")
+    if ((args.money_paid < 0) || (args.money_paid > args.money_total)) throw new Error("error : money_paid < 0")
+    return await db.$transaction(async (t) => {
+        const r = await t.todos.create({
+            data: {
+                employeeId: args.employeeId,
+                dealerId: args.dealerId,
+                description: args.description,
+                validation: args.validation,
+                money_expenses: args.money_expenses,
+                money_total: args.money_total,
+                money_paid: args.money_paid,
+                money_unpaid: args.money_total - args.money_paid,
+                money_margin: args.money_paid - args.money_expenses
+            }
+        });
+        await t.t_photos.create({
+            data: { todoId: args.id, photo: Buffer.from("", 'utf8') }
+        });
+        if (args.photo != undefined) {
+            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
+            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
+            await t.t_photos.update({ where: { todoId: args.id }, data: { photo: photpBytes } });
         }
-    })
+        return r.id
+    });
 }
 
 export const todo_update = async (id: string, args: ArgsTodoM) => {
     if (id == undefined) throw new Error('id is required');
-    if (args.money_expenses < 0) throw new Error("error : money_expenses")
-    if (args.money_total < 0) throw new Error("error : money_total")
-    if ((args.money_paid < 0) || (args.money_paid > args.money_total)) throw new Error("error : money_paid")
-    return db.todos.update({
-        where: {
-            id: id
-        },
-        data: {
-            employeeId: args.employeeId,
-            dealerId: args.dealerId,
-            description: args.description,
-            validation: args.validation,
-            money_expenses: args.money_expenses,
-            money_total: args.money_total,
-            money_paid: args.money_paid,
-            money_unpaid: args.money_total - args.money_paid,
-            money_margin: args.money_paid - args.money_expenses
+    if (args.money_expenses < 0) throw new Error("error : money_expenses < 0")
+    if (args.money_total < 0) throw new Error("error : money_total < 0")
+    if ((args.money_paid < 0) || (args.money_paid > args.money_total)) throw new Error("error : money_paid  < 0")
+    return await db.$transaction(async (t) => {
+        const r = await t.todos.update({
+            where: {
+                id: id
+            },
+            data: {
+                employeeId: args.employeeId,
+                dealerId: args.dealerId,
+                description: args.description,
+                validation: args.validation,
+                money_expenses: args.money_expenses,
+                money_total: args.money_total,
+                money_paid: args.money_paid,
+                money_unpaid: args.money_total - args.money_paid,
+                money_margin: args.money_paid - args.money_expenses
+            }
+        });
+        if (args.photo != undefined) {
+            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
+            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
+            await t.t_photos.update({ where: { todoId: args.id }, data: { photo: photpBytes } });
         }
-    })
+        return r.id
+    });
 }
-export const todo_photo_set = async (id: string, photo: string) => {
-    if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
-    const photpBytes = Buffer.from(photo ?? "", 'utf8')
-    // 
-    await db.$transaction(async (t) => {
-        const exist = await t.t_photos.findFirst({ select: { todoId: true }, where: { todoId: id } }) ? true : false
-        if (!exist) await t.t_photos.create({ data: { todoId: id, photo: photpBytes } },);
-        else await t.t_photos.update({ where: { todoId: id }, data: { photo: photpBytes } },);
-    })
-    return "ok"
-}
+
 export const todo_delete = async (id: string) => {
     await db.todos.delete({ where: { id: id } })
     return "ok"
@@ -130,5 +130,6 @@ type ArgsTodoM = {
     money_expenses?: number,
     money_total?: number,
     money_paid?: number,
+    photo?: string,
 }
 // **************************************************************************************************** 

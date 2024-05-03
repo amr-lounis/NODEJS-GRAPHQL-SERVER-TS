@@ -52,10 +52,11 @@ export const ProductMutation = extendType({
         t.field('product__create', {
             args: {
                 id: nonNull(stringArg()),
-                categorieId: nonNull(stringArg()),
-                unityId: nonNull(stringArg()),
-                code: nonNull(stringArg()),
-                description: nonNull(stringArg()),
+                categorieId: nullable(stringArg()),
+                unityId: nullable(stringArg()),
+                code: nullable(stringArg()),
+                description: nullable(stringArg()),
+                photo: nullable(stringArg()),
             },
             type: nonNull('String'),
             resolve(parent, args: ArgsProductType, context, info) {
@@ -69,6 +70,7 @@ export const ProductMutation = extendType({
                 unityId: nonNull(stringArg()),
                 code: nonNull(stringArg()),
                 description: nonNull(stringArg()),
+                photo: nullable(stringArg()),
             },
             type: nonNull('String'),
             resolve(parent, args: ArgsProductType, context, info) {
@@ -111,12 +113,12 @@ export const ProductMutation = extendType({
         // --------------------------------------------------
         t.field('product_stock_quantity_updown', {
             args: {
-                productId: nonNull(stringArg()),
-                quantity: nullable(floatArg())
+                id: nonNull(stringArg()),
+                quantity: nonNull(floatArg())
             },
             type: nonNull('String'),
             resolve(parent, args: ArgsStockType, context, info) {
-                return product_stock_quantity_updown(args.productId, args.quantity)
+                return product_stock_quantity_updown(args.id, args.quantity)
             },
         });
     }
@@ -152,52 +154,67 @@ export const categorie_delete = async (id: string): Promise<String> => {
 // --------------------------------------------------
 export const product_create = async (args: ArgsProductType) => {
     if (args.id == undefined) throw new Error('error : id is required');
-    await db.products.create({
-        data: {
-            id: args.id,
-            categorieId: args.categorieId,
-            unityId: args.unityId,
-            code: args.code,
-            description: args.description,
+    await db.$transaction(async (t) => {
+        await t.products.create({
+            data: {
+                id: args.id,
+                categorieId: args.categorieId,
+                unityId: args.unityId,
+                code: args.code,
+                description: args.description,
+            }
+        })
+        await t.p_photos.create({
+            data: { productId: args.id, photo: Buffer.from("", 'utf8') }
+        });
+        await t.p_stocks.create({
+            data: { productId: args.id }
+        });
+        if (args.photo != undefined) {
+            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
+            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
+            await t.p_photos.update({ where: { productId: args.id }, data: { photo: photpBytes } });
         }
-    })
+    });
+    return "ok"
 }
 export const product_update = async (id: string, args: ArgsProductType) => {
     if (args.id == undefined) throw new Error('error : id is required');
-    await db.products.update({
-        where: {
-            id: id
-        },
-        data: {
-            id: args.id,
-            categorieId: args.categorieId,
-            unityId: args.unityId,
-            code: args.code,
-            description: args.description,
+    await db.$transaction(async (t) => {
+        const exist_p = await t.products.findFirst({ select: { id: true }, where: { id: id } }) ? true : false;
+        if (!exist_p) throw new Error(`error : product id : ${id} is not exist`);
+        await t.products.update({
+            where: {
+                id: id
+            },
+            data: {
+                id: args.id,
+                categorieId: args.categorieId,
+                unityId: args.unityId,
+                code: args.code,
+                description: args.description,
+            }
+        });
+        if (args.photo != undefined) {
+            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
+            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
+            await t.p_photos.update({ where: { productId: args.id }, data: { photo: photpBytes } },);
         }
-    })
+    });
 }
 
+
 export const product_stock_set = async (args: ArgsStockType) => {
-    if (args.productId == undefined) throw new Error('error : productId is required');
+    if (args.id == undefined) throw new Error('error : productId is required');
     if (args.money_purchase < 0) throw new Error('error : money_purchase < 0');
     if (args.money_selling < 0) throw new Error('error : money_selling < 0');
     if (args.quantity < 0) throw new Error("error : quantity < 0)");
+
     await db.$transaction(async (t) => {
-        const exist_ps = await t.p_stocks.findFirst({ select: { productId: true }, where: { productId: args.productId } }) ? true : false;
-        if (!exist_ps) await t.p_stocks.create({
-            data: {
-                productId: args.productId,
-                money_purchase: args.money_purchase,
-                money_selling: args.money_selling,
-                quantity: args.quantity,
-                quantity_critical: args.quantity_critical,
-                date_production: args.date_production,
-                date_expiration: args.date_expiration,
-            }
-        },);
-        else await t.p_stocks.update({
-            where: { productId: args.productId }, data: {
+        const exist_p = await t.products.findFirst({ select: { id: true }, where: { id: args.id } }) ? true : false;
+        if (!exist_p) throw new Error(`error : product id : ${args.id} is not exist`);
+        await t.p_stocks.update({
+            where: { productId: args.id }, data: {
                 // productId: args.productId,
                 money_purchase: args.money_purchase,
                 money_selling: args.money_selling,
@@ -211,12 +228,11 @@ export const product_stock_set = async (args: ArgsStockType) => {
     return "ok"
 }
 
-export const product_stock_quantity_updown = async (id: string, quantity: number) => {
-    product_stock_set({ productId: id })
+export const product_stock_quantity_updown = async (id: string, quantity: number) => {//if  (quantity < 0) reduire else add
     await db.$transaction(async (t) => {
         const r = await t.p_stocks.findUnique({ select: { quantity: true }, where: { productId: id } })
         if ((r.quantity + quantity) < 0) throw new Error("error : quantity");
-        await t.p_stocks.update({ where: { productId: id }, data: { quantity: r.quantity + quantity } },);
+        await product_stock_set({ id: id, quantity: r.quantity + quantity })
     })
     return "ok"
 }
@@ -224,17 +240,7 @@ export const product_stock_quantity_updown = async (id: string, quantity: number
 export const product_delete = async (id: string) => {
     await db.products.delete({ where: { id: id } })
 }
-export const product_photo_set = async (id: string, photo: string): Promise<String> => {
-    if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
-    const photpBytes = Buffer.from(photo ?? "", 'utf8')
-    // 
-    await db.$transaction(async (t) => {
-        const exist_pp = await t.p_photos.findFirst({ select: { productId: true }, where: { productId: id } }) ? true : false;
-        if (!exist_pp) await t.p_photos.create({ data: { productId: id, photo: photpBytes } },);
-        else await t.p_photos.update({ where: { productId: id }, data: { photo: photpBytes } },);
-    })
-    return "ok"
-}
+
 // --------------------------------------------------
 type ArgsProductType = {
     id?: string,
@@ -242,10 +248,11 @@ type ArgsProductType = {
     unityId?: string,
     code?: string,
     description?: string,
+    photo?: string,
 }
 
 type ArgsStockType = {
-    productId?: string,
+    id?: string,
     money_purchase?: number,
     money_selling?: number,
     quantity?: number,

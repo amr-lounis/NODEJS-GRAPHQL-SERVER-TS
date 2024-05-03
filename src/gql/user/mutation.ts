@@ -18,7 +18,7 @@ export const UserMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('user__create', {
+        t.field('user_create', {
             args: {
                 id: nonNull(stringArg()),
                 password: stringArg(),
@@ -29,6 +29,7 @@ export const UserMutation = extendType({
                 phone: stringArg(),
                 fax: stringArg(),
                 email: stringArg(),
+                photo: stringArg(),
             },
             type: nonNull("String"),
             resolve(parent, args: ArgsUserM, context, info) {
@@ -36,7 +37,25 @@ export const UserMutation = extendType({
             }
         });
         // --------------------------------------------------
-        t.field('user__id_update', {
+        t.field('user_update_self', {
+            args: {
+                password: stringArg(),
+                description: stringArg(),
+                address: stringArg(),
+                first_name: stringArg(),
+                last_name: stringArg(),
+                phone: stringArg(),
+                fax: stringArg(),
+                email: stringArg(),
+                photo: stringArg(),
+            },
+            type: nonNull('String'),
+            resolve(parent, args: ArgsUserM, context: ContextType, info) {
+                return user_update(context?.jwt?.id, args)
+            }
+        });
+        // --------------------------------------------------
+        t.field('user_id_update', {
             args: {
                 id: nonNull(stringArg()),
                 idNew: nonNull(stringArg()),
@@ -47,7 +66,7 @@ export const UserMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('user__delete', {
+        t.field('user_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull("String"),
             resolve(parent, args: ArgsUserM, context, info) {
@@ -62,31 +81,6 @@ export const UserMutation = extendType({
                 return user_role_update(args.id, args.roleId)
             }
         });
-        // --------------------------------------------------
-        t.field('user__update_self', {
-            args: {
-                password: stringArg(),
-                description: stringArg(),
-                address: stringArg(),
-                first_name: stringArg(),
-                last_name: stringArg(),
-                phone: stringArg(),
-                fax: stringArg(),
-                email: stringArg(),
-            },
-            type: nonNull('String'),
-            resolve(parent, args: ArgsUserM, context: ContextType, info) {
-                return user_update(context?.jwt?.id, args)
-            }
-        });
-        // --------------------------------------------------
-        t.field('user_photo_update_self', {
-            args: { photo: nonNull(stringArg()), },
-            type: nonNull("String"),
-            resolve(parent, args: ArgsUserM, context: ContextType, info) {
-                return user_photo_set(context?.jwt?.id, args.photo)
-            },
-        });
     },
 });
 // **************************************************************************************************** 
@@ -98,48 +92,60 @@ export const user_role_update = async (id: string, roleId: string): Promise<Stri
     await db.users.update({ where: { id: id }, data: { roleId: roleId } })
     return "ok"
 }
-export const user_photo_set = async (id: string, photo: string): Promise<String> => {
-    if (photo.length > 524288) throw new Error("The size is greater than the maximum value");
-    const photpBytes = Buffer.from(photo ?? "", 'utf8')
-    // 
+
+export const user_create = async (args: ArgsUserM): Promise<string> => {
+    if (args.id == undefined) throw new Error('error : id is required');
     await db.$transaction(async (t) => {
-        const exist = await t.u_photos.findFirst({ select: { userId: true }, where: { userId: id } }) ? true : false
-        if (!exist) await t.u_photos.create({ data: { userId: id, photo: photpBytes } },);
-        else await t.u_photos.update({ where: { userId: id }, data: { photo: photpBytes } },);
-    })
+        await t.users.create({
+            data: {
+                id: args.id,
+                password: args.password,
+                description: args.description,
+                address: args.address,
+                first_name: args.first_name,
+                last_name: args.last_name,
+                phone: args.phone,
+                fax: args.fax,
+                email: args.email,
+            }
+        });
+        await t.u_photos.create({
+            data: { userId: args.id, photo: Buffer.from("", 'utf8') }
+        });
+        if (args.photo != undefined) {
+            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
+            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
+            await t.u_photos.update({ where: { userId: args.id }, data: { photo: photpBytes } });
+        }
+    });
     return "ok"
 }
 export const user_update = async (id: string, args: ArgsUserM): Promise<string> => {
-    await db.users.update({
-        where: { id: id },
-        data: {
-            id: args.id,
-            password: args.password,
-            description: args.description,
-            address: args.address,
-            first_name: args.first_name,
-            last_name: args.last_name,
-            phone: args.phone,
-            fax: args.fax,
-            email: args.email,
+    await db.$transaction(async (t) => {
+        if (args.id == undefined) throw new Error('error : id is required');
+        const exist_u = await t.users.findFirst({ select: { id: true }, where: { id: id } }) ? true : false;
+        if (!exist_u) throw new Error(`error : user id : ${id} is not exist`);
+        await t.users.update({
+            where: { id: id },
+            data: {
+                id: args.id,
+                password: args.password,
+                description: args.description,
+                address: args.address,
+                first_name: args.first_name,
+                last_name: args.last_name,
+                phone: args.phone,
+                fax: args.fax,
+                email: args.email,
+            }
+        });
+        if (args.photo != undefined) {
+            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
+            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
+            await t.u_photos.update({ where: { userId: args.id }, data: { photo: photpBytes } });
         }
-    })
-    return "ok"
-}
-export const user_create = async (args: ArgsUserM) => {
-    await db.users.create({
-        data: {
-            id: args.id,
-            password: args.password,
-            description: args.description,
-            address: args.address,
-            first_name: args.first_name,
-            last_name: args.last_name,
-            phone: args.phone,
-            fax: args.fax,
-            email: args.email,
-        }
-    })
+    }
+    );
     return "ok"
 }
 // **************************************************************************************************** 
