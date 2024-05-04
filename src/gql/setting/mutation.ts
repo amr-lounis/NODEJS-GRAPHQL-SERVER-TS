@@ -6,7 +6,7 @@ export const SettingMutation = extendType({
     definition(t) {
         t.field('setting_set', {
             args: { key: nonNull(stringArg()), value: nonNull(stringArg()), },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { key?: string, value?: string }, context, info): Promise<boolean> => {
                 return setting_set(args.key, args.value)
             },

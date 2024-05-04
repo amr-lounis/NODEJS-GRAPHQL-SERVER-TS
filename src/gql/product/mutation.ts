@@ -7,21 +7,21 @@ export const ProductMutation = extendType({
     definition(t) {
         t.field('product_unity_create', {
             args: { id: nonNull(stringArg()) },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
                 return unity_create(args.id)
             },
         });
         t.field('product_unity_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { id: string, idNew: string }, context, info): Promise<boolean> => {
                 return unity_update(args.id, args.idNew)
             },
         });
         t.field('product_unity_delete', {
             args: { id: nonNull(stringArg()) },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
                 return unity_delete(args.id)
             },
@@ -29,21 +29,21 @@ export const ProductMutation = extendType({
         // --------------------------------------------------
         t.field('product_categorie_create', {
             args: { id: nonNull(stringArg()) },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
                 return categorie_create(args.id)
             },
         });
         t.field('product_categorie_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string, idNew: string }, context, info): Promise<boolean> => {
                 return categorie_update(args.id, args.idNew)
             },
         });
         t.field('product_categorie_delete', {
             args: { id: nonNull(stringArg()) },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
                 return categorie_delete(args.id)
             },
@@ -58,7 +58,7 @@ export const ProductMutation = extendType({
                 description: nullable(stringArg()),
                 photo: nullable(stringArg()),
             },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: ArgsProductType, context, info): Promise<boolean> => {
                 return product_create(args)
             },
@@ -72,7 +72,7 @@ export const ProductMutation = extendType({
                 description: nonNull(stringArg()),
                 photo: nullable(stringArg()),
             },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: ArgsProductType, context, info): Promise<boolean> => {
                 return product_update(args.id, args)
             },
@@ -82,14 +82,14 @@ export const ProductMutation = extendType({
                 id: nonNull(stringArg()),
                 idNew: nonNull(stringArg()),
             },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { id: string, idNew: string }, context, info): Promise<boolean> => {
                 return product_update(args.id, { id: args.idNew })
             },
         });
         t.field('product__delete', {
             args: { id: nonNull(stringArg()) },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
                 return product_delete(args.id)
             },
@@ -105,7 +105,7 @@ export const ProductMutation = extendType({
                 date_production: nullable(stringArg()),
                 date_expiration: nullable(stringArg()),
             },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: ArgsStockType, context, info): Promise<boolean> => {
                 return product_stock_set(args)
             },
@@ -116,7 +116,7 @@ export const ProductMutation = extendType({
                 id: nonNull(stringArg()),
                 quantity: nonNull(floatArg())
             },
-            type: nonNull('String'),
+            type: nonNull('Boolean'),
             resolve: (parent, args: ArgsStockType, context, info): Promise<boolean> => {
                 return product_stock_quantity_updown(args.id, args.quantity)
             },

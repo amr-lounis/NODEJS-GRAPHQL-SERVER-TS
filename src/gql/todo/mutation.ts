@@ -14,6 +14,7 @@ export const TodoMutation = extendType({
                 money_paid: nullable(floatArg()),
                 photo: nullable(stringArg()),
             },
+            description: "return ID of new todo",
             type: nonNull('String'), // -------------------------------------------------- return ID of new todo
             resolve: (parent: any, args: ArgsTodoM, context: ContextType, info: any): Promise<string> => {
                 args.employeeId = context.jwt.id
@@ -54,7 +55,7 @@ export const TodoMutation = extendType({
     }
 });
 // **************************************************************************************************** 
-export const todo_create = async (args: ArgsTodoM): Promise<string> => {// return id of todo
+export const todo_create = async (args: ArgsTodoM): Promise<string> => {
     if (args.employeeId == undefined) throw new Error('id is required');
     if (args.money_expenses < 0) throw new Error("error : money_expenses < 0")
     if (args.money_total < 0) throw new Error("error : money_total < 0")
