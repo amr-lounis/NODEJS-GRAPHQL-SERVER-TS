@@ -1,5 +1,5 @@
 import { extendType, floatArg, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db, toPage } from '../../utils';
+import { db, myLog, toPage } from '../../utils';
 // **************************************************************************************************** 
 export const ProductQuery = extendType({
     type: 'Query',
@@ -10,6 +10,7 @@ export const ProductQuery = extendType({
                 employeeId: nullable(stringArg()),
                 dealerId: nullable(stringArg()),
                 validation: nullable(stringArg()),
+                filter_id: nullable(stringArg()),
                 filter_description: nullable(stringArg()),
                 filter_create_gte: nullable(stringArg()),
                 filter_create_lte: nullable(stringArg()),
@@ -35,24 +36,28 @@ export const ProductQuery = extendType({
 });
 // **************************************************************************************************** 
 export const products_get = async (args: ArgsProductQ) => {
-    // return await db.products.findMany({});
+    args.filter_id = args.filter_id ?? ""
     const itemsCountAll = (await db.products.aggregate({
         _count: { id: true }, where: {
-            id: args.id,
+            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
             categorieId: args.categorieId,
             unityId: args.unityId,
+            code: args.code,
+            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+            description: { contains: args.filter_description },
         }
     }))._count.id
     const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
     const items = await db.products.findMany({
         orderBy: { createdAt: 'desc' }, where: {
-            id: args.id,
+            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
             categorieId: args.categorieId,
             unityId: args.unityId,
+            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+            description: { contains: args.filter_description },
         },
         skip: p.itemsSkip, take: p.itemsTake
-    })
-
+    });
     return {
         allItemsCount: itemsCountAll,
         allPagesCount: p.allPagesCount,
@@ -98,6 +103,7 @@ export type ArgsProductQ = {
     categorieId?: string,
     unityId?: string,
     code?: string,
+    filter_id: string,
     filter_description?: string,
     filter_create_gte?: string,
     filter_create_lte?: string,
