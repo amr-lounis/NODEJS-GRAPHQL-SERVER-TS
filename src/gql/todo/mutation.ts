@@ -14,8 +14,8 @@ export const TodoMutation = extendType({
                 money_paid: nullable(floatArg()),
                 photo: nullable(stringArg()),
             },
-            type: nonNull('String'),
-            resolve(parent: any, args: ArgsTodoM, context: ContextType, info: any) {
+            type: nonNull('String'), // -------------------------------------------------- return ID of new todo
+            resolve: (parent: any, args: ArgsTodoM, context: ContextType, info: any): Promise<string> => {
                 args.employeeId = context.jwt.id
                 return todo_create(args)
             }
@@ -32,8 +32,8 @@ export const TodoMutation = extendType({
                 money_paid: nullable(floatArg()),
                 photo: nullable(stringArg()),
             },
-            type: nonNull('String'),
-            async resolve(parent: any, args: ArgsTodoM, context: ContextType, info: any) {
+            type: nonNull('Boolean'),
+            resolve: async (parent: any, args: ArgsTodoM, context: ContextType, info: any): Promise<boolean> => {
                 const r = await db.todos.findUnique({ where: { id: args.id } })
                 if (r.employeeId != context.jwt.id) throw new Error('not authorized : update only by owner');
                 //   
@@ -43,8 +43,8 @@ export const TodoMutation = extendType({
         // --------------------------------------------------
         t.field('todo_delete', {
             args: { id: nonNull(stringArg()), },
-            type: nonNull('String'),
-            async resolve(parent: any, args: { id: string }, context: ContextType, info: any) {
+            type: nonNull('Boolean'),
+            resolve: async (parent: any, args: { id: string }, context: ContextType, info: any): Promise<boolean> => {
                 const r = await db.todos.findUnique({ where: { id: args.id } })
                 if (r.employeeId != context.jwt.id) throw new Error('not authorized : update only by owner');
                 // 
@@ -112,13 +112,13 @@ export const todo_update = async (id: string, args: ArgsTodoM) => {
             const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
             await t.t_photos.update({ where: { todoId: args.id }, data: { photo: photpBytes } });
         }
-        return r.id
+        return true
     });
 }
 
 export const todo_delete = async (id: string) => {
     await db.todos.delete({ where: { id: id } })
-    return "ok"
+    return true
 }
 // **************************************************************************************************** 
 type ArgsTodoM = {

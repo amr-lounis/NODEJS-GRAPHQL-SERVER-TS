@@ -7,7 +7,7 @@ export const RoleMutation = extendType({
         t.field('role_create', {
             args: { id: nonNull(stringArg()), },
             type: nonNull('String'),
-            resolve(parent, args: { id: string }, context, info) {
+            resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
                 return role_create(args.id)
             },
         });
@@ -15,7 +15,7 @@ export const RoleMutation = extendType({
         t.field('role_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
             type: nonNull('String'),
-            resolve(parent, args: { id: string, idNew: string }, context, info) {
+            resolve: (parent, args: { id: string, idNew: string }, context, info): Promise<boolean> => {
                 return role_update(args.id, args.idNew)
             }
         });
@@ -23,7 +23,7 @@ export const RoleMutation = extendType({
         t.field('role_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('String'),
-            resolve(parent, args: { id: string }, context, info) {
+            resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
                 return role_delete(args.id)
             }
         });
@@ -31,37 +31,37 @@ export const RoleMutation = extendType({
         t.field('role_authorization_set', {
             args: { roleId: nonNull(stringArg()), operationId: nonNull(stringArg()), value: nonNull(booleanArg()) },
             type: nonNull('String'),
-            resolve(parent, args: { roleId: string, operationId: string, value: boolean }, context, info) {
+            resolve: (parent, args: { roleId: string, operationId: string, value: boolean }, context, info): Promise<boolean> => {
                 return role_authorization_set(args.roleId, args.operationId, args.value)
             }
         });
     }
 });
 // **************************************************************************************************** 
-export const operation_create = async (id: string): Promise<String> => {
+export const operation_create = async (id: string): Promise<boolean> => {
     await db.u_operations.create({ data: { id: id } })
-    return "ok"
+    return true
 }
-export const operation_update = async (id: string, idNew: string): Promise<String> => {
+export const operation_update = async (id: string, idNew: string): Promise<boolean> => {
     await db.u_operations.update({ where: { id: id }, data: { id: idNew } })
-    return "ok"
+    return true
 }
-export const operation_delete = async (id: string): Promise<String> => {
+export const operation_delete = async (id: string): Promise<boolean> => {
     await db.u_operations.delete({ where: { id: id } })
-    return "ok"
+    return true
 }
 // --------------------------------------------------
-export const role_create = async (id: string): Promise<String> => {
+export const role_create = async (id: string): Promise<boolean> => {
     await db.u_roles.create({ data: { id: id } })
-    return "ok"
+    return true
 }
-export const role_update = async (id: string, idNew: string): Promise<String> => {
+export const role_update = async (id: string, idNew: string): Promise<boolean> => {
     await db.u_roles.update({ where: { id: id }, data: { id: idNew } })
-    return "ok"
+    return true
 }
-export const role_delete = async (id: string): Promise<String> => {
+export const role_delete = async (id: string): Promise<boolean> => {
     await db.u_roles.delete({ where: { id: id } })
-    return "ok"
+    return true
 }
 // --------------------------------------------------
 export const role_authorization_set = async (roleId: string, operationId: string, value: boolean): Promise<boolean> => {

@@ -7,7 +7,7 @@ export const SettingQuery = extendType({
         t.field('settings_get', {
             args: {},
             type: list(settings_get_out),
-            async resolve(parent, args, context, info) {
+            resolve: async (parent, args, context, info): Promise<{ key?: string, value?: string }[]> => {
                 return await db.settings.findMany({});
             },
         });
@@ -15,7 +15,7 @@ export const SettingQuery = extendType({
         t.field('setting_get', {
             args: { key: nonNull(stringArg()) },
             type: nonNull('String'),
-            async resolve(parent, args: { key?: string }, context, info) {
+            resolve: async (parent, args: { key?: string }, context, info): Promise<string> => {
                 const r = await db.settings.findUnique({ where: { key: args.key } })
                 return r.value
             },

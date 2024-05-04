@@ -20,7 +20,7 @@ export const TodoQuery = extendType({
             },
             description: "date format : 2000-01-01T00:00:00Z",
             type: todos_out,
-            async resolve(parent, args: ArgsTodoQ, context, info) {
+            resolve: async (parent, args: ArgsTodoQ, context, info) => {
                 return todos_get(args)
             },
         });
@@ -28,7 +28,7 @@ export const TodoQuery = extendType({
         t.field('todo_photo_get', {
             args: { todoId: nonNull(stringArg()) },
             type: nonNull("String"),
-            async resolve(parent, args: ArgsTodoQ, context, info) {
+            resolve: async (parent, args: ArgsTodoQ, context, info): Promise<string> => {
                 return todo_photo_get(args)
             },
         });
@@ -70,7 +70,7 @@ export const todos_get = async (args: ArgsTodoQ) => {
         items: items
     }
 }
-export const todo_photo_get = async (args: ArgsTodoQ) => {
+export const todo_photo_get = async (args: ArgsTodoQ): Promise<string> => {
     const p = await db.t_photos.findFirst({ where: { todoId: args.todoId } },);
     return p?.photo?.toString() ?? ""
 }

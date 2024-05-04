@@ -7,7 +7,7 @@ export const RoleQuery = extendType({
         t.field('operations_get', {
             args: {},
             type: list('String'),
-            resolve(parent, args: void, context, info) {
+            resolve: (parent, args: void, context, info): Promise<string[]> => {
                 return operations_get()
             },
         });
@@ -15,7 +15,7 @@ export const RoleQuery = extendType({
         t.field('roles_get', {
             args: {},
             type: list('String'),
-            resolve(parent, args: void, context, info) {
+            resolve: (parent, args: void, context, info): Promise<string[]> => {
                 return roles_get()
             },
         });
@@ -29,25 +29,26 @@ export const RoleQuery = extendType({
                     t.nullable.boolean("value")
                 },
             })),
-            resolve(parent, args: { roleId?: string }, context, info) {
+            resolve: (parent, args: { roleId?: string }, context, info) => {
                 return authorizations_get(args.roleId)
             }
         });
     }
 });
 // **************************************************************************************************** 
+export const operations_get = async (): Promise<string[]> => {
+    const r = await db.u_operations.findMany({});
+    return r.map((x) => x.id)
+}
+export const roles_get = async (): Promise<string[]> => {
+    const r = await db.u_roles.findMany({ select: { id: true } });
+    return r.map((x) => x.id)
+}
 export const authorizations_get = async (roleId: string) => {
     return await db.u_roles_operations.findMany({ where: { roleId: roleId } })
 }
 export const authorizations_all_get = async () => {
     return await db.u_roles_operations.findMany({})
 }
-export const operations_get = async (): Promise<String[]> => {
-    const r = await db.u_operations.findMany({});
-    return r.map((x) => x.id)
-}
-export const roles_get = async (): Promise<String[]> => {
-    const r = await db.u_roles.findMany({ select: { id: true } });
-    return r.map((x) => x.id)
-}
+
 // **************************************************************************************************** 

@@ -7,7 +7,7 @@ export const UserQuery = extendType({
         t.field('user_authentication', {
             args: { id: nonNull(stringArg()), password: nonNull(stringArg()) },
             type: nonNull("String"),
-            resolve(parent, args: ArgsUserQ, context, info) {
+            resolve: (parent, args: ArgsUserQ, context, info): Promise<string> => {
                 return user_authentication(args.id, args.password)
             },
         });
@@ -15,7 +15,7 @@ export const UserQuery = extendType({
         t.field('user_authentication_renewal', {
             args: {},
             type: nonNull("String"),
-            resolve(parent, args: void, context: ContextType, info) {
+            resolve(parent, args: void, context: ContextType, info): Promise<string> {
                 return user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
             },
         });
@@ -23,7 +23,7 @@ export const UserQuery = extendType({
         t.field('user_authentication_info', {
             args: {},
             type: nonNull("String"),
-            resolve(parent, args: ArgsUserQ, context: ContextType, info) {
+            resolve: (parent, args: ArgsUserQ, context: ContextType, info): string => {
                 const id = context.jwt.id
                 const role = context.jwt.role
                 const iat = new Date(context.jwt.iat * 1000).toISOString()
@@ -35,7 +35,7 @@ export const UserQuery = extendType({
         t.field('user_role_get', {
             args: { id: nonNull(stringArg()), },
             type: nonNull("String"),
-            resolve(parent, args: ArgsUserQ, context, info) {
+            resolve: (parent, args: ArgsUserQ, context, info): Promise<string> => {
                 return user_role_get(args.id)
             },
         });
@@ -43,7 +43,7 @@ export const UserQuery = extendType({
         t.field('user_photo_get', {
             args: { userId: nonNull(stringArg()), },
             type: nonNull("String"),
-            resolve(parent, args: ArgsUserQ, context, info) {
+            resolve: (parent, args: ArgsUserQ, context, info): Promise<string> => {
                 return user_photo_get(args.userId)
             },
         });
@@ -60,14 +60,14 @@ export const UserQuery = extendType({
             },
             type: users_out,
             description: "date format : 2000-01-01T00:00:00Z",
-            resolve(parent, args: ArgsUserQ, context, info) {
+            resolve: (parent, args: ArgsUserQ, context, info) => {
                 return users_get(args)
             },
         });
     }
 });
 // **************************************************************************************************** 
-export const user_authentication = async (id: string, password: string): Promise<String> => {
+export const user_authentication = async (id: string, password: string): Promise<string> => {
     try {
         var u = await db.users.findFirst({ where: { id: id, password: password } })
         return MyToken.Token_Create(u.id, u.roleId)
@@ -75,18 +75,18 @@ export const user_authentication = async (id: string, password: string): Promise
         return ""
     }
 }
-export const user_authentication_renewal = async (id: string, roleId: string): Promise<String> => {
+export const user_authentication_renewal = async (id: string, roleId: string): Promise<string> => {
     try {
         return MyToken.Token_Create(id, roleId)
     } catch (error) {
         return ""
     }
 }
-export const user_role_get = async (id: string): Promise<String> => {
+export const user_role_get = async (id: string): Promise<string> => {
     const r = await db.users.findUnique({ where: { id: id } });
     return r?.roleId
 }
-export const user_photo_get = async (id: string): Promise<String> => {
+export const user_photo_get = async (id: string): Promise<string> => {
     const p = await db.u_photos.findUnique({ where: { userId: id } },);
     return p?.photo?.toString() ?? ""
 }
@@ -146,13 +146,13 @@ export const user_get_out = objectType({
 export const users_out = objectType({
     name: 'users_out',
     definition(t) {
-        t.nullable.int('allItemsCount')
-        t.nullable.int('allPagesCount')
-        t.nullable.int('pageNumber')
-        t.nullable.int('itemsTake')
-        t.nullable.int('itemsSkip')
-        t.nullable.int('itemsCount')
-        t.nullable.list.field('items', { type: 'user_get_out' })
+        t.nullable.int('allItemsCount');
+        t.nullable.int('allPagesCount');
+        t.nullable.int('pageNumber');
+        t.nullable.int('itemsTake');
+        t.nullable.int('itemsSkip');
+        t.nullable.int('itemsCount');
+        t.nullable.list.field('items', { type: 'user_get_out' });
     },
 });
 // **************************************************************************************************** 

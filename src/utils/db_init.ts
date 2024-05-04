@@ -12,18 +12,13 @@ export const db_init = async (listOperationName: string[]) => {
     const employee = 'employee'
     // -------------------------------------------------- create all operations
     for (let i = 0; i < listOperationName.length; i++)
-
         try { await operation_create(listOperationName[i]) } catch (err) { }
     // -------------------------------------------------- create all roles
-    try {
-        await role_create(admin)
-        await role_create(employee)
-    } catch (err) { }
+    try { await role_create(admin) } catch (err) { }
+    try { await role_create(employee) } catch (err) { }
     // -------------------------------------------------- create all users
-    try {
-        await user_create({ id: admin, password: admin, roleId: admin })
-        await user_create({ id: employee, password: employee, roleId: employee })
-    } catch (err) { }
+    try { await user_create({ id: admin, password: admin, roleId: admin }) } catch (err) { }
+    try { await user_create({ id: employee, password: employee, roleId: employee }) } catch (err) { }
     // -------------------------------------------------- init autorisation matrix
     try {
         // init matrix roles
@@ -37,9 +32,7 @@ export const db_init = async (listOperationName: string[]) => {
         }
         // stor matrix in database
         await authorization_matrix.storeMatrix()
-    } catch (err) {
-        myLog(err.message)
-    }
+    } catch (err) { }
     // -------------------------------------------------- init todo
     try {
         for (let i = 0; i < 10; i++) {
