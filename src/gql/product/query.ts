@@ -1,5 +1,5 @@
 import { extendType, floatArg, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db, myLog, toPage } from '../../utils';
+import { db, toPage } from '../../utils';
 // **************************************************************************************************** 
 export const ProductQuery = extendType({
     type: 'Query',

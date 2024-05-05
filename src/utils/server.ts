@@ -37,7 +37,6 @@ export const ws_server = (_server: any, _schema: any) => {
             const jwt = MyToken.Token_Verifay(headerToken);
 
             if (jwt.id == null) {// return false to sertver disconnect ro throw new Error('')
-                myLog(`-------------- WS : token not authorized : [${JSON.stringify(jwt)}]`)
                 return false;
             }
         },

@@ -1,5 +1,5 @@
 import { extendType, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db, MyToken, toPage, ContextType, myLog } from '../../utils';
+import { db, MyToken, toPage, ContextType } from '../../utils';
 // **************************************************************************************************** 
 export const UserQuery = extendType({
     type: 'Query',
@@ -95,8 +95,7 @@ export const users_get = async (args: ArgsUserQ) => {
     args.filter_id = args.filter_id ?? ""
     const itemsCountAll = (await db.users.aggregate({
         _count: { id: true }, where: { // -------------------------------------------------- where for 1
-            OR: [{ id: args.id },
-            { id: { contains: args.filter_id } },],
+            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
             createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
             description: { contains: args.filter_description },
         }

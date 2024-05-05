@@ -87,7 +87,7 @@ export const UserMutation = extendType({
 export const user_create = async (args: ArgsUserM): Promise<boolean> => {
     if (args.id == undefined) throw new Error('error : id is required');
     await db.$transaction(async (t) => {
-        await t.users.create({
+        const r = await t.users.create({
             data: {
                 id: args.id,
                 password: args.password,
@@ -102,12 +102,12 @@ export const user_create = async (args: ArgsUserM): Promise<boolean> => {
             }
         });
         await t.u_photos.create({
-            data: { userId: args.id, photo: Buffer.from("", 'utf8') }
+            data: { userId: r.id, photo: Buffer.from("", 'utf8') }
         });
         if (args.photo != undefined) {
             if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
             const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.u_photos.update({ where: { userId: args.id }, data: { photo: photpBytes } });
+            await t.u_photos.update({ where: { userId: r.id }, data: { photo: photpBytes } });
         }
     });
     return true;
@@ -135,7 +135,7 @@ export const user_update = async (id: string, args: ArgsUserM): Promise<boolean>
         if (args.photo != undefined) {
             if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
             const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.u_photos.update({ where: { userId: args.id }, data: { photo: photpBytes } });
+            await t.u_photos.update({ where: { userId: id }, data: { photo: photpBytes } });
         }
     }
     );

@@ -6,7 +6,7 @@ export const TodoMutation = extendType({
     definition(t) {
         t.field('todo_create', {
             args: {
-                agentId: nullable(stringArg()),
+                dealerId: nullable(stringArg()),
                 description: nullable(stringArg()),
                 validation: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
@@ -25,7 +25,7 @@ export const TodoMutation = extendType({
         t.field('todo_update', {
             args: {
                 id: nonNull(stringArg()),
-                agentId: nullable(stringArg()),
+                dealerId: nullable(stringArg()),
                 description: nullable(stringArg()),
                 validation: nullable(stringArg()),
                 money_expenses: nullable(floatArg()),
@@ -71,16 +71,16 @@ export const todo_create = async (args: ArgsTodoM): Promise<string> => {
                 money_total: args.money_total,
                 money_paid: args.money_paid,
                 money_unpaid: args.money_total - args.money_paid,
-                money_margin: args.money_paid - args.money_expenses
+                money_margin: args.money_total - args.money_expenses
             }
         });
         await t.t_photos.create({
-            data: { todoId: args.id, photo: Buffer.from("", 'utf8') }
+            data: { todoId: r.id, photo: Buffer.from("", 'utf8') }
         });
         if (args.photo != undefined) {
             if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
             const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.t_photos.update({ where: { todoId: args.id }, data: { photo: photpBytes } });
+            await t.t_photos.update({ where: { todoId: r.id }, data: { photo: photpBytes } });
         }
         return r.id
     });
@@ -105,13 +105,13 @@ export const todo_update = async (id: string, args: ArgsTodoM) => {
                 money_total: args.money_total,
                 money_paid: args.money_paid,
                 money_unpaid: args.money_total - args.money_paid,
-                money_margin: args.money_paid - args.money_expenses
+                money_margin: args.money_total - args.money_expenses
             }
         });
         if (args.photo != undefined) {
             if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
             const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.t_photos.update({ where: { todoId: args.id }, data: { photo: photpBytes } });
+            await t.t_photos.update({ where: { todoId: id }, data: { photo: photpBytes } });
         }
         return true
     });

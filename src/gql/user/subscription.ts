@@ -25,7 +25,6 @@ export const UserSubscription = extendType({
             resolve: async (payload, args, context, info) => {
                 return new Promise((resolve, reject) => {
                     try {
-                        // myLog("user_notification_receiver : payload:  =>  " + JSON.stringify(payload));
                         resolve(payload);
                     } catch (error) {
                         reject(new Error('---- ERROR : subscription .'));

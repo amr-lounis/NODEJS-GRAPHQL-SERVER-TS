@@ -155,7 +155,7 @@ export const categorie_delete = async (id: string): Promise<boolean> => {
 export const product_create = async (args: ArgsProductType): Promise<boolean> => {
     if (args.id == undefined) throw new Error('error : id is required');
     await db.$transaction(async (t) => {
-        await t.products.create({
+        const r = await t.products.create({
             data: {
                 id: args.id,
                 categorieId: args.categorieId,
@@ -165,15 +165,15 @@ export const product_create = async (args: ArgsProductType): Promise<boolean> =>
             }
         })
         await t.p_photos.create({
-            data: { productId: args.id, photo: Buffer.from("", 'utf8') }
+            data: { productId: r.id, photo: Buffer.from("", 'utf8') }
         });
         await t.p_stocks.create({
-            data: { productId: args.id }
+            data: { productId: r.id }
         });
         if (args.photo != undefined) {
             if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
             const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.p_photos.update({ where: { productId: args.id }, data: { photo: photpBytes } });
+            await t.p_photos.update({ where: { productId: r.id }, data: { photo: photpBytes } });
         }
     });
     return true
@@ -198,7 +198,7 @@ export const product_update = async (id: string, args: ArgsProductType): Promise
         if (args.photo != undefined) {
             if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
             const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.p_photos.update({ where: { productId: args.id }, data: { photo: photpBytes } },);
+            await t.p_photos.update({ where: { productId: id }, data: { photo: photpBytes } },);
         }
     });
     return true

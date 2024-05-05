@@ -49,7 +49,7 @@ export const db_init = async (listOperationName: string[]) => {
                     money_total: money_total,
                     money_expenses: money_expenses,
                     money_paid: money_paid,
-                    photo: await getImageAsBase64(faker.image.avatar())
+                    photo: faker.image.dataUri({ type: "svg-base64" })
                 })
             }
         }
