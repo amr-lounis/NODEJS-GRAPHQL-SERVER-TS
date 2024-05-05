@@ -179,7 +179,7 @@ export const product_create = async (args: ArgsProductType): Promise<boolean> =>
     return true
 }
 export const product_update = async (id: string, args: ArgsProductType): Promise<boolean> => {
-    if (args.id == undefined) throw new Error('error : id is required');
+    if (id == undefined) throw new Error('error : id is required');
     await db.$transaction(async (t) => {
         const exist_p = await t.products.findFirst({ select: { id: true }, where: { id: id } }) ? true : false;
         if (!exist_p) throw new Error(`error : product id : ${id} is not exist`);
