@@ -67,17 +67,20 @@ export const UserMutation = extendType({
         });
         // --------------------------------------------------
         t.field('user_role_update', {
-            args: { id: nonNull(stringArg()), roleId: nullable(stringArg()) },
+            args: {
+                userId: nonNull(stringArg()),
+                roleId: nullable(stringArg())
+            },
             type: nullable("Boolean"),
-            resolve: (parent, args: ArgsUserM, context, info): Promise<boolean> => {
-                return user_update(args.id, { roleId: args.roleId })
+            resolve: (parent, args: { userId: string, roleId: string }, context, info): Promise<boolean> => {
+                return user_update(args.userId, { roleId: args.roleId })
             }
         });
         // --------------------------------------------------
         t.field('user_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull("Boolean"),
-            resolve: (parent, args: ArgsUserM, context, info): Promise<boolean> => {
+            resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
                 return user_delete(args.id)
             },
         });
@@ -148,7 +151,6 @@ export const user_delete = async (id: string): Promise<boolean> => {
 // **************************************************************************************************** 
 export type ArgsUserM = {
     id?: string,
-    userId?: string,
     roleId?: string,
     password?: string,
     description?: string,
