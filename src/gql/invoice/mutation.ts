@@ -1,5 +1,5 @@
 import { arg, extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
-import { ContextType, db, myLog } from "../../utils";
+import { ContextType, db, limitFloat, myLog } from "../../utils";
 
 export const InvoiceMutation = extendType({
     type: 'Mutation',
@@ -13,6 +13,7 @@ export const InvoiceMutation = extendType({
                 return invoice_create(args.type, context.jwt.id)
             },
         });
+        // --------------------------------------------------
         t.field('invoice_update', {
             args: {
                 id: nonNull(stringArg()),
@@ -28,6 +29,7 @@ export const InvoiceMutation = extendType({
                 return invoice_update(args.id, args)
             },
         });
+        // --------------------------------------------------
         t.field('invoice_prudect_set', {
             args: {
                 invoiceId: nonNull(stringArg()),
@@ -43,7 +45,7 @@ export const InvoiceMutation = extendType({
         });
     }
 })
-
+// **************************************************************************************************** 
 export const invoice_create = async (type: string, employeeId: string): Promise<string> => {
     if (type == undefined) throw new Error('type is required');
     if (employeeId == undefined) throw new Error('employeeId is required');
@@ -55,7 +57,7 @@ export const invoice_create = async (type: string, employeeId: string): Promise<
     })
     return r.id
 }
-
+// **************************************************************************************************** 
 export const invoice_update = async (id: string, args: invoice_update_type): Promise<boolean> => {
     if (id == undefined) throw new Error('id is required');
     await db.$transaction(async (t) => {
@@ -86,11 +88,9 @@ export const invoice_update = async (id: string, args: invoice_update_type): Pro
     })
     return true
 }
-function limitF(number) {
-    return Math.floor(number * 100) / 100;
-    // return parseFloat(number.toFixed(2));
-}
+// **************************************************************************************************** 
 type invoice_prudect_set_type = { invoiceId: string, prudectId: string, description?: string, money_unite?: number, quantity?: number }
+
 export const invoice_prudect_set = async (args: invoice_prudect_set_type): Promise<boolean> => {
     if (args.invoiceId == undefined) throw new Error('invoiceId is required');
     if (args.prudectId == undefined) throw new Error('prudectId is required');
@@ -98,9 +98,9 @@ export const invoice_prudect_set = async (args: invoice_prudect_set_type): Promi
         const old_ip = await t.i_products.findFirst({ where: { invoiceId: args.invoiceId, productId: args.prudectId } })
 
         if (old_ip) {
-            const money_unite = limitF(args.money_unite ?? old_ip.money_unite);
-            const quantity = limitF(args.quantity ?? old_ip.quantity + 1);
-            const money_calc = limitF(money_unite * quantity);
+            const money_unite = limitFloat(args.money_unite ?? old_ip.money_unite);
+            const quantity = limitFloat(args.quantity ?? old_ip.quantity + 1);
+            const money_calc = limitFloat(money_unite * quantity);
             // 
             if (quantity > 0) {
                 await t.i_products.updateMany({
@@ -122,9 +122,9 @@ export const invoice_prudect_set = async (args: invoice_prudect_set_type): Promi
 
         } else {
             const ps = await t.p_stocks.findFirst({ where: { productId: args.prudectId } })
-            const money_unite = limitF(args.money_unite ?? ps.money_selling);
-            const quantity = limitF(args.quantity ?? 1);
-            const money_calc = limitF(money_unite * quantity);
+            const money_unite = limitFloat(args.money_unite ?? ps.money_selling);
+            const quantity = limitFloat(args.quantity ?? 1);
+            const money_calc = limitFloat(money_unite * quantity);
             if (quantity > 0) {
                 await t.i_products.create({
                     data: {
@@ -142,14 +142,15 @@ export const invoice_prudect_set = async (args: invoice_prudect_set_type): Promi
     await invoice_update(args.invoiceId, {})
     return true
 }
+// **************************************************************************************************** 
 export const invoice_delete = async (id: string): Promise<boolean> => {
     await db.invoices.delete({ where: { id: id } })
     return true
 }
-
+// **************************************************************************************************** 
 type invoice_update_type = {
     id?: string,
-    validation?: string,
+    validation?: boolean,
     employeeId?: string,
     dealerId?: string,
     description?: string,

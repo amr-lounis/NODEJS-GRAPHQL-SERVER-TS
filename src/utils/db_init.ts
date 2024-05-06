@@ -1,10 +1,9 @@
 
 import { faker } from "@faker-js/faker"
 import { authorization_matrix } from "./authorization_matrix"
-import { myLog } from "./log"
 import { db } from "./db"
-import { getImageAsBase64 } from "./files"
 import { operation_create, role_create, todo_create, user_create } from "../gql"
+import { myLog } from "./myFunc"
 
 export const db_init = async (listOperationName: string[]) => {
     myLog(" +++++ initDB +++++")

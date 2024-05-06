@@ -190,7 +190,7 @@ model invoices {
   // 
   i_products   i_products[]
   // 
-  validation   String       @default("") //{PROFORMA ,COMPLITED}
+  validation   Boolean      @default(false)
   type         String       @default("")
   description  String       @default("")
   money_net    Float        @default(0)
