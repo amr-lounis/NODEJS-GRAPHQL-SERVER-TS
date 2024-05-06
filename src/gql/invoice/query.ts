@@ -1,7 +1,7 @@
 import { extendType } from "nexus";
 
-export const IndexMutation = extendType({
-    type: 'Mutation',
+export const InvoiceQuery = extendType({
+    type: 'Query',
     definition(t) {
 
     }

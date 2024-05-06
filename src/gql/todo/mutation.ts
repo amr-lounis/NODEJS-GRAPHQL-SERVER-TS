@@ -59,7 +59,8 @@ export const todo_create = async (args: ArgsTodoM): Promise<string> => {
     if (args.employeeId == undefined) throw new Error('id is required');
     if (args.money_expenses < 0) throw new Error("error : money_expenses < 0")
     if (args.money_total < 0) throw new Error("error : money_total < 0")
-    if ((args.money_paid < 0) || (args.money_paid > args.money_total)) throw new Error("error : money_paid < 0")
+    if (args.money_paid < 0) throw new Error("error : money_paid < 0")
+    if (args.money_paid > args.money_total) throw new Error("error : money_paid < 0")
     return await db.$transaction(async (t) => {
         const r = await t.todos.create({
             data: {

@@ -190,13 +190,13 @@ model invoices {
   // 
   i_products   i_products[]
   // 
-  validation   String       @default("") //{NEW,COMPLITED}
+  validation   String       @default("") //{PROFORMA ,COMPLITED}
   type         String       @default("")
   description  String       @default("")
   money_net    Float        @default(0)
   money_tax    Float        @default(0)
   money_stamp  Float        @default(0)
-  money_total  Float        @default(0)
+  money_calc   Float        @default(0)
   money_paid   Float        @default(0)
   money_unpaid Float        @default(0)
   createdAt    DateTime?    @default(now())
@@ -211,9 +211,8 @@ model i_products {
   //
   description String    @default("")
   quantity    Float     @default(0)
-  unity       Float     @default(0)
   money_unite Float     @default(0)
-  money_total Float     @default(0)
+  money_calc  Float     @default(0)
   createdAt   DateTime? @default(now())
   updatedAt   DateTime? @updatedAt
 
