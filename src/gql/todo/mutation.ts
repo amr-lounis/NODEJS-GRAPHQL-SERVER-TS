@@ -1,4 +1,4 @@
-import { extendType, floatArg, nonNull, nullable, stringArg } from 'nexus';
+import { booleanArg, extendType, floatArg, nonNull, nullable, stringArg } from 'nexus';
 import { db, ContextType } from '../../utils';
 // **************************************************************************************************** 
 export const TodoMutation = extendType({
@@ -8,7 +8,7 @@ export const TodoMutation = extendType({
             args: {
                 dealerId: nullable(stringArg()),
                 description: nullable(stringArg()),
-                validation: nullable(stringArg()),
+                validation: nullable(booleanArg()),
                 money_expenses: nullable(floatArg()),
                 money_total: nullable(floatArg()),
                 money_paid: nullable(floatArg()),
@@ -27,7 +27,7 @@ export const TodoMutation = extendType({
                 id: nonNull(stringArg()),
                 dealerId: nullable(stringArg()),
                 description: nullable(stringArg()),
-                validation: nullable(stringArg()),
+                validation: nullable(booleanArg()),
                 money_expenses: nullable(floatArg()),
                 money_total: nullable(floatArg()),
                 money_paid: nullable(floatArg()),
@@ -128,7 +128,7 @@ type ArgsTodoM = {
     employeeId?: string,
     dealerId?: string,
     description?: string,
-    validation?: string,
+    validation?: boolean,
     money_expenses?: number,
     money_total?: number,
     money_paid?: number,
