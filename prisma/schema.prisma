@@ -149,7 +149,7 @@ model todos {
   // 
   photo          t_photos?
   // 
-  validation     String    @default("")
+  validation     Boolean   @default(false)
   description    String    @default("")
   money_total    Float     @default(0)
   money_paid     Float     @default(0)

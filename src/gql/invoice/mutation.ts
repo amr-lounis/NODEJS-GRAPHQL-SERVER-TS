@@ -1,4 +1,4 @@
-import { arg, extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
+import { arg, booleanArg, extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
 import { ContextType, db, limitFloat, myLog } from "../../utils";
 
 export const InvoiceMutation = extendType({
@@ -17,7 +17,7 @@ export const InvoiceMutation = extendType({
         t.field('invoice_update', {
             args: {
                 id: nonNull(stringArg()),
-                validation: nullable(stringArg()),
+                validation: nullable(booleanArg()),
                 dealerId: nullable(stringArg()),
                 description: nullable(stringArg()),
                 money_tax: nullable(floatArg()),
