@@ -1,16 +1,18 @@
-import { myLog } from "../src/utils"
-import { product_create, product_stock_quantity_updown, product_stock_set } from "../src/gql"
-import { faker } from "@faker-js/faker"
-import { type } from "os"
+
+enum invoice_types {
+    PURCHASE = "PURCHASE",
+    SALE = "SALE",
+    LOSS = "LOSS"
+}
 
 const main = async () => {
     try {
         // await product_create({ id: "aaaaa" })
         // await product_stock_set({ productId: "aaaaaa" })
         // await product_stock_quantity_updown("aaaaa", 10)
-        myLog(faker.image.dataUri({ type: "svg-base64" }))
+        console.log(invoice_types.PURCHASE)
     } catch (error) {
-        myLog(error.message)
+
     }
 
 }

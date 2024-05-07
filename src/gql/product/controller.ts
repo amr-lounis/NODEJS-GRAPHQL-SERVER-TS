@@ -124,36 +124,6 @@ export const categorie_delete = async (id: string): Promise<boolean> => {
     await db.p_categories.delete({ where: { id: id } })
     return true
 }
-// **************************************************************************************************** product_stock
-export const product_stock_set = async (tr: TransactionType, args: ArgsStockType): Promise<boolean> => {
-    if (args.id == undefined) throw new Error('error : productId is required');
-    if (args.money_purchase < 0) throw new Error('error : money_purchase < 0');
-    if (args.money_selling < 0) throw new Error('error : money_selling < 0');
-    if (args.quantity < 0) throw new Error("error : quantity < 0)");
-
-    const exist_p = await tr.products.findFirst({ select: { id: true }, where: { id: args.id } }) ? true : false;
-    if (!exist_p) throw new Error(`error : product id : ${args.id} is not exist`);
-    await tr.p_stocks.update({
-        where: { productId: args.id }, data: {
-            // productId: args.productId,
-            money_purchase: args.money_purchase,
-            money_selling: args.money_selling,
-            quantity: args.quantity,
-            quantity_critical: args.quantity_critical,
-            date_production: args.date_production,
-            date_expiration: args.date_expiration,
-        }
-    },);
-
-    return true
-}
-export const product_stock_quantity_updown = async (tr: TransactionType, id: string, quantity: number): Promise<boolean> => {//if  (quantity < 0) reduire else add
-    const r = await tr.p_stocks.findUnique({ select: { quantity: true }, where: { productId: id } })
-    if ((r.quantity + quantity) < 0) throw new Error("error : quantity");
-    await product_stock_set(tr, { id: id, quantity: r.quantity + quantity })
-    return true
-}
-
 // **************************************************************************************************** 
 export type ArgsProductType = {
     id?: string,
