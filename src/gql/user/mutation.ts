@@ -1,5 +1,6 @@
 import { extendType, nonNull, nullable, stringArg } from 'nexus';
 import { db, pubsub, ContextType } from '../../utils';
+import { ArgsUserM, user_create, user_delete, user_update } from './controller';
 // **************************************************************************************************** 
 export const UserMutation = extendType({
     type: 'Mutation',
@@ -87,78 +88,3 @@ export const UserMutation = extendType({
     },
 });
 // **************************************************************************************************** 
-export const user_create = async (args: ArgsUserM): Promise<boolean> => {
-    if (args.id == undefined) throw new Error('error : id is required');
-    await db.$transaction(async (t) => {
-        const r = await t.users.create({
-            data: {
-                id: args.id,
-                password: args.password,
-                description: args.description,
-                roleId: args.roleId,
-                address: args.address,
-                first_name: args.first_name,
-                last_name: args.last_name,
-                phone: args.phone,
-                fax: args.fax,
-                email: args.email,
-            }
-        });
-        await t.u_photos.create({
-            data: { userId: r.id, photo: Buffer.from("", 'utf8') }
-        });
-        if (args.photo != undefined) {
-            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
-            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.u_photos.update({ where: { userId: r.id }, data: { photo: photpBytes } });
-        }
-    });
-    return true;
-}
-export const user_update = async (id: string, args: ArgsUserM): Promise<boolean> => {
-    if (id == undefined) throw new Error('id is required');
-    await db.$transaction(async (t) => {
-        const exist_u = await t.users.findFirst({ select: { id: true }, where: { id: id } }) ? true : false;
-        if (!exist_u) throw new Error(`error : user id : ${id} is not exist`);
-        await t.users.update({
-            where: { id: id },
-            data: {
-                id: args.id,
-                password: args.password,
-                description: args.description,
-                roleId: args.roleId,
-                address: args.address,
-                first_name: args.first_name,
-                last_name: args.last_name,
-                phone: args.phone,
-                fax: args.fax,
-                email: args.email,
-            }
-        });
-        if (args.photo != undefined) {
-            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
-            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.u_photos.update({ where: { userId: id }, data: { photo: photpBytes } });
-        }
-    }
-    );
-    return true;
-}
-export const user_delete = async (id: string): Promise<boolean> => {
-    await db.users.delete({ where: { id: id } })
-    return true;
-}
-// **************************************************************************************************** 
-export type ArgsUserM = {
-    id?: string,
-    roleId?: string,
-    password?: string,
-    description?: string,
-    address?: string,
-    first_name?: string,
-    last_name?: string,
-    phone?: string,
-    fax?: string,
-    email?: string,
-    photo?: string,
-}

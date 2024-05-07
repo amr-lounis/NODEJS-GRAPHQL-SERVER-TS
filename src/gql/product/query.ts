@@ -1,5 +1,5 @@
 import { extendType, floatArg, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { db, toPage } from '../../utils';
+import { ArgsProductQ, product_photo_get, products_get } from './controller';
 // **************************************************************************************************** 
 export const ProductQuery = extendType({
     type: 'Query',
@@ -34,51 +34,7 @@ export const ProductQuery = extendType({
         });
     }
 });
-// **************************************************************************************************** 
-export const products_get = async (args: ArgsProductQ) => {
-    args.filter_id = args.filter_id ?? ""
-    const itemsCountAll = (await db.products.aggregate({
-        _count: { id: true }, where: {
-            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
-            categorieId: args.categorieId,
-            unityId: args.unityId,
-            code: args.code,
-            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
-            description: { contains: args.filter_description },
-        }
-    }))._count.id
-    const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-    const items = await db.products.findMany({
-        orderBy: { createdAt: 'desc' }, where: {
-            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
-            categorieId: args.categorieId,
-            unityId: args.unityId,
-            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
-            description: { contains: args.filter_description },
-        },
-        skip: p.itemsSkip, take: p.itemsTake
-    });
-    return {
-        allItemsCount: itemsCountAll,
-        allPagesCount: p.allPagesCount,
-        itemsSkip: p.itemsSkip,
-        itemsTake: p.itemsTake,
-        pageNumber: p.pageNumber,
-        itemsCount: items.length,
-        items: items
-    }
-}
-export const units_get = async () => {
-    return await db.p_units.findMany({});
-}
-export const categories_get = async () => {
-    return await db.p_categories.findMany({});
-}
-export const product_photo_get = async (producId: string): Promise<string> => {
-    const p = await db.p_photos.findUnique({ where: { productId: producId } },);
-    return p?.photo?.toString() ?? ""
-}
-// **************************************************************************************************** 
+
 export const product_get_out = objectType({
     name: 'product_get_out',
     definition(t) {
@@ -98,16 +54,3 @@ export const products_get_out = objectType({
         t.nullable.list.field('items', { type: 'product_get_out' })
     },
 });
-export type ArgsProductQ = {
-    id?: string,
-    categorieId?: string,
-    unityId?: string,
-    code?: string,
-    filter_id: string,
-    filter_description?: string,
-    filter_create_gte?: string,
-    filter_create_lte?: string,
-    pageNumber?: number,
-    itemsTake?: number,
-    itemsSkip?: number,
-}

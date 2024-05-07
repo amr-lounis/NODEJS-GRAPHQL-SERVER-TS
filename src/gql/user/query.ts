@@ -1,5 +1,6 @@
 import { extendType, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
 import { db, MyToken, toPage, ContextType } from '../../utils';
+import { ArgsUserQ, user_authentication, user_authentication_renewal, user_photo_get, user_role_get, users_get } from './controller';
 // **************************************************************************************************** 
 export const UserQuery = extendType({
     type: 'Query',
@@ -66,72 +67,7 @@ export const UserQuery = extendType({
         });
     }
 });
-// **************************************************************************************************** 
-export const user_authentication = async (id: string, password: string): Promise<string> => {
-    try {
-        var u = await db.users.findFirst({ where: { id: id, password: password } })
-        return MyToken.Token_Create(u.id, u.roleId)
-    } catch (error) {
-        return ""
-    }
-}
-export const user_authentication_renewal = async (id: string, roleId: string): Promise<string> => {
-    try {
-        return MyToken.Token_Create(id, roleId)
-    } catch (error) {
-        return ""
-    }
-}
-export const user_role_get = async (id: string): Promise<string> => {
-    const r = await db.users.findUnique({ where: { id: id } });
-    return r?.roleId
-}
-export const user_photo_get = async (id: string): Promise<string> => {
-    const p = await db.u_photos.findUnique({ where: { userId: id } },);
-    return p?.photo?.toString() ?? ""
-}
 
-export const users_get = async (args: ArgsUserQ) => {
-    args.filter_id = args.filter_id ?? ""
-    const itemsCountAll = (await db.users.aggregate({
-        _count: { id: true }, where: { // -------------------------------------------------- where for 1
-            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
-            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
-            description: { contains: args.filter_description },
-        }
-    }))._count.id
-    const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-    const items = await db.users.findMany({
-        orderBy: { createdAt: 'desc' }, where: {  // -------------------------------------------------- where for 2
-            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
-            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
-            description: { contains: args.filter_description },
-        }, skip: p.itemsSkip, take: p.itemsTake
-    })
-
-    return {
-        allItemsCount: itemsCountAll,
-        allPagesCount: p.allPagesCount,
-        itemsSkip: p.itemsSkip,
-        itemsTake: p.itemsTake,
-        pageNumber: p.pageNumber,
-        itemsCount: items.length,
-        items: items
-    }
-}
-// **************************************************************************************************** 
-export type ArgsUserQ = {
-    id?: string,
-    userId?: string,
-    password?: string,
-    filter_id?: string,
-    filter_description?: string,
-    filter_create_gte?: string,
-    filter_create_lte?: string,
-    itemsTake?: number,
-    itemsSkip?: number,
-    pageNumber?: number,
-}
 export const user_get_out = objectType({
     name: 'user_get_out',
     definition(t) {

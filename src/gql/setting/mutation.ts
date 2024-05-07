@@ -1,5 +1,5 @@
 import { extendType, nonNull, stringArg } from 'nexus';
-import { db } from '../../utils';
+import { setting_set } from './controller';
 // **************************************************************************************************** 
 export const SettingMutation = extendType({
     type: 'Mutation',
@@ -13,13 +13,3 @@ export const SettingMutation = extendType({
         });
     }
 });
-// **************************************************************************************************** 
-export const setting_set = async (key: string, value: string): Promise<boolean> => {
-    await db.$transaction(async (t) => {
-        const exist = await t.settings.findFirst({ select: { key: true }, where: { key: key } }) ? true : false
-        if (!exist) await t.settings.create({ data: { key: key, value: value } })
-        else await t.settings.update({ where: { key: key }, data: { key: key, value: value } })
-    })
-    return true
-}
-// **************************************************************************************************** 

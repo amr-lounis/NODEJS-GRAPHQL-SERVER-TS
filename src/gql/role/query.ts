@@ -1,5 +1,6 @@
 import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
 import { db } from '../../utils';
+import { authorizations_get, operations_get, roles_get } from './controller';
 // **************************************************************************************************** 
 export const RoleQuery = extendType({
     type: 'Query',
@@ -35,20 +36,3 @@ export const RoleQuery = extendType({
         });
     }
 });
-// **************************************************************************************************** 
-export const operations_get = async (): Promise<string[]> => {
-    const r = await db.u_operations.findMany({});
-    return r.map((x) => x.id)
-}
-export const roles_get = async (): Promise<string[]> => {
-    const r = await db.u_roles.findMany({ select: { id: true } });
-    return r.map((x) => x.id)
-}
-export const authorizations_get = async (roleId: string) => {
-    return await db.u_roles_operations.findMany({ where: { roleId: roleId } })
-}
-export const authorizations_all_get = async () => {
-    return await db.u_roles_operations.findMany({})
-}
-
-// **************************************************************************************************** 

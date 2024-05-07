@@ -3,9 +3,9 @@ import { WebSocketServer } from 'ws'
 import https from "https";
 import http from "http";
 import fs from "fs"
-import { myLog } from "./log"
 import { MyToken } from "./token_controller";
 import { authorization_matrix } from "./authorization_matrix"
+import { myLog } from "./myFunc";
 // -------------------------------------------------- https_server
 export const https_server = (_app_express: any, _path_cert: string, _path_key: string) => {
     myLog(" +++++ https_server +++++ ")
