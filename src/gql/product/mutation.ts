@@ -1,5 +1,5 @@
-import { extendType, nonNull, nullable, stringArg } from "nexus";
-import { ArgsProductType, categorie_create, categorie_delete, categorie_update, product_create, product_delete, product_update, unity_create, unity_delete, unity_update } from "./controller";
+import { extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
+import { ArgsProductType, product_categorie_create, product_categorie_delete, product_categorie_update, product_create, product_delete, product_update, product_unity_create, product_unity_delete, product_unity_update } from "./controller";
 
 // **************************************************************************************************** 
 export const ProductMutation = extendType({
@@ -9,21 +9,21 @@ export const ProductMutation = extendType({
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
-                return unity_create(args.id)
+                return product_unity_create(args.id)
             },
         });
         t.field('product_unity_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string, idNew: string }, context, info): Promise<boolean> => {
-                return unity_update(args.id, args.idNew)
+                return product_unity_update(args.id, args.idNew)
             },
         });
         t.field('product_unity_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
-                return unity_delete(args.id)
+                return product_unity_delete(args.id)
             },
         });
         // --------------------------------------------------
@@ -31,21 +31,21 @@ export const ProductMutation = extendType({
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
-                return categorie_create(args.id)
+                return product_categorie_create(args.id)
             },
         });
         t.field('product_categorie_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string, idNew: string }, context, info): Promise<boolean> => {
-                return categorie_update(args.id, args.idNew)
+                return product_categorie_update(args.id, args.idNew)
             },
         });
         t.field('product_categorie_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
-                return categorie_delete(args.id)
+                return product_categorie_delete(args.id)
             },
         });
         // --------------------------------------------------
@@ -57,6 +57,12 @@ export const ProductMutation = extendType({
                 code: nullable(stringArg()),
                 description: nullable(stringArg()),
                 photo: nullable(stringArg()),
+                money_purchase: nullable(floatArg()),
+                money_selling: nullable(floatArg()),
+                money_selling_gr: nullable(floatArg()),
+                date_alert: nullable(stringArg()),
+                quantity_alert: nullable(floatArg()),
+                // quantity: nullable(floatArg()),
             },
             type: nonNull('Boolean'),
             resolve: (parent, args: ArgsProductType, context, info): Promise<boolean> => {
@@ -71,6 +77,12 @@ export const ProductMutation = extendType({
                 code: nonNull(stringArg()),
                 description: nonNull(stringArg()),
                 photo: nullable(stringArg()),
+                money_purchase: nullable(floatArg()),
+                money_selling: nullable(floatArg()),
+                money_selling_gr: nullable(floatArg()),
+                date_alert: nullable(stringArg()),
+                quantity_alert: nullable(floatArg()),
+                // quantity: nullable(floatArg()),
             },
             type: nonNull('Boolean'),
             resolve: (parent, args: ArgsProductType, context, info): Promise<boolean> => {
@@ -94,32 +106,5 @@ export const ProductMutation = extendType({
                 return product_delete(args.id)
             },
         });
-        // --------------------------------------------------
-        // t.field('product_stock_set', {
-        //     args: {
-        //         productId: nonNull(stringArg()),
-        //         money_purchase: nullable(floatArg()),
-        //         money_selling: nullable(floatArg()),
-        //         quantity: nullable(floatArg()),
-        //         quantity_critical: nullable(floatArg()),
-        //         date_production: nullable(stringArg()),
-        //         date_expiration: nullable(stringArg()),
-        //     },
-        //     type: nonNull('Boolean'),
-        //     resolve: (parent, args: ArgsStockType, context, info): Promise<boolean> => {
-        //         return product_stock_set(args)
-        //     },
-        // });
-        // --------------------------------------------------
-        // t.field('product_stock_quantity_updown', {
-        //     args: {
-        //         id: nonNull(stringArg()),
-        //         quantity: nonNull(floatArg())
-        //     },
-        //     type: nonNull('Boolean'),
-        //     resolve: (parent, args: ArgsStockType, context, info): Promise<boolean> => {
-        //         return product_stock_quantity_updown(args.id, args.quantity)
-        //     },
-        // });
     }
 });

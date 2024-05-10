@@ -2,7 +2,7 @@
 import { faker } from "@faker-js/faker"
 import { authorization_matrix } from "./authorization_matrix"
 import { db } from "./db"
-import { categorie_create, operation_create, product_create, role_create, todo_create, unity_create, user_create } from "../gql"
+import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create } from "../gql"
 import { myLog } from "./myFunc"
 import { product_quantity_updown } from "../gql"
 
@@ -64,8 +64,8 @@ export const db_init = async (listOperationName: string[]) => {
             const u = `unity_${i}`
             const c = `categorie_${i}`
             // 
-            await unity_create(u)
-            await categorie_create(c)
+            await product_unity_create(u)
+            await product_categorie_create(c)
             await product_create({ id: p, unityId: u, categorieId: c })
             await db.$transaction(async (tr) => {
                 await product_quantity_updown(tr, p, 1)

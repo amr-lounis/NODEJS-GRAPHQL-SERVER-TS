@@ -1,5 +1,5 @@
-import { extendType, floatArg, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
-import { ArgsProductQ, product_photo_get, products_get } from './controller';
+import { extendType, floatArg, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
+import { ArgsProductQ, product_categories_get, product_photo_get, product_units_get, products_get } from './controller';
 // **************************************************************************************************** 
 export const ProductQuery = extendType({
     type: 'Query',
@@ -7,17 +7,21 @@ export const ProductQuery = extendType({
         t.field('products_get', {
             args: {
                 id: nullable(stringArg()),
-                employeeId: nullable(stringArg()),
-                dealerId: nullable(stringArg()),
-                validation: nullable(stringArg()),
+                categorieId: nullable(stringArg()),
+                unityId: nullable(stringArg()),
+                code: nullable(stringArg()),
+                // 
                 filter_id: nullable(stringArg()),
                 filter_description: nullable(stringArg()),
                 filter_create_gte: nullable(stringArg()),
                 filter_create_lte: nullable(stringArg()),
+                filter_quntity_gte: nullable(floatArg()),
+                filter_quntity_lte: nullable(floatArg()),
+                filter_expiration_gte: nullable(stringArg()),
+                filter_expiration_lte: nullable(stringArg()),
+                // 
                 pageNumber: nullable(intArg()),
                 itemsTake: nullable(intArg()),
-                money_unpaid_gte: nullable(floatArg()),
-                money_unpaid_lte: nullable(floatArg()),
             },
             description: "date format : 2000-01-01T00:00:00Z",
             type: products_get_out,
@@ -28,8 +32,22 @@ export const ProductQuery = extendType({
         t.field('product_photo_get', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('String'),
-            async resolve(parent, args: { id?: string }, context, info) {
+            async resolve(parent, args: { id?: string }, context, info): Promise<string> {
                 return product_photo_get(args.id)
+            },
+        });
+        t.field('product_units_get', {
+            args: { id: nonNull(stringArg()) },
+            type: list('String'),
+            async resolve(parent, args: { id?: string }, context, info): Promise<string[]> {
+                return product_units_get()
+            },
+        });
+        t.field('product_categories_get', {
+            args: { id: nonNull(stringArg()) },
+            type: list('String'),
+            async resolve(parent, args: { id?: string }, context, info): Promise<string[]> {
+                return product_categories_get()
             },
         });
     }
@@ -39,9 +57,10 @@ export const product_get_out = objectType({
     name: 'product_get_out',
     definition(t) {
         ["id", "categorieId", "unityId", "code", "description"].map((x) => t.nullable.string(x));
-        ["createdAt", "updatedAt"].map((x) => t.nullable.float(x));
+        ["money_purchase", "money_selling", "money_selling_gr", "quantity", "quantity_alert", "date_alert", "createdAt", "updatedAt"].map((x) => t.nullable.float(x));
     },
 });
+
 export const products_get_out = objectType({
     name: 'products_get_out',
     definition(t) {

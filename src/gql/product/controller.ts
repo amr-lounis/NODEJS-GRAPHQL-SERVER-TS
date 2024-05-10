@@ -13,7 +13,7 @@ export const products_get = async (args: ArgsProductQ) => {
                 createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
                 description: { contains: args.filter_description },
                 quantity: { gte: args.filter_quntity_gte, lte: args.filter_quntity_lte },
-                date_expiration: { gte: args.filter_expiration_gte, lte: args.filter_expiration_lte },
+                date_alert: { gte: args.filter_date_alert_gte, lte: args.filter_date_alert_lte },
             }
         }))._count.id
         const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
@@ -27,7 +27,7 @@ export const products_get = async (args: ArgsProductQ) => {
                 createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
                 description: { contains: args.filter_description },
                 quantity: { gte: args.filter_quntity_gte, lte: args.filter_quntity_lte },
-                date_expiration: { gte: args.filter_expiration_gte, lte: args.filter_expiration_lte },
+                date_alert: { gte: args.filter_date_alert_gte, lte: args.filter_date_alert_lte },
             },
             skip: p.itemsSkip, take: p.itemsTake
         });
@@ -44,11 +44,16 @@ export const products_get = async (args: ArgsProductQ) => {
 }
 export const product_photo_get = async (producId: string): Promise<string> => {
     const p = await db.p_photos.findUnique({ where: { productId: producId } });
-    if (!p) throw new Error('this id is not exist');
+    if (!p) throw new Error(`producId:${producId} not exist`);
     return p?.photo?.toString() ?? ""
 }
 export const product_create = async (args: ArgsProductType): Promise<boolean> => {
-    if (args.id == undefined) throw new Error('error : id is required');
+    if (args.id == undefined) throw new Error('product id is required');
+    if (args.money_purchase < 0) throw new Error('money_purchase < 0');
+    if (args.money_selling < 0) throw new Error('money_selling < 0');
+    if (args.money_selling_gr < 0) throw new Error('money_selling_gr < 0');
+    if (args.quantity < 0) throw new Error("quantity < 0)");
+
     await db.$transaction(async (t) => {
         const r = await t.products.create({
             data: {
@@ -57,6 +62,12 @@ export const product_create = async (args: ArgsProductType): Promise<boolean> =>
                 unityId: args.unityId,
                 code: args.code,
                 description: args.description,
+                money_purchase: args.money_purchase,
+                money_selling: args.money_selling,
+                money_selling_gr: args.money_selling_gr,
+                date_alert: args.date_alert,
+                quantity_alert: args.quantity_alert,
+                quantity: args.quantity,
             }
         })
         await t.p_photos.create({
@@ -71,7 +82,7 @@ export const product_create = async (args: ArgsProductType): Promise<boolean> =>
     return true
 }
 export const product_update = async (id: string, args: ArgsProductType): Promise<boolean> => {
-    if (id == undefined) throw new Error('error : id is required');
+    if (id == undefined) throw new Error('product id is required');
     if (args.money_purchase < 0) throw new Error('money_purchase < 0');
     if (args.money_selling < 0) throw new Error('money_selling < 0');
     if (args.money_selling_gr < 0) throw new Error('money_selling_gr < 0');
@@ -79,7 +90,7 @@ export const product_update = async (id: string, args: ArgsProductType): Promise
 
     await db.$transaction(async (t) => {
         const exist_p = await t.products.findFirst({ select: { id: true }, where: { id: id } }) ? true : false;
-        if (!exist_p) throw new Error(`error : product id : ${id} is not exist`);
+        if (!exist_p) throw new Error(`product id:${id} is not exist`);
         await t.products.update({
             where: {
                 id: id
@@ -90,15 +101,12 @@ export const product_update = async (id: string, args: ArgsProductType): Promise
                 unityId: args.unityId,
                 code: args.code,
                 description: args.description,
-                // 
                 money_purchase: args.money_purchase,
                 money_selling: args.money_selling,
                 money_selling_gr: args.money_selling_gr,
+                date_alert: args.date_alert,
+                quantity_alert: args.quantity_alert,
                 quantity: args.quantity,
-                quantity_critical: args.quantity_critical,
-                // 
-                date_production: args.date_production,
-                date_expiration: args.date_expiration,
             }
         });
         if (args.photo != undefined) {
@@ -114,34 +122,36 @@ export const product_delete = async (id: string): Promise<boolean> => {
     return true
 }
 // **************************************************************************************************** units
-export const units_get = async () => {
-    return await db.p_units.findMany({});
+export const product_units_get = async (): Promise<string[]> => {
+    const r = await db.p_units.findMany({});
+    return r.map((x) => x.id)
 }
-export const unity_create = async (id: string): Promise<boolean> => {
+export const product_unity_create = async (id: string): Promise<boolean> => {
     await db.p_units.create({ data: { id: id } })
     return true
 }
-export const unity_update = async (id: string, idNew: string): Promise<boolean> => {
+export const product_unity_update = async (id: string, idNew: string): Promise<boolean> => {
     await db.p_units.update({ where: { id: id }, data: { id: idNew } })
     return true
 }
-export const unity_delete = async (id: string): Promise<boolean> => {
+export const product_unity_delete = async (id: string): Promise<boolean> => {
     await db.p_units.delete({ where: { id: id } })
     return true
 }
 // **************************************************************************************************** categories
-export const categories_get = async () => {
-    return await db.p_categories.findMany({});
+export const product_categories_get = async (): Promise<string[]> => {
+    const r = await db.p_categories.findMany({});
+    return r.map((x) => x.id)
 }
-export const categorie_create = async (id: string): Promise<boolean> => {
+export const product_categorie_create = async (id: string): Promise<boolean> => {
     await db.p_categories.create({ data: { id: id } })
     return true
 }
-export const categorie_update = async (id: string, idNew: string): Promise<boolean> => {
+export const product_categorie_update = async (id: string, idNew: string): Promise<boolean> => {
     await db.p_categories.update({ where: { id: id }, data: { id: idNew } })
     return true
 }
-export const categorie_delete = async (id: string): Promise<boolean> => {
+export const product_categorie_delete = async (id: string): Promise<boolean> => {
     await db.p_categories.delete({ where: { id: id } })
     return true
 }
@@ -157,10 +167,9 @@ export type ArgsProductType = {
     money_purchase?: number,
     money_selling?: number,
     money_selling_gr?: number,
+    date_alert?: string,
+    quantity_alert?: number,
     quantity?: number,
-    quantity_critical?: number,
-    date_production?: string,
-    date_expiration?: string,
 }
 // **************************************************************************************************** 
 export type ArgsProductQ = {
@@ -168,17 +177,17 @@ export type ArgsProductQ = {
     categorieId?: string,
     unityId?: string,
     code?: string,
+    // 
     filter_id: string,
     filter_description?: string,
     filter_create_gte?: string,
     filter_create_lte?: string,
     filter_quntity_gte?: number,
     filter_quntity_lte?: number,
-    filter_expiration_gte?: string,
-    filter_expiration_lte?: string,
+    filter_date_alert_gte?: string,
+    filter_date_alert_lte?: string,
+    // 
     pageNumber?: number,
-    itemsTake?: number,
-    itemsSkip?: number,
-    is_critica: boolean,
+    itemsTake?: number
 }
 // **************************************************************************************************** 
