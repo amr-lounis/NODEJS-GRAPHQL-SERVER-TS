@@ -2,8 +2,9 @@
 import { faker } from "@faker-js/faker"
 import { authorization_matrix } from "./authorization_matrix"
 import { db } from "./db"
-import { operation_create, role_create, todo_create, user_create } from "../gql"
+import { categorie_create, operation_create, product_create, role_create, todo_create, unity_create, user_create } from "../gql"
 import { myLog } from "./myFunc"
+import { product_quantity_updown } from "../gql"
 
 export const db_init = async (listOperationName: string[]) => {
     myLog(" +++++ initDB +++++")
@@ -57,26 +58,20 @@ export const db_init = async (listOperationName: string[]) => {
     } catch (error) { }
     // -------------------------------------------------- init product
     try {
-        const l_u = (await db.p_units.aggregate({ _count: { id: true } }))._count.id
-        if (l_u < 10) for (let i = 0; i < 10; i++) await db.p_units.create({ data: { id: `unity_${i}` } })
-        // 
-        const l_c = (await db.p_categories.aggregate({ _count: { id: true } }))._count.id
-        if (l_c < 10) for (let i = 0; i < 10; i++) await db.p_categories.create({ data: { id: `categorie_${i}` } })
-        // 
-        const l_p = (await db.products.aggregate({ _count: { id: true } }))._count.id
-        if (l_p < 10) for (let i = 0; i < 10; i++) await db.products.create({ data: { id: `product_${i}` } })
-        // 
+        const l_p = (await db.products.aggregate({ _count: { id: true } }))._count.id ?? 0
+        if (l_p < 10) for (let i = 0; i < 10; i++) {
+            const p = `product_${i}`
+            const u = `unity_${i}`
+            const c = `categorie_${i}`
+            // 
+            await unity_create(u)
+            await categorie_create(c)
+            await product_create({ id: p, unityId: u, categorieId: c })
+            await db.$transaction(async (tr) => {
+                await product_quantity_updown(tr, p, 1)
+            })
+        }
+
     } catch (error) { }
     // -------------------------------------------------- init invoice
-    try {
-        const l_u = (await db.p_units.aggregate({ _count: { id: true } }))._count.id
-        if (l_u < 10) for (let i = 0; i < 10; i++) await db.p_units.create({ data: { id: `unity_${i}` } })
-        // 
-        const l_c = (await db.p_categories.aggregate({ _count: { id: true } }))._count.id
-        if (l_c < 10) for (let i = 0; i < 10; i++) await db.p_categories.create({ data: { id: `categorie_${i}` } })
-        // 
-        const l_p = (await db.products.aggregate({ _count: { id: true } }))._count.id
-        if (l_p < 10) for (let i = 0; i < 10; i++) await db.products.create({ data: { id: `product_${i}` } })
-        // 
-    } catch (error) { }
 }

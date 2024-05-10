@@ -39,6 +39,7 @@ export const todos_get = async (args: ArgsTodoQ) => {
 }
 export const todo_photo_get = async (args: ArgsTodoQ): Promise<string> => {
     const p = await db.t_photos.findFirst({ where: { todoId: args.todoId } },);
+    if (!p) throw new Error('this id is not exist');
     return p?.photo?.toString() ?? ""
 }
 export const todo_create = async (args: ArgsTodoM): Promise<string> => {

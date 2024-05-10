@@ -1,6 +1,6 @@
 import { booleanArg, extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
 import { ContextType } from "../../utils";
-import { invoice_create, invoice_prudect_set, invoice_prudect_set_type, invoice_update, invoice_update_type, invoice_validation } from "./controller";
+import { invoice_create, invoice_prudect_set, invoice_prudect_set_type, invoice_types, invoice_update, invoice_update_type, invoice_validation } from "./controller";
 
 export const InvoiceMutation = extendType({
     type: 'Mutation',

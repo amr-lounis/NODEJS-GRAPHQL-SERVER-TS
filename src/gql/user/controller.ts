@@ -17,10 +17,12 @@ export const user_authentication_renewal = async (id: string, roleId: string): P
 }
 export const user_role_get = async (id: string): Promise<string> => {
     const r = await db.users.findUnique({ where: { id: id } });
+    if (!r) throw new Error('not exist');
     return r?.roleId
 }
 export const user_photo_get = async (id: string): Promise<string> => {
     const p = await db.u_photos.findUnique({ where: { userId: id } },);
+    if (!p) throw new Error('not exist');
     return p?.photo?.toString() ?? ""
 }
 
