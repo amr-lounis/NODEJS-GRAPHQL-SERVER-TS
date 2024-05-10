@@ -17,8 +17,8 @@ export const ProductQuery = extendType({
                 filter_create_lte: nullable(stringArg()),
                 filter_quntity_gte: nullable(floatArg()),
                 filter_quntity_lte: nullable(floatArg()),
-                filter_expiration_gte: nullable(stringArg()),
-                filter_expiration_lte: nullable(stringArg()),
+                filter_date_alert_gte: nullable(stringArg()),
+                filter_date_alert_lte: nullable(stringArg()),
                 // 
                 pageNumber: nullable(intArg()),
                 itemsTake: nullable(intArg()),
@@ -37,16 +37,16 @@ export const ProductQuery = extendType({
             },
         });
         t.field('product_units_get', {
-            args: { id: nonNull(stringArg()) },
+            args: {},
             type: list('String'),
-            async resolve(parent, args: { id?: string }, context, info): Promise<string[]> {
+            async resolve(parent, args, context, info): Promise<string[]> {
                 return product_units_get()
             },
         });
         t.field('product_categories_get', {
-            args: { id: nonNull(stringArg()) },
+            args: {},
             type: list('String'),
-            async resolve(parent, args: { id?: string }, context, info): Promise<string[]> {
+            async resolve(parent, args, context, info): Promise<string[]> {
                 return product_categories_get()
             },
         });

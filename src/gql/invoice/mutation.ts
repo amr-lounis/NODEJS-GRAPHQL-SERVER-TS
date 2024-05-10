@@ -21,6 +21,14 @@ export const InvoiceMutation = extendType({
             },
         });
         // --------------------------------------------------
+        t.field('invoice_sale_gr_create', {
+            args: {},
+            type: nonNull('String'),
+            resolve: (parent, args, context: ContextType, info): Promise<string> => {
+                return invoice_create(invoice_types.SALE_GR, context.jwt.id)
+            },
+        });
+        // --------------------------------------------------
         t.field('invoice_loss_create', {
             args: {},
             type: nonNull('String'),

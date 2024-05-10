@@ -30,7 +30,7 @@ export const users_get = async (args: ArgsUserQ) => {
     args.filter_id = args.filter_id ?? ""
     const itemsCountAll = (await db.users.aggregate({
         _count: { id: true }, where: { // -------------------------------------------------- where for 1
-            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
+            id: { contains: args.filter_id, equals: args.id },
             createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
             description: { contains: args.filter_description },
         }
@@ -38,7 +38,7 @@ export const users_get = async (args: ArgsUserQ) => {
     const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
     const items = await db.users.findMany({
         orderBy: { createdAt: 'desc' }, where: {  // -------------------------------------------------- where for 2
-            OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
+            id: { contains: args.filter_id, equals: args.id },
             createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
             description: { contains: args.filter_description },
         }, skip: p.itemsSkip, take: p.itemsTake

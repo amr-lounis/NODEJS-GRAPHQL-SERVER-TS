@@ -2,7 +2,7 @@
 import { faker } from "@faker-js/faker"
 import { authorization_matrix } from "./authorization_matrix"
 import { db } from "./db"
-import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create } from "../gql"
+import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create, setting_set } from "../gql"
 import { myLog } from "./myFunc"
 import { product_quantity_updown } from "../gql"
 
@@ -20,8 +20,18 @@ export const db_init = async (listOperationName: string[]) => {
     } catch (err) { }
     // -------------------------------------------------- create all users
     try {
-        await user_create({ id: admin, password: admin, roleId: admin })
-        await user_create({ id: employee, password: employee, roleId: employee })
+        await user_create({
+            id: admin,
+            password: admin,
+            roleId: admin,
+            photo: generat_photo()
+        })
+        await user_create({
+            id: employee,
+            password: employee,
+            roleId: employee,
+            photo: generat_photo()
+        })
     } catch (error) { }
     // -------------------------------------------------- init autorisation matrix
     try {
@@ -52,7 +62,7 @@ export const db_init = async (listOperationName: string[]) => {
                 money_total: money_total,
                 money_expenses: money_expenses,
                 money_paid: money_paid,
-                photo: faker.image.dataUri({ type: "svg-base64" })
+                photo: generat_photo()
             })
         }
     } catch (error) { }
@@ -63,15 +73,40 @@ export const db_init = async (listOperationName: string[]) => {
             const p = `product_${i}`
             const u = `unity_${i}`
             const c = `categorie_${i}`
+            const money_purchase = faker.number.int({ min: 0, max: 100 })
+            const money_selling = faker.number.int({ min: money_purchase, max: 1000 })
+            const money_selling_gr = faker.number.int({ min: money_purchase, max: money_selling })
             // 
             await product_unity_create(u)
             await product_categorie_create(c)
-            await product_create({ id: p, unityId: u, categorieId: c })
+            await product_create({
+                id: p, unityId: u,
+                categorieId: c,
+                code: p,
+                description: p,
+                money_purchase: money_purchase,
+                money_selling: money_selling,
+                money_selling_gr: money_selling_gr,
+                quantity_alert: faker.number.int({ min: 0, max: 10 }),
+                photo: generat_photo()
+            })
             await db.$transaction(async (tr) => {
                 await product_quantity_updown(tr, p, 1)
             })
         }
 
     } catch (error) { }
+    // -------------------------------------------------- init setting
+    try {
+        const l_s = (await db.settings.aggregate({ _count: { key: true } }))._count.key ?? 0
+        if (l_s < 10) for (let i = 0; i < 10; i++) {
+            await setting_set(faker.string.uuid(), faker.string.uuid())
+        }
+
+    } catch (error) { }
     // -------------------------------------------------- init invoice
+}
+
+const generat_photo = () => {
+    return faker.image.dataUri({ type: "svg-base64" })
 }

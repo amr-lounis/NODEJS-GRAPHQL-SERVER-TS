@@ -52,7 +52,7 @@ export const myMiddleware = async (resolve: any, root: any, args: any, context: 
         const r = authorization_matrix.authorization_test(context.jwt.role, context.operation)
         if (!r) throw Error(`role:${context.jwt.role} --- operation:${context.operation} not authorized .`)
         if (args?.id?.length < 1) return new Error("id length smal then 1 ")
-        myLog(`context:${JSON.stringify(context)} --- args:[${Object.keys(args)}]`)
+        myLog(`args:[${Object.keys(args)}] --- context:${JSON.stringify(context)}`)
     }
     return await resolve(root, args, context, info)
 }

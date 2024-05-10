@@ -13,11 +13,12 @@ export const invoice_create = async (type: string, employeeId: string): Promise<
 export const invoice_update = async (id: string, args: invoice_update_type): Promise<boolean> => {
     await db.$transaction(async (tr) => {
         const invoice = await tr.invoices.findUnique({ where: { id: id } });
+        myLog(invoice)
         if (!invoice) throw new Error('this invoice is not exist');
         if (invoice.validation == true) throw new Error('invoice already validated.');
-        if (args.money_stamp < 0) throw new Error("error : money_stamp < 0")
-        if (args.money_tax < 0) throw new Error("error : money_tax < 0")
-        if (args.money_paid < 0) throw new Error("error : money_paid < 0")
+        if (args.money_stamp != undefined && args.money_stamp < 0) throw new Error("error : money_stamp < 0")
+        if (args.money_tax != undefined && args.money_tax < 0) throw new Error("error : money_tax < 0")
+        if (args.money_paid != undefined && args.money_paid < 0) throw new Error("error : money_paid < 0")
 
         await tr.invoices.update({
             where: { id: id }, data: {

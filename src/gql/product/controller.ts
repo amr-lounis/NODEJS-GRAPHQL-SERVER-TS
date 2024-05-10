@@ -1,4 +1,4 @@
-import { TransactionType, db, toPage } from '../../utils';
+import { TransactionType, db, myLog, toPage } from '../../utils';
 // **************************************************************************************************** products
 export const products_get = async (args: ArgsProductQ) => {
     args.filter_id = args.filter_id ?? ""
@@ -6,7 +6,7 @@ export const products_get = async (args: ArgsProductQ) => {
         const itemsCountAll = (await tr.products.aggregate({
             _count: { id: true },
             where: {
-                OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
+                id: { contains: args.filter_id, equals: args.id },
                 categorieId: args.categorieId,
                 unityId: args.unityId,
                 code: args.code,
@@ -20,7 +20,7 @@ export const products_get = async (args: ArgsProductQ) => {
         const items = await tr.products.findMany({
             orderBy: { createdAt: 'desc' },
             where: {
-                OR: [{ id: args.id }, { id: { contains: args.filter_id } },],
+                id: { contains: args.filter_id, equals: args.id },
                 categorieId: args.categorieId,
                 unityId: args.unityId,
                 code: args.code,
