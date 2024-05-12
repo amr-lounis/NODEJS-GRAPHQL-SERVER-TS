@@ -55,7 +55,8 @@ export const users_get = async (args: ArgsUserQ) => {
     }
 }
 export const user_create = async (args: ArgsUserM): Promise<boolean> => {
-    if (args.id == undefined) throw new Error('error : id is required');
+    if (args.id == undefined) throw new Error('id is required');
+    if (args.id.length > 100) throw new Error('id length > 100');
     await db.$transaction(async (t) => {
         const r = await t.users.create({
             data: {
@@ -84,6 +85,7 @@ export const user_create = async (args: ArgsUserM): Promise<boolean> => {
 }
 export const user_update = async (id: string, args: ArgsUserM): Promise<boolean> => {
     if (id == undefined) throw new Error('id is required');
+    if (args?.id?.length > 100) throw new Error('id length > 100');
     await db.$transaction(async (t) => {
         const exist_u = await t.users.findFirst({ select: { id: true }, where: { id: id } }) ? true : false;
         if (!exist_u) throw new Error(`error : user id : ${id} is not exist`);

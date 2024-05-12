@@ -5,7 +5,7 @@ import { invoice_create, invoice_prudect_set, invoice_prudect_set_type, invoice_
 export const InvoiceMutation = extendType({
     type: 'Mutation',
     definition(t) {
-        t.field('invoice_purchase_create', {
+        t.field('invoice_create_purchase', {
             args: {},
             type: nonNull('String'),
             resolve: (parent, args, context: ContextType, info): Promise<string> => {
@@ -13,7 +13,7 @@ export const InvoiceMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('invoice_sale_create', {
+        t.field('invoice_create_sale', {
             args: {},
             type: nonNull('String'),
             resolve: (parent, args, context: ContextType, info): Promise<string> => {
@@ -21,7 +21,7 @@ export const InvoiceMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('invoice_sale_gr_create', {
+        t.field('invoice_create_sale_gr', {
             args: {},
             type: nonNull('String'),
             resolve: (parent, args, context: ContextType, info): Promise<string> => {
@@ -29,7 +29,7 @@ export const InvoiceMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('invoice_loss_create', {
+        t.field('invoice_create_loss', {
             args: {},
             type: nonNull('String'),
             resolve: (parent, args, context: ContextType, info): Promise<string> => {
@@ -52,7 +52,7 @@ export const InvoiceMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('invoice_prudect_set', {
+        t.field('invoice_set_prudect', {
             args: {
                 invoiceId: nonNull(stringArg()),
                 prudectId: nonNull(stringArg()),

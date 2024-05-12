@@ -1,5 +1,5 @@
 export * from './controller'
-import { db, toPage } from '../../utils';
+import { db, genID, toPage } from '../../utils';
 
 // **************************************************************************************************** 
 export const todos_get = async (args: ArgsTodoQ) => {
@@ -51,6 +51,7 @@ export const todo_create = async (args: ArgsTodoM): Promise<string> => {
     return await db.$transaction(async (t) => {
         const r = await t.todos.create({
             data: {
+                id: genID(args.employeeId),
                 employeeId: args.employeeId,
                 dealerId: args.dealerId,
                 description: args.description,

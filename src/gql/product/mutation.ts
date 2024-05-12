@@ -89,7 +89,7 @@ export const ProductMutation = extendType({
                 return product_update(args.id, args)
             },
         });
-        t.field('product__id_update', {
+        t.field('product__update_id', {
             args: {
                 id: nonNull(stringArg()),
                 idNew: nonNull(stringArg()),

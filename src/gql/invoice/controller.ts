@@ -1,9 +1,11 @@
-import { TransactionType, db, myLog } from "../../utils";
+import { TransactionType, db, genID, myLog } from "../../utils";
+
 // **************************************************************************************************** 
 export const invoice_create = async (type: string, employeeId: string): Promise<string> => {
     if (type != invoice_types.PURCHASE && type != invoice_types.SALE && type != invoice_types.SALE_GR && type != invoice_types.LOSS) throw new Error('type not match');
     const r = await db.invoices.create({
         data: {
+            id: genID(type),
             type: type,
             employeeId: employeeId
         }

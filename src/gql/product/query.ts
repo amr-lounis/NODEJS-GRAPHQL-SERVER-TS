@@ -29,7 +29,7 @@ export const ProductQuery = extendType({
                 return products_get(args)
             },
         });
-        t.field('product_photo_get', {
+        t.field('product_get_photo', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('String'),
             async resolve(parent, args: { id?: string }, context, info): Promise<string> {

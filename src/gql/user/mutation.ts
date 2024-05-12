@@ -56,18 +56,18 @@ export const UserMutation = extendType({
             }
         });
         // --------------------------------------------------
-        t.field('user_id_update', {
+        t.field('user_update_id', {
             args: {
-                id: nonNull(stringArg()),
-                idNew: nonNull(stringArg()),
+                userId: nonNull(stringArg()),
+                userIdNew: nonNull(stringArg()),
             },
             type: nonNull('Boolean'),
-            resolve: (parent, args: { id: string, idNew: string }, context, info): Promise<boolean> => {
-                return user_update(args.id, { id: args.idNew })
+            resolve: (parent, args: { userId: string, userIdNew: string }, context, info): Promise<boolean> => {
+                return user_update(args.userId, { id: args.userIdNew })
             },
         });
         // --------------------------------------------------
-        t.field('user_role_update', {
+        t.field('user_update_role', {
             args: {
                 userId: nonNull(stringArg()),
                 roleId: nullable(stringArg())
@@ -79,10 +79,10 @@ export const UserMutation = extendType({
         });
         // --------------------------------------------------
         t.field('user_delete', {
-            args: { id: nonNull(stringArg()) },
+            args: { userId: nonNull(stringArg()) },
             type: nonNull("Boolean"),
-            resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
-                return user_delete(args.id)
+            resolve: (parent, args: { userId: string }, context, info): Promise<boolean> => {
+                return user_delete(args.userId)
             },
         });
     },
