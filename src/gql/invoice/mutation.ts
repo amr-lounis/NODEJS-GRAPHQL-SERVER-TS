@@ -71,8 +71,8 @@ export const InvoiceMutation = extendType({
                 invoiceId: nonNull(stringArg()),
                 validation: nonNull(booleanArg()),
             },
-            type: nonNull('Boolean'),
-            resolve: (parent, args: { invoiceId: string, validation: boolean }, context: ContextType, info): Promise<boolean> => {
+            type: nonNull('String'),
+            resolve: (parent, args: { invoiceId: string, validation: boolean }, context: ContextType, info): Promise<string> => {
                 return invoice_validation(args.invoiceId, args.validation)
             },
         });

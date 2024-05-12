@@ -135,9 +135,9 @@ model p_photos {
 model todos {
   id             String    @id @default(uuid())
   // 
-  employee       users?    @relation("employee", fields: [employeeId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  employee       users?    @relation("employee", fields: [employeeId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   employeeId     String?
-  dealer         users?    @relation("dealer", fields: [dealerId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  dealer         users?    @relation("dealer", fields: [dealerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   dealerId       String?
   // 
   photo          t_photos?
@@ -176,9 +176,9 @@ model settings {
 model invoices {
   id           String       @id @default(uuid())
   // 
-  employee     users?       @relation("employee", fields: [employeeId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  employee     users?       @relation("employee", fields: [employeeId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   employeeId   String?
-  dealer       users?       @relation("dealer", fields: [dealerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  dealer       users?       @relation("dealer", fields: [dealerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   dealerId     String?
   // 
   i_products   i_products[]
@@ -197,9 +197,9 @@ model invoices {
 }
 
 model i_products {
-  invoice     invoices  @relation(fields: [invoiceId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  invoice     invoices  @relation(fields: [invoiceId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   invoiceId   String
-  product     products  @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  product     products  @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   productId   String
   //
   description String    @default("")

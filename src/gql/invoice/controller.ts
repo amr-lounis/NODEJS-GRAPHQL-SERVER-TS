@@ -5,7 +5,7 @@ export const invoice_create = async (type: string, employeeId: string): Promise<
     if (type != invoice_types.PURCHASE && type != invoice_types.SALE && type != invoice_types.SALE_GR && type != invoice_types.LOSS) throw new Error('type not match');
     const r = await db.invoices.create({
         data: {
-            id: genID(type),
+            id: genID(type + "_invalid_"),
             type: type,
             employeeId: employeeId
         }
@@ -112,36 +112,40 @@ export const invoice_delete = async (invoiceId: string): Promise<boolean> => {
     })
     return true
 }
-export const invoice_validation = async (invoiceId: string, validation: boolean): Promise<boolean> => {
+export const invoice_validation = async (invoiceId: string, validationNew: boolean): Promise<string> => {
     if (invoiceId == undefined) throw new Error('id is required');
-    await db.$transaction(async (tr) => {
+    const r = await db.$transaction(async (tr) => {
         const invoice = await tr.invoices.findUnique({ where: { id: invoiceId } })
-        if (invoice.type == invoice_types.PURCHASE) {
-            if (validation == true && invoice.validation == true) throw new Error('invoice already validated.');
-            else if (validation == false && invoice.validation == false) throw new Error('invoice already invalidate.');
-
-            else if (validation == true && invoice.validation == false) {
+        if (!invoice) throw new Error('invoice id not exist.');
+        const validationOld = invoice.validation;
+        const invoiceType = invoice.type;
+        // 
+        if (validationNew == true && validationOld == true) throw new Error('invoice already validated.');
+        if (validationNew == false && validationOld == false) throw new Error('invoice already invalidate.');
+        // 
+        if (invoiceType == invoice_types.PURCHASE) {
+            if (validationNew == true && validationOld == false) {
                 const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
                 for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, ip[i].quantity)
-                await tr.invoices.update({ where: { id: invoiceId }, data: { validation: true } })
-            } else if (validation == false && invoice.validation == true) {
+                return await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_valid_"), validation: true } })
+            } else if (validationNew == false && validationOld == true) {
                 const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
                 for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, - ip[i].quantity)
-                await tr.invoices.update({ where: { id: invoiceId }, data: { validation: false } })
+                return await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_invalid_"), validation: false } })
             }
-        } else if (invoice.type == invoice_types.SALE || invoice.type == invoice_types.SALE_GR || invoice.type == invoice_types.LOSS) {
-            if (validation == true && invoice.validation == false) {
+        } else if (invoiceType == invoice_types.SALE || invoiceType == invoice_types.SALE_GR || invoiceType == invoice_types.LOSS) {
+            if (validationNew == true && validationOld == false) {
                 const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
                 for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, -ip[i].quantity)
-                await tr.invoices.update({ where: { id: invoiceId }, data: { validation: true } })
-            } else if (validation == false && invoice.validation == true) {
+                return await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_valid_"), validation: true } })
+            } else if (validationNew == false && validationOld == true) {
                 const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
                 for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, ip[i].quantity)
-                await tr.invoices.update({ where: { id: invoiceId }, data: { validation: false } })
+                return await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_invalid_"), validation: false } })
             }
         }
     });
-    return true
+    return r.id
 }
 // **************************************************************************************************** Transaction invoice_calc
 export const invoice_calc = async (tr: TransactionType, id: string): Promise<boolean> => {
