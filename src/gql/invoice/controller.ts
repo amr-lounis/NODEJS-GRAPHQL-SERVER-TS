@@ -37,7 +37,7 @@ export const invoice_update = async (id: string, args: invoice_update_type): Pro
     })
     return true
 }
-export const invoice_prudect_set = async (args: invoice_prudect_set_type): Promise<boolean> => {
+export const invoice_update_prudect = async (args: invoice_prudect_set_type): Promise<boolean> => {
     if (args.invoiceId == undefined) throw new Error('invoiceId is required');
     if (args.prudectId == undefined) throw new Error('prudectId is required');
     await db.$transaction(async (tr) => {
@@ -101,18 +101,7 @@ export const invoice_prudect_set = async (args: invoice_prudect_set_type): Promi
 
     return true
 }
-export const invoice_delete = async (invoiceId: string): Promise<boolean> => {
-    if (invoiceId == undefined) throw new Error('invoiceId is required');
-    await db.$transaction(async (tr) => {
-        const invoice = await tr.invoices.findUnique({ where: { id: invoiceId } })
-        if (!invoice) throw new Error('invoice not exist');
-        if (invoice.validation == true) throw new Error('invoice already validated.');
-
-        await tr.invoices.delete({ where: { id: invoiceId } })
-    })
-    return true
-}
-export const invoice_validation = async (invoiceId: string, validationNew: boolean): Promise<string> => {
+export const invoice_update_validation = async (invoiceId: string, validationNew: boolean): Promise<string> => {
     if (invoiceId == undefined) throw new Error('id is required');
     const r = await db.$transaction(async (tr) => {
         const invoice = await tr.invoices.findUnique({ where: { id: invoiceId } })
@@ -146,6 +135,17 @@ export const invoice_validation = async (invoiceId: string, validationNew: boole
         }
     });
     return r.id
+}
+export const invoice_delete = async (invoiceId: string): Promise<boolean> => {
+    if (invoiceId == undefined) throw new Error('invoiceId is required');
+    await db.$transaction(async (tr) => {
+        const invoice = await tr.invoices.findUnique({ where: { id: invoiceId } })
+        if (!invoice) throw new Error('invoice not exist');
+        if (invoice.validation == true) throw new Error('invoice already validated.');
+
+        await tr.invoices.delete({ where: { id: invoiceId } })
+    })
+    return true
 }
 // **************************************************************************************************** Transaction invoice_calc
 export const invoice_calc = async (tr: TransactionType, id: string): Promise<boolean> => {

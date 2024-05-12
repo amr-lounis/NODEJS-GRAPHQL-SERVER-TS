@@ -1,6 +1,6 @@
 import { booleanArg, extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
 import { ContextType } from "../../utils";
-import { invoice_create, invoice_prudect_set, invoice_prudect_set_type, invoice_types, invoice_update, invoice_update_type, invoice_validation } from "./controller";
+import { invoice_create, invoice_update_prudect, invoice_prudect_set_type, invoice_types, invoice_update, invoice_update_type, invoice_update_validation } from "./controller";
 
 export const InvoiceMutation = extendType({
     type: 'Mutation',
@@ -52,7 +52,7 @@ export const InvoiceMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('invoice_set_prudect', {
+        t.field('invoice_update_prudect', {
             args: {
                 invoiceId: nonNull(stringArg()),
                 prudectId: nonNull(stringArg()),
@@ -62,18 +62,28 @@ export const InvoiceMutation = extendType({
             },
             type: nonNull('Boolean'),
             resolve: (parent, args: invoice_prudect_set_type, context: ContextType, info): Promise<boolean> => {
-                return invoice_prudect_set(args)
+                return invoice_update_prudect(args)
             },
         });
         // --------------------------------------------------
-        t.field('invoice_validation', {
+        t.field('invoice_update_valid', {
+            args: {
+                invoiceId: nonNull(stringArg())
+            },
+            type: nonNull('String'),
+            resolve: (parent, args: { invoiceId: string }, context: ContextType, info): Promise<string> => {
+                return invoice_update_validation(args.invoiceId, true)
+            },
+        });
+        // --------------------------------------------------
+        t.field('invoice_update_invalid', {
             args: {
                 invoiceId: nonNull(stringArg()),
                 validation: nonNull(booleanArg()),
             },
             type: nonNull('String'),
-            resolve: (parent, args: { invoiceId: string, validation: boolean }, context: ContextType, info): Promise<string> => {
-                return invoice_validation(args.invoiceId, args.validation)
+            resolve: (parent, args: { invoiceId: string }, context: ContextType, info): Promise<string> => {
+                return invoice_update_validation(args.invoiceId, false)
             },
         });
     }
