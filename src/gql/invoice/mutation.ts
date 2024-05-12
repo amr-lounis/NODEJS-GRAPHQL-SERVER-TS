@@ -66,7 +66,7 @@ export const InvoiceMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('invoice_update_valid', {
+        t.field('invoice_set_valid', {
             args: {
                 invoiceId: nonNull(stringArg())
             },
@@ -76,7 +76,7 @@ export const InvoiceMutation = extendType({
             },
         });
         // --------------------------------------------------
-        t.field('invoice_update_invalid', {
+        t.field('invoice_set_invalid', {
             args: {
                 invoiceId: nonNull(stringArg()),
                 validation: nonNull(booleanArg()),
