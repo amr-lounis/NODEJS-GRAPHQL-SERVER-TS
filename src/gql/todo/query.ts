@@ -1,5 +1,6 @@
 import { booleanArg, extendType, floatArg, intArg, nonNull, nullable, objectType, stringArg } from 'nexus';
 import { ArgsTodoQ, todo_photo_get, todos_get } from './controller';
+import { db } from '../../utils';
 // **************************************************************************************************** 
 export const TodoQuery = extendType({
     type: 'Query',
@@ -21,7 +22,9 @@ export const TodoQuery = extendType({
             description: "date format : 2000-01-01T00:00:00Z",
             type: todos_out,
             resolve: async (parent, args: ArgsTodoQ, context, info) => {
-                return todos_get(args)
+                return await db.$transaction(async (t) => {
+                    return await todos_get(t, args)
+                })
             },
         });
         // --------------------------------------------------
@@ -29,7 +32,9 @@ export const TodoQuery = extendType({
             args: { todoId: nonNull(stringArg()) },
             type: nonNull("String"),
             resolve: async (parent, args: ArgsTodoQ, context, info): Promise<string> => {
-                return todo_photo_get(args)
+                return await db.$transaction(async (t) => {
+                    return await todo_photo_get(t, args)
+                })
             },
         });
     }

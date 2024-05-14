@@ -78,8 +78,7 @@ export const InvoiceMutation = extendType({
         // --------------------------------------------------
         t.field('invoice_set_invalid', {
             args: {
-                invoiceId: nonNull(stringArg()),
-                validation: nonNull(booleanArg()),
+                invoiceId: nonNull(stringArg())
             },
             type: nonNull('String'),
             resolve: (parent, args: { invoiceId: string }, context: ContextType, info): Promise<string> => {

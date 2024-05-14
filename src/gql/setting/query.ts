@@ -1,5 +1,6 @@
 import { extendType, list, nonNull, objectType, stringArg } from 'nexus';
 import { setting_get, settings_get } from './controller';
+import { db } from '../../utils';
 // **************************************************************************************************** 
 export const SettingQuery = extendType({
     type: 'Query',
@@ -8,7 +9,9 @@ export const SettingQuery = extendType({
             args: {},
             type: list(settings_get_out),
             resolve: (parent, args, context, info): Promise<{ key?: string, value?: string }[]> => {
-                return settings_get()
+                return db.$transaction(async (t) => {
+                    return settings_get(t)
+                })
             },
         });
         // --------------------------------------------------
@@ -16,7 +19,9 @@ export const SettingQuery = extendType({
             args: { key: nonNull(stringArg()) },
             type: nonNull('String'),
             resolve: async (parent, args: { key?: string }, context, info): Promise<string> => {
-                return setting_get(args.key)
+                return db.$transaction(async (t) => {
+                    return setting_get(t, args.key)
+                })
             },
         });
     }

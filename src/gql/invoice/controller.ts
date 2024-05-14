@@ -1,6 +1,9 @@
 import { TransactionType, db, genID, myLog } from "../../utils";
 
-// **************************************************************************************************** 
+// ****************************************************************************************************
+export const invoices_get = async (args) => {
+
+}
 export const invoice_create = async (type: string, employeeId: string): Promise<string> => {
     if (type != invoice_types.PURCHASE && type != invoice_types.SALE && type != invoice_types.SALE_GR && type != invoice_types.LOSS) throw new Error('type not match');
     const r = await db.invoices.create({
@@ -14,14 +17,14 @@ export const invoice_create = async (type: string, employeeId: string): Promise<
 }
 export const invoice_update = async (id: string, args: invoice_update_type): Promise<boolean> => {
     await db.$transaction(async (tr) => {
+        // verification
         const invoice = await tr.invoices.findUnique({ where: { id: id } });
-        myLog(invoice)
         if (!invoice) throw new Error('this invoice is not exist');
         if (invoice.validation == true) throw new Error('invoice already validated.');
         if (args.money_stamp != undefined && args.money_stamp < 0) throw new Error("error : money_stamp < 0")
         if (args.money_tax != undefined && args.money_tax < 0) throw new Error("error : money_tax < 0")
         if (args.money_paid != undefined && args.money_paid < 0) throw new Error("error : money_paid < 0")
-
+        // 
         await tr.invoices.update({
             where: { id: id }, data: {
                 employeeId: args.employeeId,
@@ -38,15 +41,17 @@ export const invoice_update = async (id: string, args: invoice_update_type): Pro
     return true
 }
 export const invoice_update_prudect = async (args: invoice_prudect_set_type): Promise<boolean> => {
-    if (args.invoiceId == undefined) throw new Error('invoiceId is required');
-    if (args.prudectId == undefined) throw new Error('prudectId is required');
     await db.$transaction(async (tr) => {
+        // verification
+        if (args.invoiceId == undefined) throw new Error('invoiceId is required');
+        if (args.prudectId == undefined) throw new Error('prudectId is required');
         const invoice = await tr.invoices.findFirst({ where: { id: args.invoiceId } })
         if (!invoice) throw new Error('invoice id not is exist');
         if (invoice.validation == true) throw new Error('invoice already validated.');
+        const product = await tr.products.findFirst({ where: { id: args.prudectId } })
+        if (!product) throw new Error('product id not is exist');
         // 
         const ip_exist = await tr.i_products.findFirst({ where: { invoiceId: args.invoiceId, productId: args.prudectId } })
-
         if (ip_exist) {
             const money_unite = (args.money_unite ?? ip_exist.money_unite);
             const quantity = (args.quantity ?? ip_exist.quantity + 1);
@@ -102,10 +107,12 @@ export const invoice_update_prudect = async (args: invoice_prudect_set_type): Pr
     return true
 }
 export const invoice_update_validation = async (invoiceId: string, validationNew: boolean): Promise<string> => {
-    if (invoiceId == undefined) throw new Error('id is required');
     const r = await db.$transaction(async (tr) => {
+        // verification
+        if (invoiceId == undefined) throw new Error('id is required');
         const invoice = await tr.invoices.findUnique({ where: { id: invoiceId } })
         if (!invoice) throw new Error('invoice id not exist.');
+        // 
         const validationOld = invoice.validation;
         const invoiceType = invoice.type;
         // 
@@ -114,45 +121,54 @@ export const invoice_update_validation = async (invoiceId: string, validationNew
         // 
         if (invoiceType == invoice_types.PURCHASE) {
             if (validationNew == true && validationOld == false) {
+                // to valid
                 const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
                 for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, ip[i].quantity)
                 return await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_valid_"), validation: true } })
             } else if (validationNew == false && validationOld == true) {
+                // to invalid
                 const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
                 for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, - ip[i].quantity)
                 return await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_invalid_"), validation: false } })
             }
         } else if (invoiceType == invoice_types.SALE || invoiceType == invoice_types.SALE_GR || invoiceType == invoice_types.LOSS) {
             if (validationNew == true && validationOld == false) {
+                // to valid
                 const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
                 for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, -ip[i].quantity)
                 return await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_valid_"), validation: true } })
             } else if (validationNew == false && validationOld == true) {
+                // to invalid
                 const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
                 for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, ip[i].quantity)
                 return await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_invalid_"), validation: false } })
             }
         }
+        else {
+            throw new Error('invoice type not recognized');
+        }
     });
     return r.id
 }
 export const invoice_delete = async (invoiceId: string): Promise<boolean> => {
-    if (invoiceId == undefined) throw new Error('invoiceId is required');
     await db.$transaction(async (tr) => {
+        // verification
+        if (invoiceId == undefined) throw new Error('invoiceId is required');
         const invoice = await tr.invoices.findUnique({ where: { id: invoiceId } })
         if (!invoice) throw new Error('invoice not exist');
         if (invoice.validation == true) throw new Error('invoice already validated.');
-
+        // 
         await tr.invoices.delete({ where: { id: invoiceId } })
     })
     return true
 }
 // **************************************************************************************************** Transaction invoice_calc
 export const invoice_calc = async (tr: TransactionType, id: string): Promise<boolean> => {
+    // verification
     const invoice = await tr.invoices.findUnique({ where: { id: id } });
     if (!invoice) throw new Error('invoice not exist');
     if (invoice.validation == true) throw new Error('invoice already validated.');
-
+    // 
     const money_net = (await tr.i_products.aggregate({ _sum: { money_calc: true }, where: { invoiceId: id } }))._sum.money_calc ?? 0;
     const money_calc = money_net + invoice.money_stamp + invoice.money_tax;
     const money_unpaid = money_calc - invoice.money_paid
@@ -172,8 +188,13 @@ export const invoice_calc = async (tr: TransactionType, id: string): Promise<boo
 }
 // **************************************************************************************************** Transaction product_stock
 export const product_quantity_updown = async (tr: TransactionType, id: string, quantity: number): Promise<boolean> => {//if  (quantity < 0) reduire else add
+    // verification
     const r = await tr.products.findUnique({ select: { quantity: true }, where: { id: id } })
+    if (!r) throw new Error('product id not exist.');
+    // 
     await tr.products.update({ where: { id: id }, data: { quantity: r.quantity + quantity } })
+    const r2 = await tr.products.findUnique({ select: { quantity: true }, where: { id: id } })
+    if (r2.quantity < 0) throw new Error('product quantity < 0 .');
     return true
 }
 // **************************************************************************************************** 

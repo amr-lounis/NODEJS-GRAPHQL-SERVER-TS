@@ -1,9 +1,9 @@
 export * from './controller'
-import { db, genID, toPage } from '../../utils';
+import { TransactionType, genID, toPage } from '../../utils';
 
 // **************************************************************************************************** 
-export const todos_get = async (args: ArgsTodoQ) => {
-    const itemsCountAll = (await db.todos.aggregate({
+export const todos_get = async (tr: TransactionType, args: ArgsTodoQ) => {
+    const itemsCountAll = (await tr.todos.aggregate({
         _count: { id: true }, where: {
             id: args.id,
             employeeId: args.employeeId,
@@ -15,7 +15,7 @@ export const todos_get = async (args: ArgsTodoQ) => {
         }
     }))._count.id
     const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-    const items = await db.todos.findMany({
+    const items = await tr.todos.findMany({
         orderBy: { createdAt: 'desc' }, where: {
             id: args.id,
             employeeId: args.employeeId,
@@ -37,76 +37,79 @@ export const todos_get = async (args: ArgsTodoQ) => {
         items: items
     }
 }
-export const todo_photo_get = async (args: ArgsTodoQ): Promise<string> => {
-    const p = await db.t_photos.findFirst({ where: { todoId: args.todoId } },);
-    if (!p) throw new Error('this id is not exist');
+export const todo_photo_get = async (tr: TransactionType, args: ArgsTodoQ): Promise<string> => {
+    // verification
+    const p = await tr.t_photos.findUnique({ where: { todoId: args.todoId } },);
+    if (!p) throw new Error('todo id is not exist');
+    // 
     return p?.photo?.toString() ?? ""
 }
-export const todo_create = async (args: ArgsTodoM): Promise<string> => {
-    if (args.employeeId == undefined) throw new Error('id is required');
+export const todo_create = async (tr: TransactionType, args: ArgsTodoM): Promise<string> => {
+    // verification
+    if (args.employeeId == undefined) throw new Error('employee id is required');
+    const todo = await tr.todos.create({ data: { id: genID(args.employeeId + ".invalid") } });
+    await tr.t_photos.create({ data: { todoId: todo.id, photo: Buffer.from("", 'utf8') } });
+    delete args?.id
+    await todo_update(tr, todo.id, args)
+    return todo.id
+}
+export const todo_update = async (tr: TransactionType, todoId: string, args: ArgsTodoM) => {
+    const todo = await testNotExist(tr, todoId);
+    if (todo.validation == true) throw new Error('todo is validated.');
+    const money_expenses = (args.money_expenses ?? todo.money_expenses);
+    const money_total = (args.money_total ?? todo.money_total);
+    const money_paid = (args.money_paid ?? money_total);
+    // 
     if (args.money_expenses < 0) throw new Error("error : money_expenses < 0")
     if (args.money_total < 0) throw new Error("error : money_total < 0")
-    if (args.money_paid < 0) throw new Error("error : money_paid < 0")
-    if (args.money_paid > args.money_total) throw new Error("error : money_paid < 0")
-    return await db.$transaction(async (t) => {
-        const r = await t.todos.create({
-            data: {
-                id: genID(args.employeeId),
-                employeeId: args.employeeId,
-                dealerId: args.dealerId,
-                description: args.description,
-                validation: args.validation,
-                money_expenses: args.money_expenses,
-                money_total: args.money_total,
-                money_paid: args.money_paid,
-                money_unpaid: args.money_total - args.money_paid,
-                money_margin: args.money_total - args.money_expenses
-            }
-        });
-        await t.t_photos.create({
-            data: { todoId: r.id, photo: Buffer.from("", 'utf8') }
-        });
-        if (args.photo != undefined) {
-            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
-            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.t_photos.update({ where: { todoId: r.id }, data: { photo: photpBytes } });
+    if (args.money_paid < 0) throw new Error("error : money_paid  < 0")
+    if (args.money_paid > args.money_total) throw new Error("error : money_paid  > money_total")
+    const r = await tr.todos.update({
+        where: {
+            id: todoId
+        },
+        data: {
+            id: args.id,
+            employeeId: args.employeeId,
+            dealerId: args.dealerId,
+            description: args.description,
+            money_expenses: money_expenses,
+            money_total: money_total,
+            money_paid: money_paid,
+            money_unpaid: money_total - money_paid,
+            money_margin: money_total - money_expenses
         }
-        return r.id
     });
-}
-export const todo_update = async (id: string, args: ArgsTodoM) => {
-    if (id == undefined) throw new Error('id is required');
-    if (args.money_expenses < 0) throw new Error("error : money_expenses < 0")
-    if (args.money_total < 0) throw new Error("error : money_total < 0")
-    if ((args.money_paid < 0) || (args.money_paid > args.money_total)) throw new Error("error : money_paid  < 0")
-    return await db.$transaction(async (t) => {
-        const r = await t.todos.update({
-            where: {
-                id: id
-            },
-            data: {
-                employeeId: args.employeeId,
-                dealerId: args.dealerId,
-                description: args.description,
-                validation: args.validation,
-                money_expenses: args.money_expenses,
-                money_total: args.money_total,
-                money_paid: args.money_paid,
-                money_unpaid: args.money_total - args.money_paid,
-                money_margin: args.money_total - args.money_expenses
-            }
-        });
-        if (args.photo != undefined) {
-            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
-            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.t_photos.update({ where: { todoId: id }, data: { photo: photpBytes } });
-        }
-        return true
-    });
-}
-export const todo_delete = async (id: string) => {
-    await db.todos.delete({ where: { id: id } })
+    if (args.photo != undefined) {
+        if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
+        const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
+        await tr.t_photos.update({ where: { todoId: todoId }, data: { photo: photpBytes } });
+    }
     return true
+}
+export const todo_delete = async (tr: TransactionType, todoId: string) => {
+    const todo = await testNotExist(tr, todoId);
+    if (todo.validation == true) throw new Error('todo is validated.');
+    await tr.todos.delete({ where: { id: todoId } })
+    return true
+}
+export const todo_update_validation = async (tr: TransactionType, todoId: string, validationNew: boolean): Promise<string> => {
+    const todo = await testNotExist(tr, todoId);
+    if (validationNew == true && todo.validation == true) throw new Error('invoice already validated.');
+    if (validationNew == false && todo.validation == false) throw new Error('invoice already invalidate.');
+    if (validationNew == true && todo.validation == false) {// to valid
+        await tr.todos.update({ where: { id: todoId }, data: { validation: true, id: genID(todo.employeeId + ".valid") } })
+    }
+    if (validationNew == false && todo.validation == true) { // to invalid
+        await tr.todos.update({ where: { id: todoId }, data: { validation: false, id: genID(todo.employeeId + ".invalid") } })
+    }
+    return ""
+}
+export const testNotExist = async (tr: TransactionType, todoId: string) => {
+    if (todoId == undefined) throw new Error('todo id is required');
+    const todo = await tr.todos.findUnique({ where: { id: todoId } })
+    if (!todo) throw new Error('todo not exist');
+    return todo
 }
 // **************************************************************************************************** 
 export type ArgsTodoQ = {
@@ -129,7 +132,6 @@ export type ArgsTodoM = {
     employeeId?: string,
     dealerId?: string,
     description?: string,
-    validation?: boolean,
     money_expenses?: number,
     money_total?: number,
     money_paid?: number,

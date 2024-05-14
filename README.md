@@ -11,5 +11,5 @@ yarn install
 # create database
 yarn db
 
-# run server aas devloper
+# run server as devloper
 yarn dev 
