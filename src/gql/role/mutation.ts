@@ -1,5 +1,6 @@
 import { booleanArg, extendType, nonNull, stringArg } from 'nexus';
 import { role_authorization_set, role_create, role_delete, role_update } from './controller';
+import { db } from '../../utils';
 // **************************************************************************************************** 
 export const RoleMutation = extendType({
     type: 'Mutation',
@@ -8,7 +9,9 @@ export const RoleMutation = extendType({
             args: { id: nonNull(stringArg()), },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
-                return role_create(args.id)
+                return db.$transaction((t) => {
+                    return role_create(t, args.id)
+                })
             },
         });
         // --------------------------------------------------
@@ -16,7 +19,9 @@ export const RoleMutation = extendType({
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string, idNew: string }, context, info): Promise<boolean> => {
-                return role_update(args.id, args.idNew)
+                return db.$transaction((t) => {
+                    return role_update(t, args.id, args.idNew)
+                })
             }
         });
         // --------------------------------------------------
@@ -24,7 +29,9 @@ export const RoleMutation = extendType({
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
-                return role_delete(args.id)
+                return db.$transaction((t) => {
+                    return role_delete(t, args.id)
+                })
             }
         });
         // --------------------------------------------------
@@ -32,7 +39,9 @@ export const RoleMutation = extendType({
             args: { roleId: nonNull(stringArg()), operationId: nonNull(stringArg()), value: nonNull(booleanArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { roleId: string, operationId: string, value: boolean }, context, info): Promise<boolean> => {
-                return role_authorization_set(args.roleId, args.operationId, args.value)
+                return db.$transaction((t) => {
+                    return role_authorization_set(t, args.roleId, args.operationId, args.value)
+                })
             }
         });
     }

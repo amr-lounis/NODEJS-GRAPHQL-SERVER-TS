@@ -9,7 +9,9 @@ export const RoleQuery = extendType({
             args: {},
             type: list('String'),
             resolve: (parent, args: void, context, info): Promise<string[]> => {
-                return operations_get()
+                return db.$transaction((t) => {
+                    return operations_get(t)
+                })
             },
         });
         // --------------------------------------------------
@@ -17,7 +19,9 @@ export const RoleQuery = extendType({
             args: {},
             type: list('String'),
             resolve: (parent, args: void, context, info): Promise<string[]> => {
-                return roles_get()
+                return db.$transaction((t) => {
+                    return roles_get(t)
+                })
             },
         });
         // --------------------------------------------------
@@ -31,7 +35,9 @@ export const RoleQuery = extendType({
                 },
             })),
             resolve: (parent, args: { roleId?: string }, context, info) => {
-                return authorizations_get(args.roleId)
+                return db.$transaction((t) => {
+                    return authorizations_get(t, args.roleId)
+                })
             }
         });
     }

@@ -14,11 +14,11 @@ export const db_init = async (listOperationName: string[]) => {
             const employee = 'employee'
             // -------------------------------------------------- create all operations
             for (let i = 0; i < listOperationName.length; i++)
-                try { await operation_create(listOperationName[i]) } catch (err) { }
+                try { await operation_create(t, listOperationName[i]) } catch (err) { }
             // -------------------------------------------------- create all roles
             try {
-                await role_create(admin)
-                await role_create(employee)
+                await role_create(t, admin)
+                await role_create(t, employee)
             } catch (err) { }
             // -------------------------------------------------- create all users
             await user_create({

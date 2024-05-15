@@ -1,4 +1,5 @@
 import { role_authorization_set, authorizations_all_get, operations_get, roles_get } from "../gql";
+import { db } from "./db";
 interface Matrix {
     [roleId: string]: {
         [operationId: string]: boolean;
@@ -8,38 +9,42 @@ class authorization_matrix_controller {
     matrix: Matrix = {};
     // --------------------------------------------------
     async initMatrix() {
-        const matrix: Matrix = {};
-        // get roles from database
-        const roles = await roles_get()
-        // get operations from database
-        const operations = await operations_get()
+        return db.$transaction(async (t) => {
+            const matrix: Matrix = {};
+            // get roles from database
+            const roles = await roles_get(t)
+            // get operations from database
+            const operations = await operations_get(t)
 
-        roles.forEach((role: string) => {
-            matrix[role] = {};
-            operations.forEach((operation: string) => {
-                matrix[role][operation] = false;
+            roles.forEach((role: string) => {
+                matrix[role] = {};
+                operations.forEach((operation: string) => {
+                    matrix[role][operation] = false;
+                });
             });
-        });
 
-        const roleoperations = await authorizations_all_get()
+            const roleoperations = await authorizations_all_get(t)
 
-        roleoperations.forEach((roleoperation) => {
-            const roleId = roleoperation.roleId;
-            const operationId = roleoperation.operationId;
-            matrix[roleId][operationId] = roleoperation.value;
-        });
-        this.matrix = matrix;
+            roleoperations.forEach((roleoperation) => {
+                const roleId = roleoperation.roleId;
+                const operationId = roleoperation.operationId;
+                matrix[roleId][operationId] = roleoperation.value;
+            });
+            this.matrix = matrix;
+        })
     }
     // --------------------------------------------------
     async storeMatrix() {
-        const roleIds = Object.keys(this.matrix);
-        for (const roleId of roleIds) {
-            const operationIds = Object.keys(this.matrix[roleId]);
-            for (const operationId of operationIds) {
-                const value = this.matrix[roleId][operationId];
-                await role_authorization_set(roleId, operationId, value)
+        return db.$transaction(async (t) => {
+            const roleIds = Object.keys(this.matrix);
+            for (const roleId of roleIds) {
+                const operationIds = Object.keys(this.matrix[roleId]);
+                for (const operationId of operationIds) {
+                    const value = this.matrix[roleId][operationId];
+                    await role_authorization_set(t, roleId, operationId, value)
+                }
             }
-        }
+        })
     }
     // --------------------------------------------------
     authorization_test(role: string, operationName: string): boolean {
