@@ -21,13 +21,13 @@ export const db_init = async (listOperationName: string[]) => {
                 await role_create(t, employee)
             } catch (err) { }
             // -------------------------------------------------- create all users
-            await user_create({
+            await user_create(t, {
                 id: admin,
                 password: admin,
                 roleId: admin,
                 photo: generat_photo()
             })
-            await user_create({
+            await user_create(t, {
                 id: employee,
                 password: employee,
                 roleId: employee,

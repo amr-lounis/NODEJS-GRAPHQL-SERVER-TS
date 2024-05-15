@@ -1,8 +1,8 @@
-import { MyToken, db, toPage } from "../../utils"
+import { MyToken, TransactionType, toPage } from "../../utils"
 // **************************************************************************************************** 
-export const user_authentication = async (id: string, password: string): Promise<string> => {
+export const user_authentication = async (tr: TransactionType, id: string, password: string): Promise<string> => {
     try {
-        var u = await db.users.findFirst({ where: { id: id, password: password } })
+        var u = await tr.users.findFirst({ where: { id: id, password: password } })
         return MyToken.Token_Create(u.id, u.roleId)
     } catch (error) {
         return ""
@@ -15,20 +15,19 @@ export const user_authentication_renewal = async (id: string, roleId: string): P
         return ""
     }
 }
-export const user_role_get = async (id: string): Promise<string> => {
-    const r = await db.users.findUnique({ where: { id: id } });
+export const user_role_get = async (tr: TransactionType, id: string): Promise<string> => {
+    const r = await tr.users.findUnique({ where: { id: id } });
     if (!r) throw new Error('not exist');
     return r?.roleId
 }
-export const user_photo_get = async (id: string): Promise<string> => {
-    const p = await db.u_photos.findUnique({ where: { userId: id } },);
+export const user_photo_get = async (tr: TransactionType, id: string): Promise<string> => {
+    const p = await tr.u_photos.findUnique({ where: { userId: id } },);
     if (!p) throw new Error('not exist');
     return p?.photo?.toString() ?? ""
 }
-
-export const users_get = async (args: ArgsUserQ) => {
+export const users_get = async (tr: TransactionType, args: ArgsUserQ) => {
     args.filter_id = args.filter_id ?? ""
-    const itemsCountAll = (await db.users.aggregate({
+    const itemsCountAll = (await tr.users.aggregate({
         _count: { id: true }, where: { // -------------------------------------------------- where for 1
             id: { contains: args.filter_id, equals: args.id },
             createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
@@ -36,7 +35,7 @@ export const users_get = async (args: ArgsUserQ) => {
         }
     }))._count.id
     const p = toPage(itemsCountAll, args.pageNumber, args.itemsTake)
-    const items = await db.users.findMany({
+    const items = await tr.users.findMany({
         orderBy: { createdAt: 'desc' }, where: {  // -------------------------------------------------- where for 2
             id: { contains: args.filter_id, equals: args.id },
             createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
@@ -54,68 +53,49 @@ export const users_get = async (args: ArgsUserQ) => {
         items: items
     }
 }
-export const user_create = async (args: ArgsUserM): Promise<boolean> => {
+export const user_create = async (tr: TransactionType, args: ArgsUserM): Promise<boolean> => {
     if (args.id == undefined) throw new Error('id is required');
-    if (args.id.length > 100) throw new Error('id length > 100');
-    await db.$transaction(async (t) => {
-        const r = await t.users.create({
-            data: {
-                id: args.id,
-                password: args.password,
-                description: args.description,
-                roleId: args.roleId,
-                address: args.address,
-                first_name: args.first_name,
-                last_name: args.last_name,
-                phone: args.phone,
-                fax: args.fax,
-                email: args.email,
-            }
-        });
-        await t.u_photos.create({
-            data: { userId: r.id, photo: Buffer.from("", 'utf8') }
-        });
-        if (args.photo != undefined) {
-            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
-            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.u_photos.update({ where: { userId: r.id }, data: { photo: photpBytes } });
+    if (args?.id?.length > 100) throw new Error('id length > 100');
+    const r = await tr.users.create({ data: { id: args.id } });
+    await tr.u_photos.create({ data: { userId: r.id, photo: Buffer.from("", 'utf8') } });
+    await user_update(tr, args.id, args)
+    return true;
+}
+export const user_update = async (tr: TransactionType, id: string, args: ArgsUserM): Promise<boolean> => {
+    if (args?.id?.length > 100) throw new Error('id length > 100');
+    await userGetOrError(tr, id)
+    await tr.users.update({
+        where: { id: id },
+        data: {
+            id: args.id,
+            password: args.password,
+            description: args.description,
+            roleId: args.roleId,
+            address: args.address,
+            first_name: args.first_name,
+            last_name: args.last_name,
+            phone: args.phone,
+            fax: args.fax,
+            email: args.email,
         }
     });
-    return true;
-}
-export const user_update = async (id: string, args: ArgsUserM): Promise<boolean> => {
-    if (id == undefined) throw new Error('id is required');
-    if (args?.id?.length > 100) throw new Error('id length > 100');
-    await db.$transaction(async (t) => {
-        const exist_u = await t.users.findFirst({ select: { id: true }, where: { id: id } }) ? true : false;
-        if (!exist_u) throw new Error(`error : user id : ${id} is not exist`);
-        await t.users.update({
-            where: { id: id },
-            data: {
-                id: args.id,
-                password: args.password,
-                description: args.description,
-                roleId: args.roleId,
-                address: args.address,
-                first_name: args.first_name,
-                last_name: args.last_name,
-                phone: args.phone,
-                fax: args.fax,
-                email: args.email,
-            }
-        });
-        if (args.photo != undefined) {
-            if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
-            const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
-            await t.u_photos.update({ where: { userId: id }, data: { photo: photpBytes } });
-        }
+    if (args.photo != undefined) {
+        if (args.photo.length > 524288) throw new Error("The size is greater than the maximum value");
+        const photpBytes = Buffer.from(args.photo ?? "", 'utf8')
+        await tr.u_photos.update({ where: { userId: id }, data: { photo: photpBytes } });
     }
-    );
     return true;
 }
-export const user_delete = async (id: string): Promise<boolean> => {
-    await db.users.delete({ where: { id: id } })
+export const user_delete = async (tr: TransactionType, id: string): Promise<boolean> => {
+    await userGetOrError(tr, id)
+    await tr.users.delete({ where: { id: id } })
     return true;
+}
+export const userGetOrError = async (tr: TransactionType, userId: string) => {
+    if (userId == undefined) throw new Error('user id is required');
+    const user = await tr.users.findUnique({ where: { id: userId } })
+    if (!user) throw new Error(`error : user id : ${userId} is not exist`);
+    return user
 }
 // **************************************************************************************************** 
 export type ArgsUserQ = {

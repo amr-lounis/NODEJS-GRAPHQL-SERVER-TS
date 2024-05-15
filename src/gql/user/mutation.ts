@@ -34,7 +34,9 @@ export const UserMutation = extendType({
             },
             type: nonNull("Boolean"),
             resolve: (parent, args: ArgsUserM, context, info): Promise<boolean> => {
-                return user_create(args)
+                return db.$transaction((t) => {
+                    return user_create(t, args)
+                })
             }
         });
         // --------------------------------------------------
@@ -52,7 +54,9 @@ export const UserMutation = extendType({
             },
             type: nonNull('Boolean'),
             resolve: (parent, args: ArgsUserM, context: ContextType, info): Promise<boolean> => {
-                return user_update(context?.jwt?.id, args)
+                return db.$transaction((t) => {
+                    return user_update(t, context?.jwt?.id, args)
+                })
             }
         });
         // --------------------------------------------------
@@ -63,7 +67,9 @@ export const UserMutation = extendType({
             },
             type: nonNull('Boolean'),
             resolve: (parent, args: { userId: string, userIdNew: string }, context, info): Promise<boolean> => {
-                return user_update(args.userId, { id: args.userIdNew })
+                return db.$transaction((t) => {
+                    return user_update(t, args.userId, { id: args.userIdNew })
+                })
             },
         });
         // --------------------------------------------------
@@ -74,7 +80,9 @@ export const UserMutation = extendType({
             },
             type: nullable("Boolean"),
             resolve: (parent, args: { userId: string, roleId: string }, context, info): Promise<boolean> => {
-                return user_update(args.userId, { roleId: args.roleId })
+                return db.$transaction((t) => {
+                    return user_update(t, args.userId, { roleId: args.roleId })
+                })
             }
         });
         // --------------------------------------------------
@@ -82,7 +90,9 @@ export const UserMutation = extendType({
             args: { userId: nonNull(stringArg()) },
             type: nonNull("Boolean"),
             resolve: (parent, args: { userId: string }, context, info): Promise<boolean> => {
-                return user_delete(args.userId)
+                return db.$transaction((t) => {
+                    return user_delete(t, args.userId)
+                })
             },
         });
     },

@@ -54,7 +54,7 @@ export const todo_create = async (tr: TransactionType, args: ArgsTodoM): Promise
     return todo.id
 }
 export const todo_update = async (tr: TransactionType, todoId: string, args: ArgsTodoM) => {
-    const todo = await testNotExistTodo(tr, todoId);
+    const todo = await todoGetOrError(tr, todoId);
     if (todo.validation == true) throw new Error('todo is validated.');
     const money_expenses = (args.money_expenses ?? todo.money_expenses);
     const money_total = (args.money_total ?? todo.money_total);
@@ -88,13 +88,13 @@ export const todo_update = async (tr: TransactionType, todoId: string, args: Arg
     return true
 }
 export const todo_delete = async (tr: TransactionType, todoId: string) => {
-    const todo = await testNotExistTodo(tr, todoId);
+    const todo = await todoGetOrError(tr, todoId);
     if (todo.validation == true) throw new Error('todo is validated.');
     await tr.todos.delete({ where: { id: todoId } })
     return true
 }
 export const todo_update_validation = async (tr: TransactionType, todoId: string, validationNew: boolean): Promise<string> => {
-    const todo = await testNotExistTodo(tr, todoId);
+    const todo = await todoGetOrError(tr, todoId);
     if (validationNew == true && todo.validation == true) throw new Error('invoice already validated.');
     if (validationNew == false && todo.validation == false) throw new Error('invoice already invalidate.');
     if (validationNew == true && todo.validation == false) {// to valid
@@ -105,7 +105,7 @@ export const todo_update_validation = async (tr: TransactionType, todoId: string
     }
     return ""
 }
-export const testNotExistTodo = async (tr: TransactionType, todoId: string) => {
+export const todoGetOrError = async (tr: TransactionType, todoId: string) => {
     if (todoId == undefined) throw new Error('todo id is required');
     const todo = await tr.todos.findUnique({ where: { id: todoId } })
     if (!todo) throw new Error('todo not exist');

@@ -9,7 +9,9 @@ export const UserQuery = extendType({
             args: { id: nonNull(stringArg()), password: nonNull(stringArg()) },
             type: nonNull("String"),
             resolve: (parent, args: ArgsUserQ, context, info): Promise<string> => {
-                return user_authentication(args.id, args.password)
+                return db.$transaction((t) => {
+                    return user_authentication(t, args.id, args.password)
+                })
             },
         });
         // --------------------------------------------------
@@ -37,7 +39,9 @@ export const UserQuery = extendType({
             args: { id: nonNull(stringArg()), },
             type: nonNull("String"),
             resolve: (parent, args: ArgsUserQ, context, info): Promise<string> => {
-                return user_role_get(args.id)
+                return db.$transaction((t) => {
+                    return user_role_get(t, args.id)
+                })
             },
         });
         // --------------------------------------------------
@@ -45,7 +49,9 @@ export const UserQuery = extendType({
             args: { userId: nonNull(stringArg()), },
             type: nonNull("String"),
             resolve: (parent, args: ArgsUserQ, context, info): Promise<string> => {
-                return user_photo_get(args.userId)
+                return db.$transaction((t) => {
+                    return user_photo_get(t, args.userId)
+                })
             },
         });
         // --------------------------------------------------
@@ -62,12 +68,14 @@ export const UserQuery = extendType({
             type: users_out,
             description: "date format : 2000-01-01T00:00:00Z",
             resolve: (parent, args: ArgsUserQ, context, info) => {
-                return users_get(args)
+                return db.$transaction((t) => {
+                    return users_get(t, args)
+                })
             },
         });
     }
 });
-
+// **************************************************************************************************** 
 export const user_get_out = objectType({
     name: 'user_get_out',
     definition(t) {
@@ -91,4 +99,3 @@ export const users_out = objectType({
         t.nullable.list.field('items', { type: 'user_get_out' });
     },
 });
-// **************************************************************************************************** 
