@@ -12,6 +12,8 @@ export const TodoQuery = extendType({
                 dealerId: nullable(stringArg()),
                 validation: nullable(booleanArg()),
                 filter_description: nullable(stringArg()),
+                filter_update_gte: nullable(stringArg()),
+                filter_update_lte: nullable(stringArg()),
                 filter_create_gte: nullable(stringArg()),
                 filter_create_lte: nullable(stringArg()),
                 pageNumber: nullable(intArg()),

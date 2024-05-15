@@ -31,6 +31,7 @@ export const users_get = async (tr: TransactionType, args: ArgsUserQ) => {
         _count: { id: true }, where: { // -------------------------------------------------- where for 1
             id: { contains: args.filter_id, equals: args.id },
             createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+            updatedAt: { gte: args.filter_update_gte, lte: args.filter_update_lte },
             description: { contains: args.filter_description },
         }
     }))._count.id
@@ -39,6 +40,7 @@ export const users_get = async (tr: TransactionType, args: ArgsUserQ) => {
         orderBy: { createdAt: 'desc' }, where: {  // -------------------------------------------------- where for 2
             id: { contains: args.filter_id, equals: args.id },
             createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
+            updatedAt: { gte: args.filter_update_gte, lte: args.filter_update_lte },
             description: { contains: args.filter_description },
         }, skip: p.itemsSkip, take: p.itemsTake
     })
@@ -104,6 +106,8 @@ export type ArgsUserQ = {
     password?: string,
     filter_id?: string,
     filter_description?: string,
+    filter_update_gte?: string,
+    filter_update_lte?: string,
     filter_create_gte?: string,
     filter_create_lte?: string,
     itemsTake?: number,

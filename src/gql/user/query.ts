@@ -60,6 +60,8 @@ export const UserQuery = extendType({
                 id: nullable(stringArg()),
                 filter_id: nullable(stringArg()),
                 filter_description: nullable(stringArg()),
+                filter_update_gte: nullable(stringArg()),
+                filter_update_lte: nullable(stringArg()),
                 filter_create_gte: nullable(stringArg()),
                 filter_create_lte: nullable(stringArg()),
                 pageNumber: nullable(intArg()),
