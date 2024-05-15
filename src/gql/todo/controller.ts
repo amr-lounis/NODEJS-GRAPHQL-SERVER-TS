@@ -110,7 +110,7 @@ export const todo_update_validation = async (tr: TransactionType, todoId: string
 export const todoGetOrError = async (tr: TransactionType, todoId: string) => {
     if (todoId == undefined) throw new Error('todo id is required');
     const todo = await tr.todos.findUnique({ where: { id: todoId } })
-    if (!todo) throw new Error('todo not exist');
+    if (!todo) throw new Error(`todo id ${todoId} not exist .`);
     return todo
 }
 // **************************************************************************************************** 
@@ -121,10 +121,10 @@ export type ArgsTodoQ = {
     dealerId?: string,
     validation?: boolean,
     filter_description?: string,
-    filter_create_gte?: string,
-    filter_create_lte?: string,
     filter_update_gte?: string,
     filter_update_lte?: string,
+    filter_create_gte?: string,
+    filter_create_lte?: string,
     pageNumber?: number,
     itemsTake?: number,
     itemsSkip?: number,

@@ -8,7 +8,7 @@ export const user_authentication = async (tr: TransactionType, id: string, passw
         return ""
     }
 }
-export const user_authentication_renewal = async (id: string, roleId: string): Promise<string> => {
+export const user_authentication_renewal = (id: string, roleId: string): string => {
     try {
         return MyToken.Token_Create(id, roleId)
     } catch (error) {
@@ -16,9 +16,8 @@ export const user_authentication_renewal = async (id: string, roleId: string): P
     }
 }
 export const user_role_get = async (tr: TransactionType, id: string): Promise<string> => {
-    const r = await tr.users.findUnique({ where: { id: id } });
-    if (!r) throw new Error('not exist');
-    return r?.roleId
+    const user = await userGetOrError(tr, id)
+    return user?.roleId
 }
 export const user_photo_get = async (tr: TransactionType, id: string): Promise<string> => {
     const p = await tr.u_photos.findUnique({ where: { userId: id } },);
@@ -30,8 +29,8 @@ export const users_get = async (tr: TransactionType, args: ArgsUserQ) => {
     const itemsCountAll = (await tr.users.aggregate({
         _count: { id: true }, where: { // -------------------------------------------------- where for 1
             id: { contains: args.filter_id, equals: args.id },
-            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
             updatedAt: { gte: args.filter_update_gte, lte: args.filter_update_lte },
+            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
             description: { contains: args.filter_description },
         }
     }))._count.id
@@ -39,8 +38,8 @@ export const users_get = async (tr: TransactionType, args: ArgsUserQ) => {
     const items = await tr.users.findMany({
         orderBy: { createdAt: 'desc' }, where: {  // -------------------------------------------------- where for 2
             id: { contains: args.filter_id, equals: args.id },
-            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
             updatedAt: { gte: args.filter_update_gte, lte: args.filter_update_lte },
+            createdAt: { gte: args.filter_create_gte, lte: args.filter_create_lte },
             description: { contains: args.filter_description },
         }, skip: p.itemsSkip, take: p.itemsTake
     })
@@ -96,7 +95,7 @@ export const user_delete = async (tr: TransactionType, id: string): Promise<bool
 export const userGetOrError = async (tr: TransactionType, userId: string) => {
     if (userId == undefined) throw new Error('user id is required');
     const user = await tr.users.findUnique({ where: { id: userId } })
-    if (!user) throw new Error(`error : user id : ${userId} is not exist`);
+    if (!user) throw new Error(`user id : ${userId} is not exist`);
     return user
 }
 // **************************************************************************************************** 

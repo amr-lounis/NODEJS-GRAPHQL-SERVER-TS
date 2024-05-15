@@ -18,7 +18,7 @@ export const UserQuery = extendType({
         t.field('user_authentication_renewal', {
             args: {},
             type: nonNull("String"),
-            resolve(parent, args: void, context: ContextType, info): Promise<string> {
+            resolve(parent, args: void, context: ContextType, info): string {
                 return user_authentication_renewal(context?.jwt?.id, context?.jwt?.role)
             },
         });
