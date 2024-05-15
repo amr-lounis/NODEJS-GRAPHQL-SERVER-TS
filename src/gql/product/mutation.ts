@@ -1,5 +1,6 @@
 import { extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
 import { ArgsProductType, product_categorie_create, product_categorie_delete, product_categorie_update, product_create, product_delete, product_update, product_unity_create, product_unity_delete, product_unity_update } from "./controller";
+import { db } from "../../utils";
 
 // **************************************************************************************************** 
 export const ProductMutation = extendType({
@@ -9,21 +10,27 @@ export const ProductMutation = extendType({
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
-                return product_unity_create(args.id)
+                return db.$transaction((t) => {
+                    return product_unity_create(t, args.id)
+                })
             },
         });
         t.field('product_unity_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string, idNew: string }, context, info): Promise<boolean> => {
-                return product_unity_update(args.id, args.idNew)
+                return db.$transaction((t) => {
+                    return product_unity_update(t, args.id, args.idNew)
+                })
             },
         });
         t.field('product_unity_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
-                return product_unity_delete(args.id)
+                return db.$transaction((t) => {
+                    return product_unity_delete(t, args.id)
+                })
             },
         });
         // --------------------------------------------------
@@ -31,21 +38,27 @@ export const ProductMutation = extendType({
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
-                return product_categorie_create(args.id)
+                return db.$transaction((t) => {
+                    return product_categorie_create(t, args.id)
+                })
             },
         });
         t.field('product_categorie_update', {
             args: { id: nonNull(stringArg()), idNew: nonNull(stringArg()), },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string, idNew: string }, context, info): Promise<boolean> => {
-                return product_categorie_update(args.id, args.idNew)
+                return db.$transaction((t) => {
+                    return product_categorie_update(t, args.id, args.idNew)
+                })
             },
         });
         t.field('product_categorie_delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id?: string }, context, info): Promise<boolean> => {
-                return product_categorie_delete(args.id)
+                return db.$transaction((t) => {
+                    return product_categorie_delete(t, args.id)
+                })
             },
         });
         // --------------------------------------------------
@@ -66,7 +79,9 @@ export const ProductMutation = extendType({
             },
             type: nonNull('Boolean'),
             resolve: (parent, args: ArgsProductType, context, info): Promise<boolean> => {
-                return product_create(args)
+                return db.$transaction((t) => {
+                    return product_create(t, args)
+                })
             },
         });
         t.field('product__update', {
@@ -86,7 +101,9 @@ export const ProductMutation = extendType({
             },
             type: nonNull('Boolean'),
             resolve: (parent, args: ArgsProductType, context, info): Promise<boolean> => {
-                return product_update(args.id, args)
+                return db.$transaction((t) => {
+                    return product_update(t, args.id, args)
+                })
             },
         });
         t.field('product__update_id', {
@@ -96,14 +113,18 @@ export const ProductMutation = extendType({
             },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string, idNew: string }, context, info): Promise<boolean> => {
-                return product_update(args.id, { id: args.idNew })
+                return db.$transaction((t) => {
+                    return product_update(t, args.id, { id: args.idNew })
+                })
             },
         });
         t.field('product__delete', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('Boolean'),
             resolve: (parent, args: { id: string }, context, info): Promise<boolean> => {
-                return product_delete(args.id)
+                return db.$transaction((t) => {
+                    return product_delete(t, args.id)
+                })
             },
         });
     }

@@ -7,7 +7,7 @@ import { myLog } from "./myFunc"
 import { product_quantity_updown } from "../gql"
 
 export const db_init = async (listOperationName: string[]) => {
-    return db.$transaction(async (t) => {
+    db.$transaction(async (t) => {
         try {
             myLog(" +++++ initDB +++++")
             const admin = 'admin'
@@ -45,6 +45,10 @@ export const db_init = async (listOperationName: string[]) => {
             }
             // stor matrix in database
             await authorization_matrix.storeMatrix()
+        } catch (err) { }
+    })
+    db.$transaction(async (t) => {
+        try {
             // -------------------------------------------------- init todo
             const l_t = await (await db.todos.aggregate({ _count: { id: true } }))._count.id
             if (l_t < 10) for (let i = 0; i < 10; i++) {
@@ -62,6 +66,10 @@ export const db_init = async (listOperationName: string[]) => {
                     photo: generat_photo()
                 })
             }
+        } catch (err) { }
+    })
+    db.$transaction(async (t) => {
+        try {
             // -------------------------------------------------- init product
             const l_p = (await db.products.aggregate({ _count: { id: true } }))._count.id ?? 0
             if (l_p < 10) for (let i = 0; i < 10; i++) {
@@ -72,9 +80,9 @@ export const db_init = async (listOperationName: string[]) => {
                 const money_selling = faker.number.int({ min: money_purchase, max: 1000 })
                 const money_selling_gr = faker.number.int({ min: money_purchase, max: money_selling })
                 // 
-                await product_unity_create(u)
-                await product_categorie_create(c)
-                await product_create({
+                await product_unity_create(t, u)
+                await product_categorie_create(t, c)
+                await product_create(t, {
                     id: p, unityId: u,
                     categorieId: c,
                     code: p,
@@ -89,6 +97,10 @@ export const db_init = async (listOperationName: string[]) => {
                     await product_quantity_updown(tr, p, 1)
                 })
             }
+        } catch (err) { }
+    })
+    db.$transaction(async (t) => {
+        try {
             // -------------------------------------------------- init setting
             const l_s = (await t.settings.aggregate({ _count: { key: true } }))._count.key ?? 0
             if (l_s < 10) for (let i = 0; i < 10; i++) {

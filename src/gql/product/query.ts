@@ -1,5 +1,6 @@
 import { extendType, floatArg, intArg, list, nonNull, nullable, objectType, stringArg } from 'nexus';
 import { ArgsProductQ, product_categories_get, product_photo_get, product_units_get, products_get } from './controller';
+import { db } from '../../utils';
 // **************************************************************************************************** 
 export const ProductQuery = extendType({
     type: 'Query',
@@ -26,28 +27,36 @@ export const ProductQuery = extendType({
             description: "date format : 2000-01-01T00:00:00Z",
             type: products_get_out,
             resolve: async (parent, args: ArgsProductQ, context, info) => {
-                return products_get(args)
+                return db.$transaction((t) => {
+                    return products_get(t, args)
+                })
             },
         });
         t.field('product_get_photo', {
             args: { id: nonNull(stringArg()) },
             type: nonNull('String'),
             async resolve(parent, args: { id?: string }, context, info): Promise<string> {
-                return product_photo_get(args.id)
+                return db.$transaction((t) => {
+                    return product_photo_get(t, args.id)
+                })
             },
         });
         t.field('product_units_get', {
             args: {},
             type: list('String'),
             async resolve(parent, args, context, info): Promise<string[]> {
-                return product_units_get()
+                return db.$transaction((t) => {
+                    return product_units_get(t)
+                })
             },
         });
         t.field('product_categories_get', {
             args: {},
             type: list('String'),
             async resolve(parent, args, context, info): Promise<string[]> {
-                return product_categories_get()
+                return db.$transaction((t) => {
+                    return product_categories_get(t)
+                })
             },
         });
     }

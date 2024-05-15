@@ -67,8 +67,8 @@ export const TodoMutation = extendType({
             },
             type: nonNull('Boolean'),
             resolve: async (parent: any, args: ArgsTodoM, context: ContextType, info: any): Promise<string> => {
-                return await db.$transaction(async (t) => {
-                    return await todo_update_validation(t, args.id, true)
+                return db.$transaction(async (t) => {
+                    return todo_update_validation(t, args.id, true)
                 })
 
             },
@@ -80,8 +80,8 @@ export const TodoMutation = extendType({
             },
             type: nonNull('Boolean'),
             resolve: async (parent: any, args: ArgsTodoM, context: ContextType, info: any): Promise<string> => {
-                return await db.$transaction(async (t) => {
-                    return await todo_update_validation(t, args.id, false)
+                return db.$transaction(async (t) => {
+                    return todo_update_validation(t, args.id, false)
                 })
 
             },
