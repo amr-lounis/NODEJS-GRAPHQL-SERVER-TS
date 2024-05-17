@@ -1,26 +1,32 @@
 
 import { faker } from "@faker-js/faker"
 import { authorization_matrix } from "./authorization_matrix"
-import { db } from "./db"
-import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create, setting_set } from "../gql"
-import { myLog } from "./myFunc"
+import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create, setting_set, invoice_create, invoice_types, invoice_update_prudect, invoice_update, invoiceGetOrError } from "../gql"
+import { myLog, randomString } from "./myFunc"
 import { product_quantity_updown } from "../gql"
+import { db } from "./db"
 
 export const db_init = async (listOperationName: string[]) => {
-    db.$transaction(async (t) => {
+    myLog(" +++++ initDB +++++")
+    const admin = 'admin'
+    const employee = 'employee'
+    // -------------------------------------------------- create all operations
+    for (let i = 0; i < listOperationName.length; i++)
         try {
-            myLog(" +++++ initDB +++++")
-            const admin = 'admin'
-            const employee = 'employee'
-            // -------------------------------------------------- create all operations
-            for (let i = 0; i < listOperationName.length; i++)
-                try { await operation_create(t, listOperationName[i]) } catch (err) { }
-            // -------------------------------------------------- create all roles
-            try {
-                await role_create(t, admin)
-                await role_create(t, employee)
-            } catch (err) { }
-            // -------------------------------------------------- create all users
+            await db.$transaction(async (t) => {
+                await operation_create(t, listOperationName[i])
+            })
+        } catch (err) { }
+    // -------------------------------------------------- create all roles
+    try {
+        await db.$transaction(async (t) => {
+            await role_create(t, admin)
+            await role_create(t, employee)
+        })
+    } catch (err) { }
+    // -------------------------------------------------- create all users
+    try {
+        await db.$transaction(async (t) => {
             await user_create(t, {
                 id: admin,
                 password: admin,
@@ -33,25 +39,26 @@ export const db_init = async (listOperationName: string[]) => {
                 roleId: employee,
                 photo: generat_photo()
             })
-            // -------------------------------------------------- init autorisation matrix
-            // init matrix roles
-            await authorization_matrix.initMatrix()
-            // admin set allow for all operation
-            if (authorization_matrix.matrix.hasOwnProperty(admin)) {
-                const operationIds = Object.keys(authorization_matrix?.matrix[admin]);
-                for (const OperationId of operationIds) {
-                    authorization_matrix.matrix[admin][OperationId] = true;
-                }
-            }
-            // stor matrix in database
-            await authorization_matrix.storeMatrix()
-        } catch (err) { }
-    })
-    db.$transaction(async (t) => {
-        try {
-            // -------------------------------------------------- init todo
-            const l_t = await (await db.todos.aggregate({ _count: { id: true } }))._count.id
-            if (l_t < 10) for (let i = 0; i < 10; i++) {
+        })
+    } catch (err) { }
+    // -------------------------------------------------- init autorisation matrix
+    // init matrix roles
+    await authorization_matrix.initMatrix()
+    // admin set allow for all operation
+    if (authorization_matrix.matrix.hasOwnProperty(admin)) {
+        const operationIds = Object.keys(authorization_matrix?.matrix[admin]);
+        for (const OperationId of operationIds) {
+            authorization_matrix.matrix[admin][OperationId] = true;
+        }
+    }
+    // stor matrix in database
+    await authorization_matrix.storeMatrix()
+    // -------------------------------------------------- init todo
+    try {
+        await db.$transaction(async (t) => {
+            let size = 0;
+            while (size <= 10) {
+                size = (await db.invoices.aggregate({ _count: { id: true } }))._count.id ?? 0
                 const money_total = faker.number.int({ min: 0, max: 100 })
                 const money_expenses = faker.number.int({ min: 0, max: money_total })
                 const money_paid = faker.number.int({ min: 0, max: money_total })
@@ -66,13 +73,16 @@ export const db_init = async (listOperationName: string[]) => {
                     photo: generat_photo()
                 })
             }
-        } catch (err) { }
-    })
-    db.$transaction(async (t) => {
-        try {
-            // -------------------------------------------------- init product
-            const l_p = (await db.products.aggregate({ _count: { id: true } }))._count.id ?? 0
-            if (l_p < 10) for (let i = 0; i < 10; i++) {
+        })
+    } catch (err) { }
+    // -------------------------------------------------- init product
+    try {
+        await db.$transaction(async (t) => {
+            let size = 0;
+            let i = 0;
+            while (size < 10) {
+                size = (await db.invoices.aggregate({ _count: { id: true } }))._count.id ?? 0
+                if (size >= 10) break;
                 const p = `product_${i}`
                 const u = `unity_${i}`
                 const c = `categorie_${i}`
@@ -93,22 +103,49 @@ export const db_init = async (listOperationName: string[]) => {
                     quantity_alert: faker.number.int({ min: 0, max: 10 }),
                     photo: generat_photo()
                 })
-                await db.$transaction(async (tr) => {
-                    await product_quantity_updown(tr, p, 1)
-                })
+                i++;
             }
-        } catch (err) { }
-    })
-    db.$transaction(async (t) => {
-        try {
-            // -------------------------------------------------- init setting
-            const l_s = (await t.settings.aggregate({ _count: { key: true } }))._count.key ?? 0
-            if (l_s < 10) for (let i = 0; i < 10; i++) {
+        })
+    } catch (err) { }
+    // -------------------------------------------------- init setting
+    try {
+        await db.$transaction(async (t) => {
+            let size = 0;
+            while (size < 10) {
+                size = (await db.invoices.aggregate({ _count: { id: true } }))._count.id ?? 0
+                if (size >= 10) break;
                 await setting_set(t, faker.string.uuid(), faker.string.uuid())
             }
-            // -------------------------------------------------- init invoice
-        } catch (err) { }
-    })
+        })
+    } catch (err) { }
+    // -------------------------------------------------- init invoice
+    try {
+        let size = 0;
+        while (size < 10) {
+            size = (await db.invoices.aggregate({ _count: { id: true } }))._count.id ?? 0
+            if (size >= 10) break;
+            await db.$transaction(async (t) => {
+                const invoiceId = await invoice_create(t, invoice_types.PURCHASE, "admin")
+                // add products
+                for (let j = 0; j < 10; j++) {
+                    await invoice_update_prudect(t, {
+                        invoiceId: invoiceId,
+                        prudectId: `product_${j}`,
+                        quantity: faker.number.int({ min: 1, max: 10 }),
+                        description: faker.lorem.sentence({ min: 5, max: 10 }),
+                    })
+                }
+                await invoice_update(t, invoiceId, {
+                    dealerId: Math.random() > 0.5 ? 'admin' : 'employee',
+                    description: faker.lorem.sentence({ min: 5, max: 10 }),
+                    money_stamp: faker.number.int({ min: 0, max: 100 }),
+                    money_tax: faker.number.int({ min: 0, max: 100 }),
+                })
+                const iii = await t.invoices.findUnique({ where: { id: invoiceId } })
+                await invoice_update(t, invoiceId, { money_paid: iii.money_calc })
+            })
+        }
+    } catch (err) { myLog(err) }
 }
 
 const generat_photo = () => {

@@ -1,11 +1,11 @@
-import { TransactionType, genID } from "../../utils";
+import { TransactionType, genID, myLog } from "../../utils";
 import { productGetOrError, product_quantity_updown } from "../product";
 
 // ****************************************************************************************************
 export const invoices_get = async (tr: TransactionType, args) => {
 }
 export const invoice_create = async (tr: TransactionType, type: string, employeeId: string): Promise<string> => {
-    if (type != invoice_types.PURCHASE && type != invoice_types.SALE && type != invoice_types.SALE_GR && type != invoice_types.LOSS) throw new Error('type not match');
+    if (type != invoice_types.PURCHASE && type != invoice_types.SALE && type != invoice_types.SALE_GR && type != invoice_types.LOSS) throw new Error('invoice type not match');
     const r = await tr.invoices.create({
         data: {
             id: genID(type + "_invalid_"),
@@ -18,11 +18,27 @@ export const invoice_create = async (tr: TransactionType, type: string, employee
 export const invoice_update = async (tr: TransactionType, id: string, args: invoice_update_type): Promise<boolean> => {
     const invoice = await invoiceGetOrError(tr, id);
     if (invoice.validation == true) throw new Error('invoice is validated.');
-
-    if (args.money_stamp != undefined && args.money_stamp < 0) throw new Error("error : money_stamp < 0")
-    if (args.money_tax != undefined && args.money_tax < 0) throw new Error("error : money_tax < 0")
-    if (args.money_paid != undefined && args.money_paid < 0) throw new Error("error : money_paid < 0")
     // 
+    args.money_stamp = args.money_stamp ?? invoice.money_stamp;
+    if (args.money_stamp < 0) throw new Error("money_stamp < 0")
+    // 
+    args.money_tax = args.money_tax ?? invoice.money_tax;
+    if (args.money_tax < 0) throw new Error("money_tax < 0")
+    // 
+    args.money_paid = args.money_paid ?? invoice.money_paid;
+    if (args.money_paid < 0) throw new Error("money_paid < 0")
+    // 
+    const money_net = (await tr.i_products.aggregate({ _sum: { money_calc: true }, where: { invoiceId: id } }))._sum.money_calc ?? 0;
+    const money_calc = money_net + args.money_stamp + args.money_tax;
+    const money_unpaid = money_calc - args.money_paid
+
+    // myLog(`money_net:${money_net} money_calc:${money_calc} money_unpaid:{money_unpaid} money_paid:${args.money_paid}`)
+    myLog(`money_calc:${money_calc} money_paid:${args.money_paid} `)
+
+    if (args.money_paid > money_calc) throw new Error("money_paid > money_calc")
+    if (money_unpaid > money_calc) throw new Error("money_unpaid > money_calc")
+
+
     await tr.invoices.update({
         where: { id: id }, data: {
             id: args.id,
@@ -31,13 +47,16 @@ export const invoice_update = async (tr: TransactionType, id: string, args: invo
             description: args.description,
             money_stamp: args.money_stamp,
             money_tax: args.money_tax,
-            money_paid: args.money_paid
+            money_paid: args.money_paid,
+            money_net: money_net,
+            money_calc: money_calc,
+            money_unpaid: money_unpaid,
         }
     })
-    await invoice_calc(tr, id)
     return true
 }
 export const invoice_update_prudect = async (tr: TransactionType, args: invoice_update_prudect_type): Promise<boolean> => {
+    if (args?.quantity < 0) throw new Error('quantity < 0.');
     const invoice = await invoiceGetOrError(tr, args.invoiceId);
     if (invoice.validation == true) throw new Error('invoice is validated.');
     const product = await productGetOrError(tr, args.prudectId);
@@ -87,7 +106,7 @@ export const invoice_update_prudect = async (tr: TransactionType, args: invoice_
             })
         }
     }
-    await invoice_calc(tr, args.invoiceId)
+    // await invoice_update(tr, args.invoiceId, {})
     return true
 }
 export const invoice_update_validation = async (tr: TransactionType, invoiceId: string, validationNew: boolean): Promise<string> => {
@@ -137,27 +156,6 @@ export const invoice_delete = async (tr: TransactionType, invoiceId: string): Pr
     await tr.invoices.delete({ where: { id: invoiceId } })
     return true
 }
-export const invoice_calc = async (tr: TransactionType, id: string): Promise<boolean> => {
-    const invoice = await invoiceGetOrError(tr, id);
-    if (invoice.validation == true) throw new Error('invoice is validated.');
-    // 
-    const money_net = (await tr.i_products.aggregate({ _sum: { money_calc: true }, where: { invoiceId: id } }))._sum.money_calc ?? 0;
-    const money_calc = money_net + invoice.money_stamp + invoice.money_tax;
-    const money_unpaid = money_calc - invoice.money_paid
-
-    if (invoice.money_paid > money_calc) throw new Error("error : money_paid > money_calc)");
-    if (money_calc < 0) throw new Error("error : money_calc < 0)");
-    if (money_unpaid < 0) throw new Error("error : money_unpaid < 0)");
-
-    await tr.invoices.update({
-        where: { id: id }, data: {
-            money_net: money_net,
-            money_calc: money_calc,
-            money_unpaid: money_unpaid
-        }
-    })
-    return true
-}
 export const invoiceGetOrError = async (tr: TransactionType, invoiceId: string) => {
     if (invoiceId == undefined) throw new Error('invoice id is required');
     const invoice = await tr.invoices.findUnique({ where: { id: invoiceId } })
@@ -172,7 +170,7 @@ export type invoice_update_type = {
     description?: string,
     money_tax?: number,
     money_stamp?: number,
-    money_paid?: number;
+    money_paid?: number,
 }
 export type invoice_update_prudect_type = {
     invoiceId: string,
