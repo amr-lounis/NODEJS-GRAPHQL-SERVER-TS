@@ -1,8 +1,7 @@
 #dirs
 /node_modules/
 /dist/
-/_zip
-/_db
+/_utils
 /.vs
 /.git
 /prisma/migrations

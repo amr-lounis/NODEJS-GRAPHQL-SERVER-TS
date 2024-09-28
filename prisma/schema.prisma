@@ -172,7 +172,7 @@ model settings {
   updatedAt DateTime? @updatedAt
 }
 
-// ****************************************************************************************************  //{PURCHASE,SALE,LOSS}
+// ****************************************************************************************************  : type => {PURCHASE,SALE,LOSS}
 model invoices {
   id           String       @id @default(uuid())
   // 
