@@ -101,7 +101,7 @@ export const product_quantity_updown = async (tr: TransactionType, productId: st
 export const productGetOrError = async (tr: TransactionType, productId: string) => {
     if (productId == undefined) throw new Error('product id is required');
     const product = await tr.products.findUnique({ where: { id: productId } })
-    if (!product) throw new Error(`product id ${product} not exist .`);
+    if (!product) throw new Error(`product id "${product}" not exist .`);
     return product
 }
 // **************************************************************************************************** units

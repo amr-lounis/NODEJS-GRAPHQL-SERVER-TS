@@ -1,3 +1,4 @@
+import { arg } from "nexus";
 import { TransactionType, genID, myLog } from "../../utils";
 import { productGetOrError, product_quantity_updown } from "../product";
 
@@ -33,7 +34,7 @@ export const invoice_update = async (tr: TransactionType, id: string, args: invo
     const money_unpaid = money_calc - args.money_paid
 
     // myLog(`money_net:${money_net} money_calc:${money_calc} money_unpaid:{money_unpaid} money_paid:${args.money_paid}`)
-    myLog(`money_calc:${money_calc} money_paid:${args.money_paid} `)
+    // myLog(`money_calc:${money_calc} money_paid:${args.money_paid} `)
 
     if (args.money_paid > money_calc) throw new Error("money_paid > money_calc")
     if (money_unpaid > money_calc) throw new Error("money_unpaid > money_calc")
@@ -61,6 +62,7 @@ export const invoice_update_prudect = async (tr: TransactionType, args: invoice_
     if (invoice.validation == true) throw new Error('invoice is validated.');
     const product = await productGetOrError(tr, args.prudectId);
     const ip_exist = await tr.i_products.findFirst({ where: { invoiceId: args.invoiceId, productId: args.prudectId } })
+
     if (ip_exist) {
         const money_unite = (args.money_unite ?? ip_exist.money_unite);
         const quantity = (args.quantity ?? ip_exist.quantity + 1);
