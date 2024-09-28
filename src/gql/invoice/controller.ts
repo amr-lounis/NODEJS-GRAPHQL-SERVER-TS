@@ -5,7 +5,7 @@ import { productGetOrError, product_quantity_updown } from "../product";
 export const invoices_get = async (tr: TransactionType, args) => {
 }
 export const invoice_create = async (tr: TransactionType, type: string, employeeId: string): Promise<string> => {
-    if (type != invoice_types.PURCHASE && type != invoice_types.SALE && type != invoice_types.SALE_GR && type != invoice_types.LOSS) throw new Error('invoice type not match');
+    if (type != INVOICE_TYPES.PURCHASE && type != INVOICE_TYPES.SALE && type != INVOICE_TYPES.SALE_GR && type != INVOICE_TYPES.LOSS) throw new Error('invoice type not match');
     const r = await tr.invoices.create({
         data: {
             id: genID(type + "_invalid_"),
@@ -85,10 +85,10 @@ export const invoice_update_prudect = async (tr: TransactionType, args: invoice_
         }
     } else {
         let defult_money_unite: number = 0;
-        if (invoice.type == invoice_types.SALE) defult_money_unite = product.money_selling;
-        else if (invoice.type == invoice_types.SALE_GR) defult_money_unite = product.money_selling_gr;
-        else if (invoice.type == invoice_types.PURCHASE) defult_money_unite = product.money_purchase;
-        else if (invoice.type == invoice_types.LOSS) defult_money_unite = product.money_purchase;
+        if (invoice.type == INVOICE_TYPES.SALE) defult_money_unite = product.money_selling;
+        else if (invoice.type == INVOICE_TYPES.SALE_GR) defult_money_unite = product.money_selling_gr;
+        else if (invoice.type == INVOICE_TYPES.PURCHASE) defult_money_unite = product.money_purchase;
+        else if (invoice.type == INVOICE_TYPES.LOSS) defult_money_unite = product.money_purchase;
 
         const money_unite = args.money_unite ?? defult_money_unite;
         const quantity = (args.quantity ?? 1);
@@ -119,7 +119,7 @@ export const invoice_update_validation = async (tr: TransactionType, invoiceId: 
     if (validationNew == false && validationOld == false) throw new Error('invoice already invalidate.');
     // 
     let idOut;
-    if (invoiceType == invoice_types.PURCHASE) {
+    if (invoiceType == INVOICE_TYPES.PURCHASE) {
         if (validationNew == true && validationOld == false) {
             // to valid
             const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
@@ -131,7 +131,7 @@ export const invoice_update_validation = async (tr: TransactionType, invoiceId: 
             for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, - ip[i].quantity)
             idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_invalid_"), validation: false } })
         }
-    } else if (invoiceType == invoice_types.SALE || invoiceType == invoice_types.SALE_GR || invoiceType == invoice_types.LOSS) {
+    } else if (invoiceType == INVOICE_TYPES.SALE || invoiceType == INVOICE_TYPES.SALE_GR || invoiceType == INVOICE_TYPES.LOSS) {
         if (validationNew == true && validationOld == false) {
             // to valid
             const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
@@ -178,7 +178,7 @@ export type invoice_update_prudect_type = {
     money_unite?: number,
     quantity?: number
 }
-export const invoice_types = {
+export const INVOICE_TYPES = {
     PURCHASE: "PURCHASE",
     SALE: "SALE",
     SALE_GR: "SALE_GR",

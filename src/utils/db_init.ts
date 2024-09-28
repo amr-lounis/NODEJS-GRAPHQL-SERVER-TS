@@ -1,9 +1,8 @@
 
 import { faker } from "@faker-js/faker"
 import { authorization_matrix } from "./authorization_matrix"
-import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create, setting_set, invoice_create, invoice_types, invoice_update_prudect, invoice_update, invoiceGetOrError } from "../gql"
-import { myLog, randomString } from "./myFunc"
-import { product_quantity_updown } from "../gql"
+import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create, setting_set, invoice_create, INVOICE_TYPES, invoice_update_prudect, invoice_update } from "../gql"
+import { myLog } from "./myFunc"
 import { db } from "./db"
 
 export const db_init = async (listOperationName: string[]) => {
@@ -125,7 +124,7 @@ export const db_init = async (listOperationName: string[]) => {
             size = (await db.invoices.aggregate({ _count: { id: true } }))._count.id ?? 0
             if (size >= 10) break;
             await db.$transaction(async (t) => {
-                const invoiceId = await invoice_create(t, invoice_types.PURCHASE, "admin")
+                const invoiceId = await invoice_create(t, INVOICE_TYPES.PURCHASE, "admin")
                 // add products
                 for (let j = 0; j < 10; j++) {
                     await invoice_update_prudect(t, {

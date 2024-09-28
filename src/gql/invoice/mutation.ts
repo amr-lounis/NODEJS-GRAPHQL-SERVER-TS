@@ -1,6 +1,6 @@
 import { booleanArg, extendType, floatArg, nonNull, nullable, stringArg } from "nexus";
 import { ContextType, db } from "../../utils";
-import { invoice_create, invoice_update_prudect, invoice_update_prudect_type, invoice_types, invoice_update, invoice_update_type, invoice_update_validation } from "./controller";
+import { invoice_create, invoice_update_prudect, invoice_update_prudect_type, INVOICE_TYPES, invoice_update, invoice_update_type, invoice_update_validation } from "./controller";
 
 export const InvoiceMutation = extendType({
     type: 'Mutation',
@@ -10,7 +10,7 @@ export const InvoiceMutation = extendType({
             type: nonNull('String'),
             resolve: (parent, args, context: ContextType, info): Promise<string> => {
                 return db.$transaction((t) => {
-                    return invoice_create(t, invoice_types.PURCHASE, context.jwt.id)
+                    return invoice_create(t, INVOICE_TYPES.PURCHASE, context.jwt.id)
                 })
             },
         });
@@ -20,7 +20,7 @@ export const InvoiceMutation = extendType({
             type: nonNull('String'),
             resolve: (parent, args, context: ContextType, info): Promise<string> => {
                 return db.$transaction((t) => {
-                    return invoice_create(t, invoice_types.SALE, context.jwt.id)
+                    return invoice_create(t, INVOICE_TYPES.SALE, context.jwt.id)
                 })
             },
         });
@@ -30,7 +30,7 @@ export const InvoiceMutation = extendType({
             type: nonNull('String'),
             resolve: (parent, args, context: ContextType, info): Promise<string> => {
                 return db.$transaction((t) => {
-                    return invoice_create(t, invoice_types.SALE_GR, context.jwt.id)
+                    return invoice_create(t, INVOICE_TYPES.SALE_GR, context.jwt.id)
                 })
             },
         });
@@ -40,7 +40,7 @@ export const InvoiceMutation = extendType({
             type: nonNull('String'),
             resolve: (parent, args, context: ContextType, info): Promise<string> => {
                 return db.$transaction((t) => {
-                    return invoice_create(t, invoice_types.LOSS, context.jwt.id)
+                    return invoice_create(t, INVOICE_TYPES.LOSS, context.jwt.id)
                 })
             },
         });
