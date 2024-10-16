@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker"
 import { authorization_matrix } from "./authorization_matrix"
 import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create, setting_set, invoice_create, INVOICE_TYPES, invoice_update_prudect, invoice_update, invoices_get, invoiceGetOrError } from "../gql"
 import { myLog } from "./myFunc"
@@ -37,7 +36,7 @@ const init_setting = async () => {
         if (size > 10) return;
         for (let i = 1; i <= 10; i++) {
             try {
-                await setting_set(t, faker.string.uuid(), faker.string.uuid())
+                await setting_set(t, generateRandomString(10, 10), generateRandomString(10, 10))
             } catch (err) { }
         }
     })
@@ -70,7 +69,7 @@ const init_users = async (roles: string[]) => {
                     id: roles[i],
                     password: roles[i],
                     roleId: roles[i],
-                    photo: generat_photo()
+                    photo: generateRandomString(100, 100)
                 })
             } catch (err) { }
         }
@@ -82,18 +81,18 @@ const init_todo = async () => {
         let size = (await t.todos.aggregate({ _count: { id: true } }))._count.id ?? 0;
         if (size > 10) return;
         for (let i = 0; i < 10; i++) {
-            const money_total = faker.number.int({ min: 0, max: 100 })
-            const money_expenses = faker.number.int({ min: 0, max: money_total })
-            const money_paid = faker.number.int({ min: 0, max: money_total })
+            const money_total = generateRandomInt(0, 100);
+            const money_expenses = generateRandomInt(0, money_total);
+            const money_paid = generateRandomInt(0, money_total);
             try {
                 const r = await todo_create(t, {
                     employeeId: Math.random() > 0.5 ? 'admin' : 'employee',
                     dealerId: Math.random() > 0.5 ? 'admin' : 'employee',
-                    description: faker.lorem.sentence({ min: 5, max: 10 }),
+                    description: generateRandomString(50, 100),
                     money_total: money_total,
                     money_expenses: money_expenses,
                     money_paid: money_paid,
-                    photo: generat_photo()
+                    photo: generateRandomString(100, 100)
                 })
             } catch (err) { }
         }
@@ -108,9 +107,9 @@ const init_product = async () => {
             const p = `product_${i}`
             const u = `unity_${i}`
             const c = `categorie_${i}`
-            const money_purchase = faker.number.int({ min: 0, max: 100 })
-            const money_selling = faker.number.int({ min: money_purchase, max: 1000 })
-            const money_selling_gr = faker.number.int({ min: money_purchase, max: money_selling })
+            const money_purchase = generateRandomInt(0, 100);
+            const money_selling = generateRandomInt(money_purchase, 1000);
+            const money_selling_gr = generateRandomInt(money_purchase, money_selling);
             // 
             try {
                 await product_unity_create(t, u)
@@ -127,8 +126,8 @@ const init_product = async () => {
                     money_purchase: money_purchase,
                     money_selling: money_selling,
                     money_selling_gr: money_selling_gr,
-                    quantity_alert: faker.number.int({ min: 0, max: 10 }),
-                    photo: generat_photo()
+                    quantity_alert: generateRandomInt(0, 10),
+                    photo: generateRandomString(100, 100)
                 })
             } catch (err) { }
         }
@@ -147,8 +146,8 @@ const init_invoice = async () => {
                     await invoice_update_prudect(t, {
                         invoiceId: invoiceId,
                         prudectId: `product_${j}`,
-                        quantity: faker.number.int({ min: 1, max: 10 }),
-                        description: faker.lorem.sentence({ min: 5, max: 10 }),
+                        quantity: generateRandomInt(1, 10),
+                        description: generateRandomString(50, 100),
                     })
                 } catch (err) { }
             }
@@ -156,9 +155,9 @@ const init_invoice = async () => {
             try {
                 await invoice_update(t, invoiceId, {
                     dealerId: Math.random() > 0.5 ? 'admin' : 'employee',
-                    description: faker.lorem.sentence({ min: 5, max: 10 }),
-                    money_stamp: faker.number.int({ min: 0, max: 100 }),
-                    money_tax: faker.number.int({ min: 0, max: 100 }),
+                    description: generateRandomString(50, 100),
+                    money_stamp: generateRandomInt(0, 100),
+                    money_tax: generateRandomInt(0, 100)
                 })
             } catch (err) { }
             // change value of paid
@@ -170,6 +169,22 @@ const init_invoice = async () => {
     })
 }
 
-const generat_photo = () => {
-    return faker.image.dataUri({ type: "svg-base64" })
+function generateRandomString(min, max) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    const randomLength = Math.floor(Math.random() * (max - min + 1)) + min;
+    let randomString = '';
+    for (let i = 0; i < randomLength; i++) {
+        const randomIndex = Math.floor(Math.random() * charactersLength);
+        randomString += characters.charAt(randomIndex);
+    }
+    return randomString;
+}
+function generateRandomInt(min, max) {
+    const randomLength = Math.floor(Math.random() * (max - min + 1)) + min;
+    return randomLength;
+}
+function generateRandomFloat(min, max) {
+    const randomLength = Math.random() * (max - min + 1) + min;
+    return randomLength;
 }
