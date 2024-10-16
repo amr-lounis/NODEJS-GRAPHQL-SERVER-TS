@@ -3,10 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = "mysql://root@localhost:3306/la_msi"
-  // provider = "sqlite"
-  // url      = "file:../_db/dev.db"
+  //provider = "mysql"
+  //url      = "mysql://root@localhost:3306/la_msi"
+  provider = "sqlite"
+  url      = "file:../database.sqlite"
 }
 
 // **************************************************************************************************** 

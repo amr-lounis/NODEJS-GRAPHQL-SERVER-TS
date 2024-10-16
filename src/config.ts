@@ -3,7 +3,7 @@ export const myConfig: myConfigType = {
     JWT_ExpiresDay: "7 days",
     PORT_HTTP: 80,
     PORT_HTTPS: 443,
-    SERVER_SSL: true
+    SERVER_SSL: false
 }
 // -------------------------------------------------- types
 type myConfigType = {
