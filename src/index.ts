@@ -1,4 +1,5 @@
 import express from 'express';
+import serveIndex from 'serve-index';
 import { ApolloServer } from 'apollo-server-express';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import { applyMiddleware } from 'graphql-middleware'
@@ -16,6 +17,9 @@ const main = async () => {
   await db_init(listOperationName)
   // -----------------------
   const app = express();
+  //
+  app.use(express.static('public'));
+  app.use("/public", serveIndex('public', { icons: true }));
   //
   const schemaWithMiddleware = applyMiddleware(schema, myMiddleware)
   // ----------------------- https or http
