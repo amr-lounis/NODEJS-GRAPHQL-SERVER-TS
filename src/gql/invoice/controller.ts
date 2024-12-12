@@ -1,5 +1,5 @@
 import { arg } from "nexus";
-import { TransactionType, genID, myLog } from "../../utils";
+import { TransactionType, generateID } from "../../utils";
 import { productGetOrError, product_quantity_updown } from "../product";
 
 // ****************************************************************************************************
@@ -9,7 +9,7 @@ export const invoice_create = async (tr: TransactionType, type: string, employee
     if (type != INVOICE_TYPES.PURCHASE && type != INVOICE_TYPES.SALE && type != INVOICE_TYPES.SALE_GR && type != INVOICE_TYPES.LOSS) throw new Error('invoice type not match');
     const r = await tr.invoices.create({
         data: {
-            id: genID(type + "_invalid_"),
+            id: generateID(type + "_invalid_"),
             type: type,
             employeeId: employeeId
         }
@@ -32,9 +32,6 @@ export const invoice_update = async (tr: TransactionType, id: string, args: invo
     const money_net = (await tr.i_products.aggregate({ _sum: { money_calc: true }, where: { invoiceId: id } }))._sum.money_calc ?? 0;
     const money_calc = money_net + args.money_stamp + args.money_tax;
     const money_unpaid = money_calc - args.money_paid
-
-    // myLog(`money_net:${money_net} money_calc:${money_calc} money_unpaid:{money_unpaid} money_paid:${args.money_paid}`)
-    // myLog(`money_calc:${money_calc} money_paid:${args.money_paid} `)
 
     if (args.money_paid > money_calc) throw new Error("money_paid > money_calc")
     if (money_unpaid > money_calc) throw new Error("money_unpaid > money_calc")
@@ -126,24 +123,24 @@ export const invoice_update_validation = async (tr: TransactionType, invoiceId: 
             // to valid
             const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
             for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, ip[i].quantity)
-            idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_valid_"), validation: true } })
+            idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: generateID(invoiceType + "_valid_"), validation: true } })
         } else if (validationNew == false && validationOld == true) {
             // to invalid
             const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
             for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, - ip[i].quantity)
-            idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_invalid_"), validation: false } })
+            idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: generateID(invoiceType + "_invalid_"), validation: false } })
         }
     } else if (invoiceType == INVOICE_TYPES.SALE || invoiceType == INVOICE_TYPES.SALE_GR || invoiceType == INVOICE_TYPES.LOSS) {
         if (validationNew == true && validationOld == false) {
             // to valid
             const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
             for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, -ip[i].quantity)
-            idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_valid_"), validation: true } })
+            idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: generateID(invoiceType + "_valid_"), validation: true } })
         } else if (validationNew == false && validationOld == true) {
             // to invalid
             const ip = await tr.i_products.findMany({ where: { invoiceId: invoiceId } })
             for (let i = 0; i < ip.length; i++) await product_quantity_updown(tr, ip[i].productId, ip[i].quantity)
-            idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: genID(invoiceType + "_invalid_"), validation: false } })
+            idOut = await tr.invoices.update({ where: { id: invoiceId }, data: { id: generateID(invoiceType + "_invalid_"), validation: false } })
         }
     }
     else {

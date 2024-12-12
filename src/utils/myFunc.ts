@@ -1,4 +1,5 @@
 import axios from "axios";
+import { myConfig } from "../config";
 // **************************************************************************************************** 
 export const getImageAsBase64 = async (url) => {
     try {
@@ -16,6 +17,7 @@ export const limitFloat = (number) => {
 // **************************************************************************************************** 
 let count = 0;
 export const myLog = (str: any) => {
+    if (myConfig.myLog == false) return;
     console.log(`------------------------------ ${count++} ------------------------------`)
     console.log(str)
 }
@@ -37,17 +39,29 @@ export const toPage = (itemsCountAll: number, pageNumber?: number, itemsTake?: n
     return { allPagesCount, itemsTake, pageNumber, itemsSkip };
 }
 // **************************************************************************************************** 
-export const randomString = (length) => {
-    let result = '';
+
+export function generateRandomString(min, max) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        counter += 1;
+    const randomLength = Math.floor(Math.random() * (max - min + 1)) + min;
+    let randomString = '';
+    for (let i = 0; i < randomLength; i++) {
+        const randomIndex = Math.floor(Math.random() * charactersLength);
+        randomString += characters.charAt(randomIndex);
     }
-    return result;
+    return randomString;
 }
-export const genID = (input: string) => {
-    return input + "_" + (new Date().toISOString()) + "_" + randomString(20);
+
+export const generateID = (input: string) => {
+    return input + "_" + (new Date().toISOString()) + "_" + generateRandomString(20, 20);
+}
+
+export function generateRandomInt(min, max) {
+    const randomLength = Math.floor(Math.random() * (max - min + 1)) + min;
+    return randomLength;
+}
+
+export function generateRandomFloat(min, max) {
+    const randomLength = Math.random() * (max - min + 1) + min;
+    return randomLength;
 }

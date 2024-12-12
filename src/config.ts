@@ -5,7 +5,8 @@ export const myConfig: myConfigType = {
     PORT_HTTPS: 443,
     SERVER_SSL: false,
     path_ssl_crt: "./_utils/cert-gen/sub_file.crt",
-    path_ssl_key: "./_utils/cert-gen/sub_file.key"
+    path_ssl_key: "./_utils/cert-gen/sub_file.key",
+    myLog: true
 }
 // -------------------------------------------------- types
 type myConfigType = {
@@ -16,5 +17,5 @@ type myConfigType = {
     SERVER_SSL: boolean,
     path_ssl_crt: string,
     path_ssl_key: string
-
+    myLog: boolean
 }

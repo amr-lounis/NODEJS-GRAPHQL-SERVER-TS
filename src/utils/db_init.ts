@@ -1,6 +1,6 @@
 import { authorization_matrix } from "./authorization_matrix"
-import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create, setting_set, invoice_create, INVOICE_TYPES, invoice_update_prudect, invoice_update, invoices_get, invoiceGetOrError } from "../gql"
-import { myLog } from "./myFunc"
+import { product_categorie_create, operation_create, product_create, role_create, todo_create, product_unity_create, user_create, setting_set, invoice_create, INVOICE_TYPES, invoice_update_prudect, invoice_update } from "../gql"
+import { myLog, generateRandomString, generateRandomInt } from "./myFunc"
 import { db } from "./db"
 
 export const db_init = async (listOperationName: string[]) => {
@@ -167,24 +167,4 @@ const init_invoice = async () => {
             } catch (err) { }
         }
     })
-}
-
-function generateRandomString(min, max) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    const randomLength = Math.floor(Math.random() * (max - min + 1)) + min;
-    let randomString = '';
-    for (let i = 0; i < randomLength; i++) {
-        const randomIndex = Math.floor(Math.random() * charactersLength);
-        randomString += characters.charAt(randomIndex);
-    }
-    return randomString;
-}
-function generateRandomInt(min, max) {
-    const randomLength = Math.floor(Math.random() * (max - min + 1)) + min;
-    return randomLength;
-}
-function generateRandomFloat(min, max) {
-    const randomLength = Math.random() * (max - min + 1) + min;
-    return randomLength;
 }

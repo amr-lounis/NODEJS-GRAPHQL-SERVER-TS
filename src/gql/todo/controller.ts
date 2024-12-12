@@ -1,5 +1,5 @@
 export * from './controller'
-import { TransactionType, genID, myLog, toPage } from '../../utils';
+import { TransactionType, generateID, toPage } from '../../utils';
 
 // **************************************************************************************************** 
 export const todos_get = async (tr: TransactionType, args: ArgsTodoQ) => {
@@ -49,7 +49,7 @@ export const todo_photo_get = async (tr: TransactionType, args: ArgsTodoQ): Prom
 export const todo_create = async (tr: TransactionType, args: ArgsTodoM): Promise<string> => {
     // verification
     if (args.employeeId == undefined) throw new Error('employee id is required');
-    const todo = await tr.todos.create({ data: { id: genID(args.employeeId + ".invalid") } });
+    const todo = await tr.todos.create({ data: { id: generateID(args.employeeId + ".invalid") } });
     await tr.t_photos.create({ data: { todoId: todo.id, photo: Buffer.from("", 'utf8') } });
     delete args?.id
     await todo_update(tr, todo.id, args)
@@ -100,10 +100,10 @@ export const todo_update_validation = async (tr: TransactionType, todoId: string
     if (validationNew == true && todo.validation == true) throw new Error('invoice already validated.');
     if (validationNew == false && todo.validation == false) throw new Error('invoice already invalidate.');
     if (validationNew == true && todo.validation == false) {// to valid
-        await tr.todos.update({ where: { id: todoId }, data: { validation: true, id: genID(todo.employeeId + ".valid") } })
+        await tr.todos.update({ where: { id: todoId }, data: { validation: true, id: generateID(todo.employeeId + ".valid") } })
     }
     if (validationNew == false && todo.validation == true) { // to invalid
-        await tr.todos.update({ where: { id: todoId }, data: { validation: false, id: genID(todo.employeeId + ".invalid") } })
+        await tr.todos.update({ where: { id: todoId }, data: { validation: false, id: generateID(todo.employeeId + ".invalid") } })
     }
     return ""
 }
