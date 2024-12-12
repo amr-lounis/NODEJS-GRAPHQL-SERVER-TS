@@ -23,7 +23,7 @@ const main = async () => {
   //
   const schemaWithMiddleware = applyMiddleware(schema, myMiddleware)
   // ----------------------- https or http
-  const server = myConfig.SERVER_SSL ? https_server(app, "./assets/certificate.crt", "./assets/private.key") : http_server(app);
+  const server = myConfig.SERVER_SSL ? https_server(app, "/_utils/cert-gen/sub_file.crt", "/_utils/cert-gen/sub_file.key") : http_server(app);
   // ----------------------- ws
   const serverCleanup = ws_server(server, schema)
   // ----------------------- ApolloServer
